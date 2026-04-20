@@ -1,0 +1,315 @@
+import React from 'react';
+import { User } from '../types';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback } from './ui/avatar';
+import { Badge } from './ui/badge';
+import { Brain, Home, BookOpen, Code, MessageSquare, TrendingUp, LogOut, User as UserIcon, Settings, Bell } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from './ui/popover';
+import { getAllNotifications, markNotificationAsRead, deleteNotification } from '../utils/storage';
+import { createSampleNotifications } from '../utils/notifications';
+import { ScrollArea } from './ui/scroll-area';
+import { toast } from 'sonner';
+
+interface HeaderProps {
+  user: User | null;
+  currentView: string;
+  onNavigate: (view: string) => void;
+  onLogout: () => void;
+  onSettings: () => void;
+}
+
+export function Header({ user, currentView, onNavigate, onLogout, onSettings }: HeaderProps) {
+  if (!user) return null;
+
+  const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const [notifications, setNotifications] = React.useState<any[]>([]);
+  const [notificationOpen, setNotificationOpen] = React.useState(false);
+
+  // Load notifications on mount and when popover opens
+  React.useEffect(() => {
+    if (user.role === 'student') {
+      // Initialize sample notifications if none exist
+      createSampleNotifications(user.id);
+      setNotifications(getAllNotifications(user.id));
+    }
+  }, [user.id, user.role]);
+
+  // Refresh notifications when popover opens
+  React.useEffect(() => {
+    if (notificationOpen && user.role === 'student') {
+      setNotifications(getAllNotifications(user.id));
+    }
+  }, [notificationOpen, user.id, user.role]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const handleMarkAsRead = (notificationId: string) => {
+    markNotificationAsRead(user.id, notificationId);
+    setNotifications(getAllNotifications(user.id));
+  };
+
+  const handleDeleteNotification = (notificationId: string) => {
+    deleteNotification(user.id, notificationId);
+    setNotifications(getAllNotifications(user.id));
+    toast.success('Notification deleted');
+  };
+
+  const handleNotificationClick = (notification: any) => {
+    handleMarkAsRead(notification.id);
+    if (notification.moduleId) {
+      setNotificationOpen(false);
+      onNavigate('modules');
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'module':
+        return '📚';
+      case 'activity':
+        return '✏️';
+      case 'announcement':
+        return '📢';
+      default:
+        return '🔔';
+    }
+  };
+
+  const getSourceBadgeColor = (sourceType?: string) => {
+    switch (sourceType) {
+      case 'neural-network':
+        return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'ai-generated':
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'instructor':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'curriculum':
+        return 'bg-orange-100 text-orange-700 border-orange-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getSourceLabel = (sourceType?: string) => {
+    switch (sourceType) {
+      case 'neural-network':
+        return '🧠 AI Neural Network';
+      case 'ai-generated':
+        return '🤖 AI Generated';
+      case 'instructor':
+        return '👨‍🏫 Instructor';
+      case 'curriculum':
+        return '📖 Curriculum';
+      default:
+        return 'System';
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
+
+  // Role-specific navigation items based on use case diagram
+  const studentNavItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'modules', label: 'Learning Modules', icon: BookOpen },
+    { id: 'progress', label: 'Performance Monitoring', icon: TrendingUp },
+  ];
+
+  const instructorNavItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'course-management', label: 'Course Management', icon: BookOpen },
+    { id: 'monitoring', label: 'Monitoring', icon: Code },
+  ];
+
+  const navItems = user.role === 'student' ? studentNavItems : instructorNavItems;
+
+  return (
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo and Brand */}
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600 p-2 rounded-lg">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">CodeLearn AI</h1>
+              <p className="text-xs text-gray-500">Neural Network Powered Learning</p>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id || 
+                (currentView === 'module' && item.id === 'modules') ||
+                (currentView === 'lesson' && item.id === 'modules');
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* User Menu */}
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block text-right">
+              <p className="text-sm font-medium text-gray-900">{user.name}</p>
+              <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+            </div>
+            
+            {/* Notification Bell - Students Only */}
+            {user.role === 'student' && (
+              <Popover open={notificationOpen} onOpenChange={setNotificationOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" className="h-10 w-10 rounded-full p-0 relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-5 w-5 text-xs flex items-center justify-center p-0 border-2 border-white">
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-96 p-0 border-0 shadow-lg">
+                  <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <h4 className="text-base font-semibold text-gray-900">Notifications</h4>
+                    <p className="text-xs text-gray-600 mt-0.5">{unreadCount} unread notifications</p>
+                  </div>
+                  <ScrollArea className="h-96">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-sm text-gray-500">No notifications yet</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-100">
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                              !notification.read ? 'bg-blue-50/30' : ''
+                            }`}
+                            onClick={() => handleNotificationClick(notification)}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-lg">
+                                {getNotificationIcon(notification.type)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                                    {notification.title}
+                                  </p>
+                                  <button
+                                    className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteNotification(notification.id);
+                                    }}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="w-4 h-4"
+                                    >
+                                      <line x1="18" y1="6" x2="6" y2="18" />
+                                      <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                  </button>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
+                                
+                                {/* Source and Timestamp */}
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  <span className="text-xs text-gray-500">{formatTimestamp(notification.timestamp)}</span>
+                                  {!notification.read && (
+                                    <Badge className="bg-blue-600 text-white text-xs px-2 py-0">New</Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </PopoverContent>
+              </Popover>
+            )}
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-blue-600 text-white font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div>
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onSettings}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onLogout} className="text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
