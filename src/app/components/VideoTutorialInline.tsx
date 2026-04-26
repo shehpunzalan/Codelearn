@@ -2,9 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { 
-  ArrowLeft, Video, ExternalLink, Play, BookOpen, 
-  Code, Lightbulb, Clock, Target, Trophy, CheckCircle 
+import {
+  ArrowLeft, Video, ExternalLink, Play, BookOpen,
+  Lightbulb, Clock
 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
@@ -19,7 +19,7 @@ interface VideoTutorialInlineProps {
   onOpenVideoTutorial?: (moduleId: string, lessonId: string, lessonTitle: string) => void;
 }
 
-export function VideoTutorialInline({ 
+export function VideoTutorialInline({
   moduleId,
   lessonId,
   lessonTitle,
@@ -35,7 +35,8 @@ export function VideoTutorialInline({
         {/* Left Column: Video Player and Details (2/3 width) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Video Player Card */}
-          <Card className="border-0 shadow-xl overflow-hidden">
+          <div>
+            <Card className="border-0 shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4">
               <div className="flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
@@ -79,7 +80,8 @@ export function VideoTutorialInline({
                 />
               </div>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
 
           {/* About this Video */}
           <Card className="border-0 shadow-lg">
@@ -107,39 +109,10 @@ export function VideoTutorialInline({
             </CardContent>
           </Card>
 
-          {/* What You'll Learn */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-yellow-600" />
-                What You'll Learn
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <Target className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <span className="text-gray-700">Visual demonstration of concepts</span>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100">
-                  <Code className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                  <span className="text-gray-700">Step-by-step code examples</span>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-100">
-                  <Lightbulb className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                  <span className="text-gray-700">Expert tips and best practices</span>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
-                  <Trophy className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Real-world applications</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Supplementary Videos */}
           {lessonVideo.supplementaryVideos && lessonVideo.supplementaryVideos.length > 0 && (
-            <Card className="border-0 shadow-lg">
+            <div>
+              <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Play className="w-5 h-5 text-blue-600" />
@@ -186,52 +159,13 @@ export function VideoTutorialInline({
                   </div>
                 </ScrollArea>
               </CardContent>
-            </Card>
+              </Card>
+            </div>
           )}
         </div>
 
         {/* Right Column: Sidebar (1/3 width) */}
         <div className="space-y-6">
-          {/* Video Resources */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50">
-              <CardTitle className="text-lg">Video Resources</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3">
-              <div className="p-4 rounded-lg border-2 border-purple-600 bg-gradient-to-r from-purple-50 to-blue-50">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600">
-                    <Video className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">Main Tutorial</h4>
-                    <p className="text-sm text-gray-600 mb-2">Comprehensive video explanation</p>
-                    <Badge variant="outline" className="text-xs border-purple-600 text-purple-600">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {lessonVideo.duration}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-4 rounded-lg border-2 border-gray-200 hover:border-purple-300 bg-white transition-all">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-100">
-                    <BookOpen className="w-5 h-5 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">Supplementary Videos</h4>
-                    <p className="text-sm text-gray-600 mb-2">Additional learning resources</p>
-                    <Badge variant="outline" className="text-xs border-gray-400 text-gray-600">
-                      <Clock className="w-3 h-3 mr-1" />
-                      Various
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Learning Tips */}
           <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
             <CardHeader>

@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { 
-  ArrowLeft, Video, ExternalLink, Play, BookOpen, 
-  Code, Lightbulb, Clock, Target, Trophy, CheckCircle 
+import {
+  ArrowLeft, Video, ExternalLink, Play, BookOpen,
+  Lightbulb, Clock, CheckCircle
 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { getLessonVideo, getVideoEmbedUrl, getVideoFullUrl } from '../data/lessonVideos';
@@ -17,23 +17,22 @@ interface VideoTutorialPageProps {
   onBack: () => void;
 }
 
-export function VideoTutorialPage({ 
-  moduleId, 
-  lessonId, 
+export function VideoTutorialPage({
+  moduleId,
+  lessonId,
   lessonTitle,
-  onBack 
+  onBack
 }: VideoTutorialPageProps) {
-  const [selectedVideoType, setSelectedVideoType] = useState<'main' | 'supplementary'>('main');
   const [videoError, setVideoError] = useState(false);
-  
+
   // Construct the comprehensive lesson content key (format: 'mod1-lesson1-1')
   const comprehensiveLessonKey = `${moduleId}-${lessonId}`;
-  
+
   // Get lesson-specific video data
   const lessonVideo = getLessonVideo(comprehensiveLessonKey);
   const embedUrl = getVideoEmbedUrl(comprehensiveLessonKey);
   const fullUrl = getVideoFullUrl(comprehensiveLessonKey);
-  
+
   // Check if it's a local video file
   const isLocalVideo = fullUrl.endsWith('.mp4') || fullUrl.endsWith('.webm') || fullUrl.endsWith('.ogg');
 
@@ -50,32 +49,6 @@ export function VideoTutorialPage({
       description: 'Video is ready to play'
     });
   };
-
-  // Video resources section
-  const videoResources = [
-    {
-      title: 'Main Tutorial',
-      description: 'Comprehensive video explanation',
-      duration: lessonVideo.duration,
-      type: 'main' as const,
-      icon: Video
-    },
-    {
-      title: 'Supplementary Videos',
-      description: 'Additional learning resources',
-      duration: 'Various',
-      type: 'supplementary' as const,
-      icon: BookOpen
-    }
-  ];
-
-  // Learning points from the video
-  const learningPoints = [
-    { icon: Target, text: 'Visual demonstration of concepts', color: 'text-blue-600' },
-    { icon: Code, text: 'Step-by-step code examples', color: 'text-purple-600' },
-    { icon: Lightbulb, text: 'Expert tips and best practices', color: 'text-yellow-600' },
-    { icon: Trophy, text: 'Real-world applications', color: 'text-green-600' }
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
@@ -109,7 +82,8 @@ export function VideoTutorialPage({
           {/* Left Column: Video Player (2/3 width) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Video Player Card */}
-            <Card className="border-0 shadow-xl overflow-hidden">
+            <div>
+              <Card className="border-0 shadow-xl overflow-hidden">
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4">
                 <div className="flex items-center justify-between text-white">
                   <div className="flex items-center gap-3">
@@ -184,7 +158,8 @@ export function VideoTutorialPage({
                   </div>
                 )}
               </CardContent>
-            </Card>
+              </Card>
+            </div>
 
             {/* Video Description */}
             <Card className="border-0 shadow-lg">
@@ -223,27 +198,13 @@ export function VideoTutorialPage({
                   </div>
                 </div>
 
-                {/* What You'll Learn */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4 text-yellow-600" />
-                    What You'll Learn
-                  </h4>
-                  <div className="grid gap-2">
-                    {learningPoints.map((point, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100">
-                        <point.icon className={`w-5 h-5 ${point.color}`} />
-                        <span className="text-gray-700">{point.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
             {/* Supplementary Videos */}
             {lessonVideo.supplementaryVideos && lessonVideo.supplementaryVideos.length > 0 && (
-              <Card className="border-0 shadow-lg">
+              <div>
+                <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Play className="w-5 h-5 text-blue-600" />
@@ -290,52 +251,13 @@ export function VideoTutorialPage({
                     </div>
                   </ScrollArea>
                 </CardContent>
-              </Card>
+                </Card>
+              </div>
             )}
           </div>
 
           {/* Right Column: Quick Actions & Progress */}
           <div className="space-y-6">
-            {/* Video Resources */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Video Resources</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {videoResources.map((resource, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedVideoType(resource.type)}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedVideoType === resource.type
-                        ? 'border-purple-600 bg-gradient-to-r from-purple-50 to-blue-50'
-                        : 'border-gray-200 hover:border-purple-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        selectedVideoType === resource.type
-                          ? 'bg-gradient-to-r from-purple-600 to-blue-600'
-                          : 'bg-gray-100'
-                      }`}>
-                        <resource.icon className={`w-5 h-5 ${
-                          selectedVideoType === resource.type ? 'text-white' : 'text-gray-600'
-                        }`} />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 mb-1">{resource.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{resource.description}</p>
-                        <Badge variant="outline" className="text-xs">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {resource.duration}
-                        </Badge>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-
             {/* Learning Tips */}
             <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
               <CardHeader>

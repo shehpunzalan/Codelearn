@@ -19,62 +19,62 @@ export const lessonVideos: Record<string, LessonVideo> = {
   
   // Lesson 1-1: Introduction to Java Programming
   'mod1-lesson1-1': {
-    videoId: 'WPhCLy20IvU',
+    videoId: '3LY9f9WbSbU',
     title: 'Introduction to Java Programming',
     channel: 'YouTube',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
     description: 'Comprehensive introduction to Java programming covering fundamental concepts and getting started with Java.',
-    fullUrl: 'https://youtu.be/WPhCLy20IvU',
-    citation: 'YouTube. Introduction to Java Programming [Video]. YouTube. https://youtu.be/WPhCLy20IvU'
+    fullUrl: 'https://youtu.be/3LY9f9WbSbU',
+    citation: 'YouTube. Introduction to Java Programming [Video]. YouTube. https://youtu.be/3LY9f9WbSbU'
   },
 
   // Lesson 1-2: Variables and Data Types
   'mod1-lesson1-2': {
-    videoId: '-t8gUtLzuW8',
+    videoId: 'kMcaefpVxW4',
     title: 'Java Variables and Data Types',
     channel: 'YouTube',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
     description: 'Comprehensive guide to Java variables and data types including primitive types, reference types, type conversion, and variable declaration best practices.',
-    fullUrl: 'https://youtu.be/-t8gUtLzuW8',
-    citation: 'YouTube. Java Variables and Data Types [Video]. YouTube. https://youtu.be/-t8gUtLzuW8'
+    fullUrl: 'https://youtu.be/kMcaefpVxW4',
+    citation: 'YouTube. Java Variables and Data Types [Video]. YouTube. https://youtu.be/kMcaefpVxW4'
   },
 
   // Lesson 1-3: Operators in Java
   'mod1-lesson1-3': {
-    videoId: 'pKfggX1WSoo',
+    videoId: 'u6ozbTRd6VQ',
     title: 'Java Operators - Arithmetic, Relational, Logical',
     channel: 'YouTube',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
     description: 'Complete guide to Java operators including arithmetic (+, -, *, /, %), relational (==, !=, >, <, >=, <=), logical (&&, ||, !), assignment, increment/decrement, and bitwise operators with practical examples.',
-    fullUrl: 'https://youtu.be/pKfggX1WSoo',
-    citation: 'YouTube. Java Operators - Arithmetic, Relational, Logical [Video]. YouTube. https://youtu.be/pKfggX1WSoo'
+    fullUrl: 'https://youtu.be/u6ozbTRd6VQ',
+    citation: 'YouTube. Java Operators - Arithmetic, Relational, Logical [Video]. YouTube. https://youtu.be/u6ozbTRd6VQ'
   },
 
   // Lesson 1-4: Control Flow: If-Else Statements
   'mod1-lesson1-4': {
-    videoId: 'wi-cSpSHu9w',
+    videoId: '28pR6asZ2oI',
     title: 'Java If-Else Statements and Conditionals',
     channel: 'YouTube',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
     description: 'Comprehensive guide to Java control flow statements including if, else, else-if, nested conditionals, ternary operators, switch-case statements, and conditional logic for decision making in programs.',
-    fullUrl: 'https://youtu.be/wi-cSpSHu9w',
-    citation: 'YouTube. Java If-Else Statements and Conditionals [Video]. YouTube. https://youtu.be/wi-cSpSHu9w'
+    fullUrl: 'https://youtu.be/28pR6asZ2oI',
+    citation: 'YouTube. Java If-Else Statements and Conditionals [Video]. YouTube. https://youtu.be/28pR6asZ2oI'
   },
 
   // Lesson 1-5: Loops - For and While
   'mod1-lesson1-5': {
-    videoId: 'PRlO-6Q7xWk',
+    videoId: 'iq5jrtqBcw4',
     title: 'Java Loops - For, While, Do-While Explained',
     channel: 'YouTube',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
     description: 'Complete tutorial on Java loops including for loops, while loops, do-while loops, enhanced for-each loops, loop initialization and conditions, break and continue statements, nested loops, and infinite loop prevention with practical examples.',
-    fullUrl: 'https://youtu.be/PRlO-6Q7xWk',
-    citation: 'YouTube. Java Loops - For, While, Do-While Explained [Video]. YouTube. https://youtu.be/PRlO-6Q7xWk'
+    fullUrl: 'https://youtu.be/iq5jrtqBcw4',
+    citation: 'YouTube. Java Loops - For, While, Do-While Explained [Video]. YouTube. https://youtu.be/iq5jrtqBcw4'
   },
 
   // Alternative for Lesson 1-5 (can be used by changing the key)
