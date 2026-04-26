@@ -599,7 +599,7 @@ export function ProgressView({ onBack }: ProgressViewProps) {
             <h3 className="text-base font-bold text-gray-900 mb-4">Topic Mastery Distribution</h3>
             <div className="flex items-center justify-center">
               <ResponsiveContainer width="100%" height={200}>
-                  <PieChart id="progress-view-topic-pie-chart">
+                  <PieChart>
                     <Pie
                       data={topicDistributionData}
                       cx="50%"
@@ -610,8 +610,8 @@ export function ProgressView({ onBack }: ProgressViewProps) {
                       dataKey="value"
                       nameKey="name"
                     >
-                      {topicDistributionData.map((entry) => (
-                        <Cell key={`topic-cell-${entry.id}`} fill={entry.color} />
+                      {topicDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${entry.id}-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip />
