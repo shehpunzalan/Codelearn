@@ -18,10 +18,10 @@ app.use("/*", cors({
   maxAge: 600,
 }));
 
-app.get("/make-server-aaa3a86f/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
+app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
 
 // AUTH
-app.post("/make-server-aaa3a86f/auth/signup", async (c) => {
+app.post("/auth/signup", async (c) => {
   try {
     const body = await c.req.json();
     const { email, password, name, role, studentId, section, yearLevel } = body;
@@ -43,7 +43,7 @@ app.post("/make-server-aaa3a86f/auth/signup", async (c) => {
   }
 });
 
-app.post("/make-server-aaa3a86f/auth/signin", async (c) => {
+app.post("/auth/signin", async (c) => {
   try {
     const { email, password } = await c.req.json();
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
@@ -56,7 +56,7 @@ app.post("/make-server-aaa3a86f/auth/signin", async (c) => {
   }
 });
 
-app.post("/make-server-aaa3a86f/auth/signout", async (c) => {
+app.post("/auth/signout", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     if (!accessToken) return c.json({ success: false, error: 'No access token' }, 401);
@@ -69,7 +69,7 @@ app.post("/make-server-aaa3a86f/auth/signout", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/auth/session", async (c) => {
+app.get("/auth/session", async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
     if (!accessToken) return c.json({ success: false, error: 'No access token' }, 401);
@@ -84,7 +84,7 @@ app.get("/make-server-aaa3a86f/auth/session", async (c) => {
 });
 
 // PROGRESS
-app.get("/make-server-aaa3a86f/progress/:userId/:moduleId/:lessonId", async (c) => {
+app.get("/progress/:userId/:moduleId/:lessonId", async (c) => {
   try {
     const { userId, moduleId, lessonId } = c.req.param();
     const progress = await kv.get(`progress_${userId}_${moduleId}_${lessonId}`);
@@ -94,7 +94,7 @@ app.get("/make-server-aaa3a86f/progress/:userId/:moduleId/:lessonId", async (c) 
   }
 });
 
-app.post("/make-server-aaa3a86f/progress", async (c) => {
+app.post("/progress", async (c) => {
   try {
     const { userId, moduleId, lessonId, completed, timeSpent, score } = await c.req.json();
     const progressData = { userId, moduleId, lessonId, completed: completed || false, timeSpent: timeSpent || 0, score: score || 0, timestamp: new Date().toISOString() };
@@ -105,7 +105,7 @@ app.post("/make-server-aaa3a86f/progress", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/progress/:userId", async (c) => {
+app.get("/progress/:userId", async (c) => {
   try {
     const { userId } = c.req.param();
     const allProgress = await kv.getByPrefix(`progress_${userId}_`);
@@ -116,7 +116,7 @@ app.get("/make-server-aaa3a86f/progress/:userId", async (c) => {
 });
 
 // QUIZ
-app.post("/make-server-aaa3a86f/quiz/submit", async (c) => {
+app.post("/quiz/submit", async (c) => {
   try {
     const { userId, moduleId, lessonId, score, answers, totalQuestions } = await c.req.json();
     const quizId = `quiz_${Date.now()}_${userId}`;
@@ -130,7 +130,7 @@ app.post("/make-server-aaa3a86f/quiz/submit", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/quiz/:userId/:moduleId/:lessonId", async (c) => {
+app.get("/quiz/:userId/:moduleId/:lessonId", async (c) => {
   try {
     const { userId, moduleId, lessonId } = c.req.param();
     const allQuizzes = await kv.getByPrefix(`quiz_`);
@@ -143,7 +143,7 @@ app.get("/make-server-aaa3a86f/quiz/:userId/:moduleId/:lessonId", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/quiz/:userId", async (c) => {
+app.get("/quiz/:userId", async (c) => {
   try {
     const { userId } = c.req.param();
     const allQuizzes = await kv.getByPrefix(`quiz_`);
@@ -155,7 +155,7 @@ app.get("/make-server-aaa3a86f/quiz/:userId", async (c) => {
 });
 
 // AI FEEDBACK
-app.post("/make-server-aaa3a86f/ai-feedback/analyze", async (c) => {
+app.post("/ai-feedback/analyze", async (c) => {
   try {
     const { userId, moduleId, lessonId, code } = await c.req.json();
     if (!code || code.trim().length === 0) return c.json({ success: false, error: 'Code required' }, 400);
@@ -170,7 +170,7 @@ app.post("/make-server-aaa3a86f/ai-feedback/analyze", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/ai-feedback/:userId", async (c) => {
+app.get("/ai-feedback/:userId", async (c) => {
   try {
     const { userId } = c.req.param();
     const allFeedback = await kv.getByPrefix(`aifeedback_`);
@@ -181,7 +181,7 @@ app.get("/make-server-aaa3a86f/ai-feedback/:userId", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/ai-feedback/:userId/:moduleId/:lessonId", async (c) => {
+app.get("/ai-feedback/:userId/:moduleId/:lessonId", async (c) => {
   try {
     const { userId, moduleId, lessonId } = c.req.param();
     const allFeedback = await kv.getByPrefix(`aifeedback_`);
@@ -192,7 +192,7 @@ app.get("/make-server-aaa3a86f/ai-feedback/:userId/:moduleId/:lessonId", async (
   }
 });
 
-app.post("/make-server-aaa3a86f/feedback/save", async (c) => {
+app.post("/feedback/save", async (c) => {
   try {
     const { userId, moduleId, lessonId, code, feedback, analysisResults, score } = await c.req.json();
     const feedbackId = `feedback_${Date.now()}_${userId}`;
@@ -204,7 +204,7 @@ app.post("/make-server-aaa3a86f/feedback/save", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/feedback/:userId", async (c) => {
+app.get("/feedback/:userId", async (c) => {
   try {
     const { userId } = c.req.param();
     const allFeedback = await kv.getByPrefix(`feedback_`);
@@ -215,7 +215,7 @@ app.get("/make-server-aaa3a86f/feedback/:userId", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/feedback/:userId/:moduleId/:lessonId", async (c) => {
+app.get("/feedback/:userId/:moduleId/:lessonId", async (c) => {
   try {
     const { userId, moduleId, lessonId } = c.req.param();
     const allFeedback = await kv.getByPrefix(`feedback_`);
@@ -227,7 +227,7 @@ app.get("/make-server-aaa3a86f/feedback/:userId/:moduleId/:lessonId", async (c) 
 });
 
 // PROFILE
-app.post("/make-server-aaa3a86f/profile", async (c) => {
+app.post("/profile", async (c) => {
   try {
     const { userId, name, email, studentId, section, yearLevel, avatar, bio } = await c.req.json();
     const profileData = { userId, name, email, studentId, section, yearLevel, avatar, bio, updatedAt: new Date().toISOString() };
@@ -238,7 +238,7 @@ app.post("/make-server-aaa3a86f/profile", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/profile/:userId", async (c) => {
+app.get("/profile/:userId", async (c) => {
   try {
     const { userId } = c.req.param();
     const profile = await kv.get(`profile_${userId}`);
@@ -252,7 +252,7 @@ app.get("/make-server-aaa3a86f/profile/:userId", async (c) => {
 });
 
 // LESSON COMPLETION
-app.post("/make-server-aaa3a86f/lesson/complete", async (c) => {
+app.post("/lesson/complete", async (c) => {
   try {
     const { userId, moduleId, lessonId, timeSpent } = await c.req.json();
     const completionData = { userId, moduleId, lessonId, completed: true, timeSpent: timeSpent || 0, completedAt: new Date().toISOString() };
@@ -263,7 +263,7 @@ app.post("/make-server-aaa3a86f/lesson/complete", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/lesson/completions/:userId", async (c) => {
+app.get("/lesson/completions/:userId", async (c) => {
   try {
     const { userId } = c.req.param();
     const allCompletions = await kv.getByPrefix(`completion_${userId}_`);
@@ -274,7 +274,7 @@ app.get("/make-server-aaa3a86f/lesson/completions/:userId", async (c) => {
 });
 
 // ANALYTICS
-app.get("/make-server-aaa3a86f/analytics/students", async (c) => {
+app.get("/analytics/students", async (c) => {
   try {
     const allProfiles = await kv.getByPrefix(`profile_`);
     const studentsData = await Promise.all(allProfiles.map(async (profile) => {
@@ -297,7 +297,7 @@ app.get("/make-server-aaa3a86f/analytics/students", async (c) => {
   }
 });
 
-app.get("/make-server-aaa3a86f/analytics/student/:userId", async (c) => {
+app.get("/analytics/student/:userId", async (c) => {
   try {
     const { userId } = c.req.param();
     const profile = await kv.get(`profile_${userId}`);
@@ -333,27 +333,27 @@ app.get("/make-server-aaa3a86f/analytics/student/:userId", async (c) => {
 });
 
 // EXTERNAL ENDPOINTS
-app.post("/make-server-aaa3a86f/assignments/create", additional.createAssignment);
-app.get("/make-server-aaa3a86f/assignments", additional.getAllAssignments);
-app.get("/make-server-aaa3a86f/assignments/:assignmentId", additional.getAssignmentById);
-app.put("/make-server-aaa3a86f/assignments/:assignmentId", additional.updateAssignment);
-app.delete("/make-server-aaa3a86f/assignments/:assignmentId", additional.deleteAssignment);
-app.post("/make-server-aaa3a86f/assignments/submit", additional.submitAssignment);
-app.post("/make-server-aaa3a86f/assignments/grade", additional.gradeAssignment);
-app.get("/make-server-aaa3a86f/assignments/:assignmentId/submissions", additional.getAssignmentSubmissions);
-app.post("/make-server-aaa3a86f/plagiarism/check", additional.checkPlagiarismEndpoint);
-app.get("/make-server-aaa3a86f/plagiarism/reports/:assignmentId", additional.getPlagiarismReports);
-app.post("/make-server-aaa3a86f/neural-network/analyze", additional.neuralNetworkAnalyze);
-app.get("/make-server-aaa3a86f/leaderboard", additional.getGlobalLeaderboard);
-app.get("/make-server-aaa3a86f/leaderboard/module/:moduleId", additional.getModuleLeaderboard);
-app.post("/make-server-aaa3a86f/notifications/create", additional.createNotification);
-app.get("/make-server-aaa3a86f/notifications/:userId", additional.getUserNotifications);
-app.put("/make-server-aaa3a86f/notifications/:notificationId/read", additional.markNotificationAsRead);
-app.post("/make-server-aaa3a86f/submissions/submit", codeSubmission.submitCodeHandler);
-app.get("/make-server-aaa3a86f/submissions/history", codeSubmission.getSubmissionHistoryHandler);
-app.get("/make-server-aaa3a86f/submissions/:submissionId", codeSubmission.getSubmissionHandler);
-app.get("/make-server-aaa3a86f/submissions/lesson", codeSubmission.getSubmissionsByLessonHandler);
-app.post("/make-server-aaa3a86f/submissions/autosave", codeSubmission.autoSaveCodeHandler);
-app.get("/make-server-aaa3a86f/submissions/draft", codeSubmission.getDraftCodeHandler);
+app.post("/assignments/create", additional.createAssignment);
+app.get("/assignments", additional.getAllAssignments);
+app.get("/assignments/:assignmentId", additional.getAssignmentById);
+app.put("/assignments/:assignmentId", additional.updateAssignment);
+app.delete("/assignments/:assignmentId", additional.deleteAssignment);
+app.post("/assignments/submit", additional.submitAssignment);
+app.post("/assignments/grade", additional.gradeAssignment);
+app.get("/assignments/:assignmentId/submissions", additional.getAssignmentSubmissions);
+app.post("/plagiarism/check", additional.checkPlagiarismEndpoint);
+app.get("/plagiarism/reports/:assignmentId", additional.getPlagiarismReports);
+app.post("/neural-network/analyze", additional.neuralNetworkAnalyze);
+app.get("/leaderboard", additional.getGlobalLeaderboard);
+app.get("/leaderboard/module/:moduleId", additional.getModuleLeaderboard);
+app.post("/notifications/create", additional.createNotification);
+app.get("/notifications/:userId", additional.getUserNotifications);
+app.put("/notifications/:notificationId/read", additional.markNotificationAsRead);
+app.post("/submissions/submit", codeSubmission.submitCodeHandler);
+app.get("/submissions/history", codeSubmission.getSubmissionHistoryHandler);
+app.get("/submissions/:submissionId", codeSubmission.getSubmissionHandler);
+app.get("/submissions/lesson", codeSubmission.getSubmissionsByLessonHandler);
+app.post("/submissions/autosave", codeSubmission.autoSaveCodeHandler);
+app.get("/submissions/draft", codeSubmission.getDraftCodeHandler);
 
 Deno.serve(app.fetch);

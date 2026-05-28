@@ -2,7 +2,7 @@
 const projectId = "hovedryqutuucipuqxca";
 const publicAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0";
 
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f`;
+const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/server`;
 
 // Helper to get auth token
 function getAuthToken(): string {

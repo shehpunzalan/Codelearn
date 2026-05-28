@@ -8,7 +8,7 @@ import { mockAPI } from './mockBackend';
 
 const USE_MOCK = true; // Set to true to bypass 403 error and use localStorage
 
-const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f`;
+const BASE_URL = `https://${projectId}.supabase.co/functions/v1/server`;
 
 async function fetchWithFallback(endpoint: string, options: RequestInit = {}) {
   if (USE_MOCK) {
