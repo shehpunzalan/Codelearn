@@ -291,18 +291,9 @@ export function FeedbackPage({ onBack }: FeedbackPageProps) {
               {/* Submitted Code */}
               <Card className="border-0 shadow-md">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <Code className="w-5 h-5 text-blue-600" />
-                      <h3 className="text-lg font-bold text-gray-900">Your Submitted Code</h3>
-                    </div>
-                    <div className="flex gap-3 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <FileText className="w-3 h-3" />
-                        {selectedSubmission.code.split('\n').length} lines
-                      </span>
-                      <span>{selectedSubmission.code.length} chars</span>
-                    </div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Code className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-bold text-gray-900">Your Submitted Code</h3>
                   </div>
                   <div className="border rounded-lg overflow-hidden">
                     <pre className="bg-gray-900 text-gray-100 p-6 overflow-x-auto text-sm">

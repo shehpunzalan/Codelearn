@@ -5,13 +5,15 @@ import { Badge } from './ui/badge';
 import { 
   ArrowLeft, BookOpen, Target, Brain, Lightbulb, Code, 
   CheckCircle, Clock, Download, Eye, EyeOff, ChevronDown,
-  ChevronUp, Trophy, Play, FileText, Circle
+  ChevronUp, Trophy, Play, FileText, Circle, BookMarked,
+  Video, Award, ExternalLink
 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
 import { comprehensiveLessonsContent, getLessonSpecificKeywords } from '../data/comprehensiveLessonsContent';
 import { getMinimumRealWorldExamples } from '../data/realWorldExamples';
 import { getChallengesForLesson } from '../data/lessonChallenges';
+import { getLessonVideo } from '../data/lessonVideos';
 
 interface ReadingContentPageProps {
   moduleId: string;
@@ -39,6 +41,7 @@ export function ReadingContentPage({
   const comprehensiveContent = comprehensiveLessonsContent[comprehensiveLessonKey];
   const realWorldExamples = getMinimumRealWorldExamples(comprehensiveLessonKey);
   const challenges = getChallengesForLesson(comprehensiveLessonKey);
+  const lessonVideo = getLessonVideo(comprehensiveLessonKey);
 
   // Learning path sections
   const learningSections = [

@@ -165,9 +165,10 @@ export class NeuralNetworkSimulator {
       feedback += `• Overall OOP Score: ${oopScores.overall}/100\n\n`;
     }
 
-    // Pattern-based feedback
+    // Pattern-based feedback - identify common error patterns
     if (errors.length > 0) {
-      const errorPatterns = errors.map(e => e.pattern).filter(Boolean);
+      // Extract error patterns and remove duplicates
+      const errorPatterns = errors.map(error => error.pattern).filter(Boolean);
       const uniquePatterns = [...new Set(errorPatterns)];
 
       feedback += '🔍 Detected Patterns:\n';
@@ -177,22 +178,23 @@ export class NeuralNetworkSimulator {
       feedback += '\n';
     }
 
-    // Personalized recommendations
+    // Personalized recommendations based on detected errors
     feedback += '💡 AI-Powered Recommendations:\n';
     
-    if (errors.some(e => e.pattern === 'Public instance variables')) {
+    // Check for specific error patterns and provide targeted advice
+    if (errors.some(error => error.pattern === 'Public instance variables')) {
       feedback += '• Apply encapsulation: Make fields private and add getters/setters\n';
     }
-    if (errors.some(e => e.pattern === 'Missing validation in setter')) {
+    if (errors.some(error => error.pattern === 'Missing validation in setter')) {
       feedback += '• Add validation logic in setters to ensure data integrity\n';
     }
-    if (errors.some(e => e.pattern === 'Not using "this" keyword')) {
+    if (errors.some(error => error.pattern === 'Not using "this" keyword')) {
       feedback += '• Use "this" keyword to improve code clarity\n';
     }
-    if (errors.some(e => e.pattern === 'Missing access modifier')) {
+    if (errors.some(error => error.pattern === 'Missing access modifier')) {
       feedback += '• Specify access modifiers explicitly (public/private/protected)\n';
     }
-    if (errors.some(e => e.pattern === 'No JavaDoc comments')) {
+    if (errors.some(error => error.pattern === 'No JavaDoc comments')) {
       feedback += '• Document your code with JavaDoc comments\n';
     }
 
@@ -227,10 +229,18 @@ export class NeuralNetworkSimulator {
     return 'Continue to the next module to learn more advanced OOP concepts!';
   }
 
+  /**
+   * Predict success probability for code submission
+   * Uses error analysis and submission history to predict outcomes
+   * @param code - The Java code to analyze
+   * @param pastSubmissions - Number of previous submissions
+   * @returns Success probability percentage (0-100)
+   */
   predictSuccess(code: string, pastSubmissions: number): number {
+    // Analyze code for errors and warnings
     const errors = this.analyzeCode(code);
-    const criticalErrors = errors.filter(e => e.severity === 'error').length;
-    const warnings = errors.filter(e => e.severity === 'warning').length;
+    const criticalErrors = errors.filter(error => error.severity === 'error').length;
+    const warnings = errors.filter(error => error.severity === 'warning').length;
     
     const errorWeight = Math.max(0, 100 - (criticalErrors * 20 + warnings * 10));
     const experienceWeight = Math.min(100, 50 + pastSubmissions * 2);

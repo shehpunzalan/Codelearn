@@ -94,13 +94,18 @@ export function ReferencesView({ modules, onBack }: ReferencesViewProps) {
 
   // Statistics
   const stats = {
+    // Count total references
     total: allReferences.length,
-    books: allReferences.filter(r => r.type === 'book').length,
-    websites: allReferences.filter(r => r.type === 'website').length,
-    documentation: allReferences.filter(r => r.type === 'documentation').length,
-    research: allReferences.filter(r => r.type === 'research').length,
-    articles: allReferences.filter(r => r.type === 'article').length,
-    withLinks: allReferences.filter(r => r.url).length
+    
+    // Count references by type
+    books: allReferences.filter(reference => reference.type === 'book').length,
+    websites: allReferences.filter(reference => reference.type === 'website').length,
+    documentation: allReferences.filter(reference => reference.type === 'documentation').length,
+    research: allReferences.filter(reference => reference.type === 'research').length,
+    articles: allReferences.filter(reference => reference.type === 'article').length,
+    
+    // Count references with URL links
+    withLinks: allReferences.filter(reference => reference.url).length
   };
 
   return (

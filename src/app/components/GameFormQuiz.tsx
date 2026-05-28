@@ -31,7 +31,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  
+
   // Gamification states
   const [totalXP, setTotalXP] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -41,7 +41,38 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
 
-  const currentQuestion = questions[currentQuestionIndex];
+  // Current question with shuffled options
+  const [currentShuffledQuestion, setCurrentShuffledQuestion] = useState<Challenge | null>(null);
+
+  // Shuffle options for the current question whenever question index changes
+  useEffect(() => {
+    if (questions && questions[currentQuestionIndex]) {
+      const question = questions[currentQuestionIndex];
+      const options = [...question.options];
+
+      // Fisher-Yates shuffle
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      const shuffled = {
+        ...question,
+        options
+      };
+
+      console.log('🔀 Question', currentQuestionIndex + 1, '- Shuffled options');
+      console.log('   Correct answer is now at position:', options.findIndex(opt => opt.isCorrect) + 1);
+
+      setCurrentShuffledQuestion(shuffled);
+    }
+  }, [currentQuestionIndex]);
+
+  if (!currentShuffledQuestion) {
+    return null;
+  }
+
+  const currentQuestion = currentShuffledQuestion;
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
 
   // Determine difficulty and XP based on question characteristics

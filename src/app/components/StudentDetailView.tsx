@@ -189,7 +189,8 @@ export function StudentDetailView({ studentId, studentName, onBack, modules }: S
   // Calculate statistics
   const calculateStats = () => {
     const totalLessons = progressData.length;
-    const completedLessons = progressData.filter(p => p.completed).length;
+    // Count completed lessons
+    const completedLessons = progressData.filter(progressItem => progressItem.completed).length;
     const completionRate = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
     const totalQuizzes = quizData.length;

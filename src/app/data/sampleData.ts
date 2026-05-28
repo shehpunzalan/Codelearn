@@ -870,8 +870,12 @@ export const initializeSampleData = () => {
   console.log('');
   console.log(`🔴 LOW Performance (<60%): ${lowPerformanceStudents.length} students (${Math.round((lowPerformanceStudents.length / allStudents.length) * 100)}%)`);
   console.log(`   Needs Help: ${lowPerformanceStudents[0].name} - ${lowPerformanceStudents[0].averageScore}%`);
-  console.log(`   Avg Modules Completed: ${Math.round(lowPerformanceStudents.reduce((sum, s) => sum + s.modulesCompleted, 0) / lowPerformanceStudents.length)}/10`);
-  console.log(`   ⚠️  Inactive Students: ${lowPerformanceStudents.filter(s => (Date.now() - new Date(s.lastActive).getTime()) / (1000 * 60 * 60 * 24) > 3).length} (urgent intervention needed)`);
+  
+  // Calculate average modules completed for low-performing students
+  console.log(`   Avg Modules Completed: ${Math.round(lowPerformanceStudents.reduce((sum, student) => sum + student.modulesCompleted, 0) / lowPerformanceStudents.length)}/10`);
+  
+  // Count inactive students (those who haven't been active in 3+ days)
+  console.log(`   ⚠️  Inactive Students: ${lowPerformanceStudents.filter(student => (Date.now() - new Date(student.lastActive).getTime()) / (1000 * 60 * 60 * 24) > 3).length} (urgent intervention needed)`);
   console.log('');
   console.log('📈 Additional Data Loaded:');
   console.log(`   • 7 Behavioral Patterns`);
@@ -897,8 +901,13 @@ export const getStudentsByLevel = (level: 'HIGH' | 'MEDIUM' | 'LOW') => {
   }
 };
 
+/**
+ * Get a specific student by their ID
+ * @param studentId - The student ID to search for
+ * @returns StudentData object if found, undefined otherwise
+ */
 export const getStudentById = (studentId: string): StudentData | undefined => {
-  return allStudents.find(s => s.id === studentId);
+  return allStudents.find(student => student.id === studentId);
 };
 
 export const getSubmissionsByStudent = (studentId: string): SubmissionData[] => {

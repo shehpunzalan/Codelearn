@@ -24,7 +24,8 @@ export function SettingsPage({ user, onSave }: SettingsPageProps) {
     // Save language preference to localStorage
     localStorage.setItem('preferredLanguage', language);
     
-    const selectedLanguage = languages.find(l => l.code === language);
+    // Find the language object that matches the current language code
+    const selectedLanguage = languages.find(languageOption => languageOption.code === language);
     
     onSave({
       ...user,
@@ -38,7 +39,8 @@ export function SettingsPage({ user, onSave }: SettingsPageProps) {
     });
   };
 
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+  // Generate user initials from name for avatar display
+  const initials = name.split(' ').map(namePart => namePart[0]).join('').toUpperCase();
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -177,8 +179,8 @@ export function SettingsPage({ user, onSave }: SettingsPageProps) {
               <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                 <SelectValue>
                   <div className="flex items-center gap-2">
-                    <span>{languages.find(l => l.code === language)?.flag}</span>
-                    <span>{languages.find(l => l.code === language)?.name}</span>
+                    <span>{languages.find(languageOption => languageOption.code === language)?.flag}</span>
+                    <span>{languages.find(languageOption => languageOption.code === language)?.name}</span>
                   </div>
                 </SelectValue>
               </SelectTrigger>

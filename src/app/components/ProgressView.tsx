@@ -75,8 +75,11 @@ export function ProgressView({ onBack }: ProgressViewProps) {
     
     const modules = mockModules;
     const totalLessons = modules.reduce((sum, m) => sum + m.totalLessons, 0);
-    const completedLessons = modules.reduce((sum, m) => sum + m.completedLessons, 0);
-    const completedModules = modules.filter(m => m.progress === 100).length;
+    // Calculate total completed lessons across all modules
+    const completedLessons = modules.reduce((sum, module) => sum + module.completedLessons, 0);
+    
+    // Count modules with 100% completion
+    const completedModules = modules.filter(module => module.progress === 100).length;
     
     return {
       averageScore,
@@ -706,7 +709,7 @@ export function ProgressView({ onBack }: ProgressViewProps) {
                 <Award className="w-5 h-5 text-purple-600" />
                 <p className="text-sm font-semibold text-gray-900">Achievements</p>
               </div>
-              <p className="text-3xl font-bold text-gray-900">{achievements.filter(a => a.unlocked).length}</p>
+              <p className="text-3xl font-bold text-gray-900">{achievements.filter(achievement => achievement.unlocked).length}</p>
             </div>
 
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">

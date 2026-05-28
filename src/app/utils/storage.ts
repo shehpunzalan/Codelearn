@@ -91,12 +91,20 @@ export const getAllProgress = (userId: string): StudentProgress[] => {
 };
 
 // User Stats Management
+/**
+ * Update user statistics based on their progress
+ * Calculates completed lessons, modules, and average scores
+ * @param userId - The user ID to update stats for
+ */
 export const updateUserStats = (userId: string): void => {
+  // Retrieve all progress records for this user
   const allProgress = getAllProgress(userId);
-  const completedLessons = allProgress.filter(p => p.completed);
   
-  // Get unique modules
-  const completedModuleIds = [...new Set(completedLessons.map(p => p.moduleId))];
+  // Filter only completed lessons
+  const completedLessons = allProgress.filter(progressItem => progressItem.completed);
+  
+  // Get unique module IDs from completed lessons
+  const completedModuleIds = [...new Set(completedLessons.map(progressItem => progressItem.moduleId))];
   
   // Calculate average score
   const totalScore = completedLessons.reduce((sum, p) => sum + p.score, 0);
@@ -116,7 +124,7 @@ export const updateUserStats = (userId: string): void => {
     totalTimeSpent: Math.round(totalTimeSpent * 10) / 10,
     streak,
     lastActiveDate: new Date().toISOString(),
-    completedLessons: completedLessons.map(p => p.lessonId),
+    completedLessons: completedLessons.map(progressItem => progressItem.lessonId),
     completedModules: completedModuleIds
   };
   
@@ -189,9 +197,15 @@ export const getAllSubmissions = (userId: string): CodeSubmission[] => {
   return data ? JSON.parse(data) : [];
 };
 
+/**
+ * Get all code submissions for a specific lesson
+ * @param userId - The user ID
+ * @param lessonId - The lesson ID to filter submissions
+ * @returns Array of code submissions for the specified lesson
+ */
 export const getSubmissionsByLesson = (userId: string, lessonId: string): CodeSubmission[] => {
   const allSubmissions = getAllSubmissions(userId);
-  return allSubmissions.filter(s => s.lessonId === lessonId);
+  return allSubmissions.filter(submission => submission.lessonId === lessonId);
 };
 
 // Clear user data (for testing)
@@ -223,17 +237,27 @@ export const getAllNotifications = (userId: string): Notification[] => {
   return notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
+/**
+ * Mark a specific notification as read
+ * @param userId - The user ID
+ * @param notificationId - The notification ID to mark as read
+ */
 export const markNotificationAsRead = (userId: string, notificationId: string): void => {
   const notifications = getAllNotifications(userId);
-  const updatedNotifications = notifications.map(n => 
-    n.id === notificationId ? { ...n, read: true } : n
+  const updatedNotifications = notifications.map(notification => 
+    notification.id === notificationId ? { ...notification, read: true } : notification
   );
   localStorage.setItem(`notifications_${userId}`, JSON.stringify(updatedNotifications));
 };
 
+/**
+ * Delete a specific notification
+ * @param userId - The user ID
+ * @param notificationId - The notification ID to delete
+ */
 export const deleteNotification = (userId: string, notificationId: string): void => {
   const notifications = getAllNotifications(userId);
-  const updatedNotifications = notifications.filter(n => n.id !== notificationId);
+  const updatedNotifications = notifications.filter(notification => notification.id !== notificationId);
   localStorage.setItem(`notifications_${userId}`, JSON.stringify(updatedNotifications));
 };
 
@@ -241,9 +265,14 @@ export const clearAllNotifications = (userId: string): void => {
   localStorage.removeItem(`notifications_${userId}`);
 };
 
+/**
+ * Get the count of unread notifications for a user
+ * @param userId - The user ID
+ * @returns Number of unread notifications
+ */
 export const getUnreadNotificationCount = (userId: string): number => {
   const notifications = getAllNotifications(userId);
-  return notifications.filter(n => !n.read).length;
+  return notifications.filter(notification => !notification.read).length;
 };
 
 // Export Data

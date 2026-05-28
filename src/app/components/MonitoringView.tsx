@@ -246,18 +246,20 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
     {
       id: 4,
       pattern: 'Inactive Students',
-      students: lowPerformanceStudents.filter(s => {
-        const daysSinceActive = (Date.now() - new Date(s.lastActive).getTime()) / (1000 * 60 * 60 * 24);
+      // Count students who haven't been active for more than 3 days
+      students: lowPerformanceStudents.filter(student => {
+        const daysSinceActive = (Date.now() - new Date(student.lastActive).getTime()) / (1000 * 60 * 60 * 24);
         return daysSinceActive > 3;
       }).length,
-      percentage: Math.round((lowPerformanceStudents.filter(s => {
-        const daysSinceActive = (Date.now() - new Date(s.lastActive).getTime()) / (1000 * 60 * 60 * 24);
+      // Calculate percentage of inactive students
+      percentage: Math.round((lowPerformanceStudents.filter(student => {
+        const daysSinceActive = (Date.now() - new Date(student.lastActive).getTime()) / (1000 * 60 * 60 * 24);
         return daysSinceActive > 3;
       }).length / allStudents.length) * 100),
       trend: 'increasing',
       severity: 'high',
-      description: `${lowPerformanceStudents.filter(s => {
-        const daysSinceActive = (Date.now() - new Date(s.lastActive).getTime()) / (1000 * 60 * 60 * 24);
+      description: `${lowPerformanceStudents.filter(student => {
+        const daysSinceActive = (Date.now() - new Date(student.lastActive).getTime()) / (1000 * 60 * 60 * 24);
         return daysSinceActive > 3;
       }).length} students haven't submitted code in 3+ days, risking course failure`,
       action: 'Send immediate email reminders and offer office hours',
@@ -266,11 +268,13 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
     {
       id: 5,
       pattern: 'Rapid Progress (High Performers)',
-      students: highPerformanceStudents.filter(s => s.modulesCompleted >= 6).length,
-      percentage: Math.round((highPerformanceStudents.filter(s => s.modulesCompleted >= 6).length / allStudents.length) * 100),
+      // Count high-performing students who completed 6+ modules
+      students: highPerformanceStudents.filter(student => student.modulesCompleted >= 6).length,
+      // Calculate percentage of high performers
+      percentage: Math.round((highPerformanceStudents.filter(student => student.modulesCompleted >= 6).length / allStudents.length) * 100),
       trend: 'increasing',
       severity: 'positive',
-      description: `${highPerformanceStudents.filter(s => s.modulesCompleted >= 6).length} students completing modules ahead of schedule with scores >85%`,
+      description: `${highPerformanceStudents.filter(student => student.modulesCompleted >= 6).length} students completing modules ahead of schedule with scores >85%`,
       action: 'Provide advanced challenges and research opportunities',
       color: 'text-green-600'
     },

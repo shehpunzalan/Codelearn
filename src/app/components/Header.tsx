@@ -3,7 +3,7 @@ import { User } from '../types';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Badge } from './ui/badge';
-import { Brain, Home, BookOpen, Code, MessageSquare, TrendingUp, LogOut, User as UserIcon, Settings, Bell } from 'lucide-react';
+import { Brain, Home, BookOpen, Code, MessageSquare, TrendingUp, LogOut, User as UserIcon, Settings, Bell, Database } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +33,8 @@ interface HeaderProps {
 export function Header({ user, currentView, onNavigate, onLogout, onSettings }: HeaderProps) {
   if (!user) return null;
 
-  const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  // Generate user initials from name (e.g., "John Doe" -> "JD")
+  const initials = user.name.split(' ').map(namePart => namePart[0]).join('').toUpperCase();
   const [notifications, setNotifications] = React.useState<any[]>([]);
   const [notificationOpen, setNotificationOpen] = React.useState(false);
 
@@ -53,7 +54,8 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
     }
   }, [notificationOpen, user.id, user.role]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Count unread notifications for badge display
+  const unreadCount = notifications.filter(notification => !notification.read).length;
 
   const handleMarkAsRead = (notificationId: string) => {
     markNotificationAsRead(user.id, notificationId);
@@ -299,6 +301,10 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
                 <DropdownMenuItem onClick={onSettings}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigate('data-viewer')}>
+                  <Database className="mr-2 h-4 w-4" />
+                  <span>View Data</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onLogout} className="text-red-600">

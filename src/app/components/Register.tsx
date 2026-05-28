@@ -186,9 +186,18 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     } catch (error) {
       console.error('Registration error:', error);
       setIsLoading(false);
-      toast.error('Registration failed', {
-        description: String(error) || 'Please try again or contact support.',
-      });
+
+      // Check if it's a network error (backend not deployed)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast.error('Backend server unavailable', {
+          description: 'Registration requires backend deployment. Use demo accounts: student@demo.com or instructor@demo.com (password: demo123)',
+          duration: 6000,
+        });
+      } else {
+        toast.error('Registration failed', {
+          description: String(error) || 'Please try again or contact support.',
+        });
+      }
     }
   };
 

@@ -45,6 +45,7 @@ export function InteractiveGamePage({
   const [timeRemaining, setTimeRemaining] = useState(30);
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
+  const [currentShuffledQuestion, setCurrentShuffledQuestion] = useState<QuizQuestion | null>(null);
 
   // Get quiz questions from quiz database or lesson content
   const getQuestions = (): QuizQuestion[] => {
@@ -218,6 +219,34 @@ export function InteractiveGamePage({
     console.log(`📝 All questions loaded:`, questions.map((q, i) => `Q${i+1}: ${q.question.substring(0, 30)}...`));
     console.log(`✅ TOTAL QUESTIONS IN GAME: ${totalQuestions}`);
   }, []);
+
+  // Shuffle options for current question whenever question index changes
+  useEffect(() => {
+    if (questions && questions[currentQuestion]) {
+      const question = questions[currentQuestion];
+      const options = [...question.options];
+      const correctOptionText = options[question.correctAnswer];
+
+      // Fisher-Yates shuffle
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      // Find new index of correct answer
+      const newCorrectAnswer = options.indexOf(correctOptionText);
+
+      const shuffled: QuizQuestion = {
+        ...question,
+        options,
+        correctAnswer: newCorrectAnswer
+      };
+
+      console.log('🎮 Interactive Game - Question', currentQuestion + 1, '- Correct answer at position:', newCorrectAnswer + 1);
+
+      setCurrentShuffledQuestion(shuffled);
+    }
+  }, [currentQuestion]);
 
   // Timer effect
   useEffect(() => {
@@ -530,8 +559,12 @@ export function InteractiveGamePage({
     );
   }
 
-  // Game play screen
-  const currentQ = questions[currentQuestion];
+  // Use shuffled question or fallback to original
+  if (!currentShuffledQuestion) {
+    return null;
+  }
+
+  const currentQ = currentShuffledQuestion;
   const progress = ((currentQuestion + 1) / totalQuestions) * 100;
 
   return (

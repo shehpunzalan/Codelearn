@@ -1,30 +1,40 @@
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+// Supabase Configuration
+const projectId = "hovedryqutuucipuqxca";
+const publicAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0";
 
 const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f`;
 
 // Helper function to make API requests
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${publicAnonKey}`
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers,
+      },
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `API request failed: ${response.status}`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API request failed: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    // Log network errors silently and rethrow for caller to handle
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Backend server unavailable');
+    }
+    throw error;
   }
-
-  return response.json();
 }
 
 // ============================================

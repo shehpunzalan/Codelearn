@@ -12,8 +12,9 @@ interface ModulesPageProps {
 }
 
 export function ModulesPage({ modules, onSelectModule }: ModulesPageProps) {
-  const modulesStarted = modules.filter(m => m.progress > 0).length;
-  const lessonsCompleted = modules.reduce((sum, m) => sum + m.completedLessons, 0);
+  // Calculate statistics for modules overview
+  const modulesStarted = modules.filter(module => module.progress > 0).length;
+  const lessonsCompleted = modules.reduce((sum, module) => sum + module.completedLessons, 0);
   const totalLessons = modules.reduce((sum, m) => sum + m.totalLessons, 0);
   const overallProgress = Math.round((lessonsCompleted / totalLessons) * 100);
 

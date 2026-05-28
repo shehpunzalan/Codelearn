@@ -9,7 +9,8 @@ import {
   Lightbulb, Users, Brain, Target, Zap, Award,
   ChevronRight, ChevronLeft, Sparkles, Eye,
   Clock, BarChart3, TrendingUp, Gamepad2, Trophy,
-  AlertCircle, XCircle, User, ExternalLink, ArrowLeft
+  AlertCircle, XCircle, User, ExternalLink, ArrowLeft,
+  BookMarked
 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
@@ -75,17 +76,15 @@ export function EnhancedLearningDelivery({
   const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
+  const [shuffledQuizQuestions, setShuffledQuizQuestions] = useState<Challenge[]>([]);
   const [showVideoTutorials, setShowVideoTutorials] = useState(true);
-  
+
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
-  
+
   // Construct the comprehensive lesson content key (format: 'mod1-lesson1-1')
   const comprehensiveLessonKey = `${moduleId}-${lessonId}`;
-
-  // Get lesson-specific video data
-  const lessonVideo = getLessonVideo(comprehensiveLessonKey);
 
   // Simulated learning path sections
   const learningSections = [
@@ -96,6 +95,36 @@ export function EnhancedLearningDelivery({
     { id: 5, title: 'Knowledge Check', duration: '4 min', type: 'quiz' },
     { id: 6, title: 'Summary & Next Steps', duration: '2 min', type: 'summary' }
   ];
+
+  // Shuffle quiz questions only when section changes to quiz
+  useEffect(() => {
+    if (learningSections[currentSection]?.type === 'quiz') {
+      const challenges = getChallengesForLesson(comprehensiveLessonKey);
+      const originalQuizQuestions = challenges ? challenges.slice(0, 10).filter((q: any) => q && q.question) : [];
+
+      // Shuffle options for each question
+      const shuffled = originalQuizQuestions.map(question => {
+        const options = [...question.options];
+
+        // Fisher-Yates shuffle
+        for (let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+
+        return {
+          ...question,
+          options
+        };
+      });
+
+      setShuffledQuizQuestions(shuffled);
+      console.log('📝 Enhanced Quiz - Shuffled', shuffled.length, 'questions');
+    }
+  }, [currentSection, comprehensiveLessonKey]);
+
+  // Get lesson-specific video data
+  const lessonVideo = getLessonVideo(comprehensiveLessonKey);
 
   // Modern delivery methods
   const deliveryMethods = [
@@ -122,16 +151,24 @@ export function EnhancedLearningDelivery({
     }
   ];
 
-  // Track time spent
+  /**
+   * Effect: Track time spent and engagement metrics
+   * Updates every second to monitor student engagement
+   * Increases engagement score during active learning
+   */
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeSpent(prev => prev + 1);
+    // Set up interval to update metrics every second
+    const timeTrackingInterval = setInterval(() => {
+      setTimeSpent(previousTimeSpent => previousTimeSpent + 1);
+      
+      // Increase engagement score when actively learning
       if (isPlaying || selectedMode === 'interactive') {
-        setEngagementScore(prev => Math.min(100, prev + 0.5));
+        setEngagementScore(previousEngagementScore => Math.min(100, previousEngagementScore + 0.5));
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    // Clean up interval on component unmount
+    return () => clearInterval(timeTrackingInterval);
   }, [isPlaying, selectedMode]);
 
   // Audio playback tracking
@@ -163,29 +200,41 @@ export function EnhancedLearningDelivery({
     setProgress(Math.round((completed / totalSections) * 100));
   }, [completedSections]);
 
+  /**
+   * Handler: Mark a learning section as complete
+   * Updates progress tracking and advances to next section
+   * @param sectionId - The ID of the section being completed
+   */
   const handleSectionComplete = (sectionId: number) => {
-    const newCompleted = new Set(completedSections);
-    newCompleted.add(sectionId);
-    setCompletedSections(newCompleted);
+    // Add section to completed set
+    const newCompletedSections = new Set(completedSections);
+    newCompletedSections.add(sectionId);
+    setCompletedSections(newCompletedSections);
     
+    // Calculate and display experience points earned
+    const experiencePoints = Math.round(100 / learningSections.length);
     toast.success('Section Completed! 🎉', {
-      description: `+${Math.round(100 / learningSections.length)} XP earned`
+      description: `+${experiencePoints} XP earned`
     });
 
+    // Advance to next section or complete lesson
     if (currentSection < learningSections.length - 1) {
-      setCurrentSection(prev => prev + 1);
+      setCurrentSection(previousSectionIndex => previousSectionIndex + 1);
     } else if (onComplete) {
       onComplete();
     }
   };
 
-  // Highlight key terms functionality with enhanced feedback
+  /**
+   * Handler: Toggle highlighting of key programming terms
+   * Enables/disables visual highlighting of important concepts
+   */
   const handleHighlightKeyTerms = () => {
-    const newState = !highlightEnabled;
-    setHighlightEnabled(newState);
+    const newHighlightState = !highlightEnabled;
+    setHighlightEnabled(newHighlightState);
     
-    if (newState) {
-      // Count keywords in current lesson
+    if (newHighlightState) {
+      // Count keywords in current lesson for user feedback
       const lessonKeywords = getLessonSpecificKeywords(comprehensiveLessonKey) || [];
       const totalKeywords = lessonKeywords.length > 0 ? lessonKeywords.length : 50;
       
@@ -194,8 +243,8 @@ export function EnhancedLearningDelivery({
         duration: 4000
       });
       
-      // Add visual emphasis
-      setEngagementScore(prev => Math.min(100, prev + 2));
+      // Reward engagement with additional score
+      setEngagementScore(previousEngagementScore => Math.min(100, previousEngagementScore + 2));
     } else {
       toast.info('Highlights Removed', {
         description: 'Key term highlighting has been turned off',
@@ -1022,9 +1071,8 @@ export function EnhancedLearningDelivery({
 
               {/* Section 5: Knowledge Check */}
               {learningSections[currentSection].type === 'quiz' && (() => {
-                const challenges = getChallengesForLesson(comprehensiveLessonKey);
-                const quizQuestions = challenges ? challenges.slice(0, 10).filter((q: any) => q && q.question) : [];
-                
+                const quizQuestions = shuffledQuizQuestions;
+
                 if (!quizQuestions || quizQuestions.length === 0) {
                   return (
                     <Card className="border-4 border-yellow-200 shadow-lg bg-gradient-to-br from-yellow-50 to-amber-50">

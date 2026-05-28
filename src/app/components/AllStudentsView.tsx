@@ -184,8 +184,11 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
     }
     
     const avgScore = students.reduce((sum, s) => sum + s.averageScore, 0) / totalStudents;
-    const avgCompletion = students.reduce((sum, s) => sum + s.completionRate, 0) / totalStudents;
-    const struggling = students.filter(s => s.averageScore < 70).length;
+    // Calculate average completion rate across all students
+    const avgCompletion = students.reduce((sum, student) => sum + student.completionRate, 0) / totalStudents;
+    
+    // Count students who are struggling (score below 70%)
+    const struggling = students.filter(student => student.averageScore < 70).length;
     
     return {
       total: totalStudents,
@@ -389,7 +392,8 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                   {/* Student Info */}
                   <div className="flex items-center gap-4 flex-1">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white flex items-center justify-center font-bold text-lg">
-                      {student.name.split(' ').map(n => n[0]).join('')}
+                      {/* Generate initials from student name */}
+                      {student.name.split(' ').map(namePart => namePart[0]).join('')}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">

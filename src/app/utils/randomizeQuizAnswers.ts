@@ -39,7 +39,8 @@ export function randomizeQuestionOptions(question: QuizQuestion): QuizQuestion {
  * Randomizes options for all questions in a quiz
  */
 export function randomizeQuizQuestions(questions: QuizQuestion[]): QuizQuestion[] {
-  return questions.map(q => randomizeQuestionOptions(q));
+  // Apply randomization to each question in the array
+  return questions.map(question => randomizeQuestionOptions(question));
 }
 
 /**

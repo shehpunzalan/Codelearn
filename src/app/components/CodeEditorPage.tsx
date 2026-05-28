@@ -15,59 +15,89 @@ import { submitCode } from '../services/api';
 import { submitCode as submitCodeToBackend, autoSaveCode, getDraftCode, getSubmissionsByLesson } from '../services/codeSubmissionApi';
 import { toast } from 'sonner';
 
+/**
+ * Props interface for CodeEditorPage component
+ * Defines the required properties for rendering the code editor
+ */
 interface CodeEditorPageProps {
-  module: Module;
-  lesson: Lesson;
-  onBack: () => void;
-  onViewFeedback: () => void;
+  module: Module;              // Current module being studied
+  lesson: Lesson;              // Current lesson within the module
+  onBack: () => void;          // Callback function to navigate back to lesson
+  onViewFeedback: () => void;  // Callback function to view detailed feedback
 }
 
+/**
+ * Metrics interface to track code statistics
+ * Monitors the size and complexity of student code
+ */
 interface CodeMetrics {
-  lines: number;
-  characters: number;
+  lines: number;      // Total number of lines in the code
+  characters: number; // Total character count in the code
 }
 
+/**
+ * Performance metrics interface to track student coding activity
+ * Helps analyze student engagement and coding patterns
+ */
 interface PerformanceMetrics {
-  startTime: number;
-  keystrokes: number;
-  timeSpent: number;
-  typingSpeed: number;
-  submitAttempts: number;
+  startTime: number;      // Timestamp when coding session started
+  keystrokes: number;     // Total number of keystrokes made
+  timeSpent: number;      // Total time spent in seconds
+  typingSpeed: number;    // Words per minute typing speed
+  submitAttempts: number; // Number of times code was submitted
 }
 
+/**
+ * Error detail interface for comprehensive error reporting
+ * Provides structured information about code errors
+ */
 interface ErrorDetail {
-  line: number;
-  severity: 'error' | 'warning';
-  message: string;
-  suggestion: string;
+  line: number;                    // Line number where error occurred
+  severity: 'error' | 'warning';   // Severity level of the issue
+  message: string;                 // Error message description
+  suggestion: string;              // Suggested fix for the error
 }
 
+/**
+ * Feedback interface for AI-generated code analysis
+ * Contains comprehensive analysis results from the neural network
+ */
 interface Feedback {
-  codeQuality: number;
-  oopPrinciples: string[];
-  errors: string[];
-  suggestions: string[];
-  detailedFeedback: string;
-  errorDetails?: ErrorDetail[];
-  strengths?: string[];
-  improvements?: string[];
-  codeSmells?: string[];
-  securityIssues?: string[];
-  performanceIssues?: string[];
+  codeQuality: number;              // Overall code quality score (0-100)
+  oopPrinciples: string[];          // List of OOP principles detected
+  errors: string[];                 // List of errors found in code
+  suggestions: string[];            // Suggestions for improvement
+  detailedFeedback: string;         // Detailed markdown feedback
+  errorDetails?: ErrorDetail[];     // Detailed error information
+  strengths?: string[];             // Code strengths identified
+  improvements?: string[];          // Areas needing improvement
+  codeSmells?: string[];            // Code smell patterns detected
+  securityIssues?: string[];        // Security vulnerabilities found
+  performanceIssues?: string[];     // Performance optimization opportunities
 }
 
+/**
+ * Submission interface for storing code submission records
+ * Tracks all student submissions with metadata
+ */
 interface Submission {
-  id: string;
-  moduleId: string;
-  lessonId: string;
-  code: string;
-  feedback: Feedback;
-  timestamp: string;
-  score: number;
-  performanceMetrics?: PerformanceMetrics;
+  id: string;                           // Unique submission identifier
+  moduleId: string;                     // Associated module ID
+  lessonId: string;                     // Associated lesson ID
+  code: string;                         // Submitted code content
+  feedback: Feedback;                   // AI-generated feedback
+  timestamp: string;                    // Submission timestamp (ISO format)
+  score: number;                        // Overall score (0-100)
+  performanceMetrics?: PerformanceMetrics; // Optional performance data
 }
 
+/**
+ * CodeEditorPage Component
+ * Main component for the Java code editor with AI-powered feedback
+ * Provides Monaco editor integration, code analysis, and submission handling
+ */
 export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeEditorPageProps) {
+  // State management for code content and editor behavior
   const [code, setCode] = useState<string>(lesson.starterCode || '// Write your Java code here...');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Submission | null>(null);
@@ -81,17 +111,23 @@ export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeE
     submitAttempts: 0
   });
 
-  // Clear all saved data on mount to ensure fresh start
+  /**
+   * Effect: Initialize code editor on component mount
+   * Clears any previously saved data to ensure a fresh start for each lesson
+   * Dependencies: module.id, lesson.id (runs when switching lessons/modules)
+   */
   useEffect(() => {
     // Clear any previously saved code and metrics for this lesson
     localStorage.removeItem(`code_${module.id}_${lesson.id}`);
     localStorage.removeItem(`submission_${module.id}_${lesson.id}`);
     localStorage.removeItem(`performance_${module.id}_${lesson.id}`);
     
-    // Reset to starter code
+    // Reset to starter code provided by the lesson
     setCode(lesson.starterCode || '// Write your Java code here...');
     setLastSubmission(null);
     setHasSubmitted(false);
+    
+    // Reset performance metrics to initial state
     setPerformanceMetrics({
       startTime: Date.now(),
       keystrokes: 0,
@@ -101,57 +137,99 @@ export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeE
     });
   }, [module.id, lesson.id]);
 
-  // Update code metrics
+  /**
+   * Effect: Update code metrics whenever code changes
+   * Calculates and updates line count and character count
+   * Dependencies: code (runs whenever student modifies code)
+   */
   useEffect(() => {
-    const lines = code.split('\n').length;
-    const characters = code.length;
-    setCodeMetrics({ lines, characters });
+    const totalLines = code.split('\n').length;
+    const totalCharacters = code.length;
+    setCodeMetrics({ lines: totalLines, characters: totalCharacters });
   }, [code]);
 
-  // Track performance metrics
+  /**
+   * Effect: Track performance metrics over time
+   * Updates time spent and typing speed every second
+   * Dependencies: performanceMetrics.startTime, performanceMetrics.keystrokes
+   */
   useEffect(() => {
-    const interval = setInterval(() => {
-      const timeSpent = Math.floor((Date.now() - performanceMetrics.startTime) / 1000);
-      const typingSpeed = performanceMetrics.keystrokes > 0 
-        ? Math.round((performanceMetrics.keystrokes / timeSpent) * 60) 
+    // Set up interval to update metrics every second
+    const metricsInterval = setInterval(() => {
+      const elapsedTimeInSeconds = Math.floor((Date.now() - performanceMetrics.startTime) / 1000);
+      const wordsPerMinute = performanceMetrics.keystrokes > 0 
+        ? Math.round((performanceMetrics.keystrokes / elapsedTimeInSeconds) * 60) 
         : 0;
       
-      setPerformanceMetrics(prev => ({
-        ...prev,
-        timeSpent,
-        typingSpeed
+      setPerformanceMetrics(previousMetrics => ({
+        ...previousMetrics,
+        timeSpent: elapsedTimeInSeconds,
+        typingSpeed: wordsPerMinute
       }));
     }, 1000);
 
-    return () => clearInterval(interval);
+    // Clean up interval on component unmount
+    return () => clearInterval(metricsInterval);
   }, [performanceMetrics.startTime, performanceMetrics.keystrokes]);
 
-  const handleCodeChange = (value: string | undefined) => {
-    if (value !== undefined) {
-      setCode(value);
-      setPerformanceMetrics(prev => ({
-        ...prev,
-        keystrokes: prev.keystrokes + 1
+  /**
+   * Handler: Process code changes in the Monaco editor
+   * Updates code state and increments keystroke counter
+   * @param newValue - The new code value from the editor
+   */
+  const handleCodeChange = (newValue: string | undefined) => {
+    if (newValue !== undefined) {
+      setCode(newValue);
+      
+      // Increment keystroke counter for performance tracking
+      setPerformanceMetrics(previousMetrics => ({
+        ...previousMetrics,
+        keystrokes: previousMetrics.keystrokes + 1
       }));
     }
   };
 
+  /**
+   * Handler: Save current code to local storage
+   * Persists both code content and performance metrics
+   */
   const handleSaveCode = () => {
+    // Save code content to browser local storage
     localStorage.setItem(`code_${module.id}_${lesson.id}`, code);
     localStorage.setItem(`performance_${module.id}_${lesson.id}`, JSON.stringify(performanceMetrics));
+    
+    // Show success notification to user
     toast.success('💾 Code saved successfully!');
   };
 
+  /**
+   * Handler: Reset code to original starter template
+   * Clears all progress and restores the initial code
+   */
   const handleResetCode = () => {
+    // Confirm with user before resetting (destructive action)
     if (confirm('Are you sure you want to reset your code? This will restore the starter code and cannot be undone.')) {
+      // Restore starter code from lesson
       setCode(lesson.starterCode || '// Write your Java code here...');
+      
+      // Remove saved code from local storage
       localStorage.removeItem(`code_${module.id}_${lesson.id}`);
+      
+      // Reset submission state
       setHasSubmitted(false);
       setLastSubmission(null);
+      
+      // Notify user of successful reset
       toast.info('Code reset to starter template');
     }
   };
 
+  /**
+   * Function: Analyze code for OOP principles and quality
+   * Manually checks for OOP principles and assigns a quality score
+   * @param code - The Java code to analyze
+   * @returns Feedback object containing analysis results
+   */
   const analyzeCode = (code: string): Feedback => {
     const feedback: Feedback = {
       codeQuality: 70,
@@ -261,21 +339,25 @@ export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeE
 Your code has been analyzed by our neural network system. Overall quality score: ${feedback.codeQuality}/100
 
 **OOP Principles Detected:**
-${feedback.oopPrinciples.length > 0 ? feedback.oopPrinciples.map(p => `- ${p}`).join('\n') : '- No OOP principles detected'}
+${feedback.oopPrinciples.length > 0 ? feedback.oopPrinciples.map(principle => `- ${principle}`).join('\n') : '- No OOP principles detected'}
 
 **Strengths:**
-${feedback.strengths && feedback.strengths.length > 0 ? feedback.strengths.map(s => `- ${s}`).join('\n') : '- Continue building your skills'}
+${feedback.strengths && feedback.strengths.length > 0 ? feedback.strengths.map(strength => `- ${strength}`).join('\n') : '- Continue building your skills'}
 
 **Areas for Improvement:**
-${feedback.improvements && feedback.improvements.length > 0 ? feedback.improvements.map(i => `- ${i}`).join('\n') : '- Great job! Keep up the good work'}
+${feedback.improvements && feedback.improvements.length > 0 ? feedback.improvements.map(improvement => `- ${improvement}`).join('\n') : '- Great job! Keep up the good work'}
 
 **Suggestions:**
-${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join('\n') : '- Your code looks good'}
+${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${suggestion}`).join('\n') : '- Your code looks good'}
     `.trim();
 
     return feedback;
   };
 
+  /**
+   * Handler: Submit code for AI analysis and feedback
+   * Compiles code, analyzes with AI, and saves submission details
+   */
   const handleSubmit = async () => {
     // Get current user
     const currentUser = localStorage.getItem('currentUser');
@@ -388,7 +470,7 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
     localStorage.setItem(`submission_${module.id}_${lesson.id}`, JSON.stringify(submission));
     localStorage.setItem(`performance_${module.id}_${lesson.id}`, JSON.stringify(updatedMetrics));
 
-    // Save to backend server via API
+    // Save to backend server via API (optional - falls back to local storage)
     try {
       const backendResult = await submitCode({
         userId: user.id,
@@ -397,15 +479,13 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
         code,
         assignmentId: lesson.id
       });
-      
-      console.log('Backend submission successful:', backendResult);
-      
+
       if (backendResult.success) {
-        toast.success('✓ Submission saved to server');
+        console.log('✓ Backend submission successful');
       }
     } catch (error) {
-      console.error('Backend submission error:', error);
-      toast.error('Warning: Could not save to server, saved locally');
+      // Backend is optional - local storage is the primary storage
+      console.log('Backend unavailable, using local storage');
     }
 
     // Save to central storage (localStorage fallback)
@@ -465,18 +545,36 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
     }
   };
 
+  /**
+   * Function: Determine color based on code quality score
+   * Assigns color for visual representation of code quality
+   * @param score - The code quality score (0-100)
+   * @returns CSS class name for text color
+   */
   const getQualityColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
   };
 
+  /**
+   * Function: Determine icon based on code quality score
+   * Assigns icon for visual representation of code quality
+   * @param score - The code quality score (0-100)
+   * @returns SVG icon element
+   */
   const getQualityIcon = (score: number) => {
     if (score >= 80) return <CheckCircle className="w-5 h-5" />;
     if (score >= 60) return <AlertCircle className="w-5 h-5" />;
     return <XCircle className="w-5 h-5" />;
   };
 
+  /**
+   * Function: Format time in minutes and seconds
+   * Converts total seconds into a formatted time string
+   * @param seconds - Total time in seconds
+   * @returns Formatted time string (MM:SS)
+   */
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -513,30 +611,6 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
           </div>
         </div>
       </div>
-
-      {/* Performance Metrics Bar */}
-      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-purple-50">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-4 gap-4 text-center">
-            <div>
-              <p className="text-xs text-gray-600 mb-1">Time Spent</p>
-              <p className="text-lg font-bold text-gray-900">{formatTime(performanceMetrics.timeSpent)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 mb-1">Keystrokes</p>
-              <p className="text-lg font-bold text-gray-900">{performanceMetrics.keystrokes}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 mb-1">Typing Speed</p>
-              <p className="text-lg font-bold text-gray-900">{performanceMetrics.typingSpeed} WPM</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 mb-1">Submit Attempts</p>
-              <p className="text-lg font-bold text-gray-900">{performanceMetrics.submitAttempts}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -575,13 +649,6 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
                 <Badge variant="outline" className="text-xs">
                   {module.title} - {lesson.title}
                 </Badge>
-                <div className="flex gap-3 text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <FileText className="w-3 h-3" />
-                    {codeMetrics.lines} lines
-                  </span>
-                  <span>{codeMetrics.characters} chars</span>
-                </div>
               </div>
 
               <div className="border rounded-lg overflow-hidden bg-gray-900">

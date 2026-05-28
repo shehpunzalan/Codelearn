@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getQuizForLesson, type QuizQuestion, shuffleArray } from '../data/quizQuestions';
+import { randomizeQuizQuestions } from '../utils/randomizeQuizAnswers';
 
 interface QuizGameModalProps {
   moduleId: string;
@@ -28,28 +29,56 @@ export function QuizGameModal({ moduleId, lessonId, lessonTitle, onClose }: Quiz
   const [answeredQuestions, setAnsweredQuestions] = useState<boolean[]>([]);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [allQuestions, setAllQuestions] = useState<QuizQuestion[]>([]);
+  const [currentShuffledQuestion, setCurrentShuffledQuestion] = useState<QuizQuestion | null>(null);
 
-  // Load quiz data
+  // Load quiz data (shuffle questions once)
   useEffect(() => {
     const quiz = getQuizForLesson(moduleId, lessonId);
     if (quiz) {
-      // Use all 20 questions
-      const allQuestions = shuffleArray(quiz.questions);
-      setQuestions(allQuestions);
-      setAnsweredQuestions(new Array(allQuestions.length).fill(false));
+      const shuffledQuestions = shuffleArray(quiz.questions);
+      setAllQuestions(shuffledQuestions);
+      setAnsweredQuestions(new Array(shuffledQuestions.length).fill(false));
     } else {
       toast.error('Quiz not available for this lesson');
       onClose();
     }
   }, [moduleId, lessonId]);
 
-  if (questions.length === 0) {
+  // Shuffle options for current question whenever question index changes
+  useEffect(() => {
+    if (allQuestions && allQuestions[currentQuestionIndex]) {
+      const question = allQuestions[currentQuestionIndex];
+      const options = [...question.options];
+      const correctOptionText = options[question.correctAnswer];
+
+      // Fisher-Yates shuffle
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      // Find new index of correct answer
+      const newCorrectAnswer = options.indexOf(correctOptionText);
+
+      const shuffled: QuizQuestion = {
+        ...question,
+        options,
+        correctAnswer: newCorrectAnswer
+      };
+
+      console.log('🎮 Question', currentQuestionIndex + 1, '- Correct answer at position:', newCorrectAnswer + 1);
+
+      setCurrentShuffledQuestion(shuffled);
+    }
+  }, [currentQuestionIndex]);
+
+  if (!currentShuffledQuestion) {
     return null;
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const totalQuestions = questions.length;
+  const currentQuestion = currentShuffledQuestion;
+  const totalQuestions = allQuestions.length;
   const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
 
   const handleAnswerSelect = (optionIndex: number) => {

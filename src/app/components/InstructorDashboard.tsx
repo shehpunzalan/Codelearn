@@ -6,9 +6,9 @@ import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { 
-  Users, BookOpen, TrendingUp, Brain, Activity, 
-  AlertCircle, MessageSquare, Award, Download, Bell
+import {
+  Users, BookOpen, TrendingUp, Brain, Activity,
+  AlertCircle, MessageSquare, Award, Download, Bell, Search
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createModuleNotification, createActivityNotification, createAnnouncementNotification } from '../utils/notifications';
@@ -29,6 +29,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
   const [showAllStudents, setShowAllStudents] = useState(false);
   const [viewingStudentId, setViewingStudentId] = useState<string | null>(null);
   const [viewingStudentName, setViewingStudentName] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const totalStudents = 42;
   const activeStudents = 38;
@@ -47,6 +48,16 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
     { id: 1, name: 'Daniel Patrick Lopez', avgScore: 52, issues: ['Polymorphism', 'Abstraction'], lastActive: '3 days ago' },
     { id: 2, name: 'Vincent Paul Morales', avgScore: 46, issues: ['Inheritance', 'Code Quality'], lastActive: '4 days ago' },
   ];
+
+  // Filter students based on search
+  const filteredTopStudents = topStudents.filter(student =>
+    student.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredNeedsAttention = needsAttention.filter(student =>
+    student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.issues.some(issue => issue.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   const handleSendIntervention = (student: any) => {
     setSelectedStudent(student);
@@ -163,6 +174,18 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search students by name or topic..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+        />
+      </div>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card 
@@ -240,7 +263,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
               <CardDescription>Students excelling in OOP</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {topStudents.map((student, index) => (
+              {filteredTopStudents.length > 0 ? filteredTopStudents.map((student, index) => (
                 <div key={student.id} className="p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold">
@@ -257,7 +280,11 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-500">No top performers found</p>
+                </div>
+              )}
               <Button variant="outline" className="w-full" size="sm" onClick={() => setShowAllStudents(true)}>
                 <Users className="w-4 h-4 mr-2" />
                 View All Students
@@ -275,7 +302,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
               <CardDescription>Students requiring support</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {needsAttention.map((student) => (
+              {filteredNeedsAttention.length > 0 ? filteredNeedsAttention.map((student) => (
                 <div key={student.id} className="p-3 bg-red-50 rounded-lg border border-red-200">
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-semibold text-gray-900">{student.name}</p>
@@ -303,7 +330,11 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
                     Send Intervention
                   </Button>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-500">No students found</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

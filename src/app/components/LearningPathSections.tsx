@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -140,21 +140,45 @@ export function KnowledgeCheckSection({
 
   const questions = quizQuestions && quizQuestions.length > 0 ? quizQuestions : defaultQuestions;
 
+  // Randomize quiz options only once on mount
+  const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>(() => {
+    // Initialize with shuffled questions
+    const randomized = questions.map(question => {
+      const options = [...question.options];
+
+      // Fisher-Yates shuffle
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      return {
+        ...question,
+        options
+      };
+    });
+
+    console.log('📝 Knowledge Check - Randomized', randomized.length, 'questions');
+    return randomized;
+  });
+
+  const displayQuestions = shuffledQuestions;
+
   const handleQuizSubmit = async () => {
-    // Calculate score based on correct answers
+    // Calculate score based on correct answers (use original questions for correct answers)
     let score = 0;
     const scorePerQuestion = 100 / questions.length;
-    
+
     questions.forEach(question => {
       if (quizAnswers[question.id] === question.correctAnswer) {
         score += scorePerQuestion;
       }
     });
-    
+
     const finalScore = Math.round(score);
     setQuizScore(finalScore);
     setQuizSubmitted(true);
-    
+
     // Save quiz score to database
     if (moduleId && lessonId) {
       try {
@@ -195,7 +219,7 @@ export function KnowledgeCheckSection({
           {!quizSubmitted ? (
             <div className="space-y-6">
               {/* Dynamic Quiz Questions */}
-              {questions.map((question, qIndex) => (
+              {displayQuestions.map((question, qIndex) => (
                 <div key={question.id} className="bg-white border border-yellow-200 rounded-lg p-5">
                   <h4 className="font-semibold text-gray-900 mb-3">{qIndex + 1}. {question.question}</h4>
                   <div className="space-y-2">

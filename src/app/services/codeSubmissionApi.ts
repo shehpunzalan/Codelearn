@@ -1,7 +1,9 @@
 // Code Submission API Service
 // Handles all communication with backend for code submissions and AI feedback
 
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+// Supabase Configuration
+const projectId = "hovedryqutuucipuqxca";
+const publicAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0";
 
 const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f`;
 
@@ -56,14 +58,17 @@ export async function submitCode(submission: CodeSubmission): Promise<Submission
     });
 
     const data = await response.json();
-    
+
     if (!data.success) {
       throw new Error(data.error || 'Failed to submit code');
     }
 
     return data.data;
   } catch (error) {
-    console.error('Error submitting code:', error);
+    // Handle network errors gracefully
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Backend server unavailable');
+    }
     throw error;
   }
 }

@@ -3,7 +3,7 @@ import { User, Module } from '../types';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { BookOpen, Target, TrendingUp, Clock, Brain, CheckCircle, Loader, Code, MessageSquare, BarChart3, Edit, Activity, FileText } from 'lucide-react';
+import { BookOpen, Target, TrendingUp, Clock, Brain, CheckCircle, Loader, Code, MessageSquare, BarChart3, Edit, Activity, FileText, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { getUserStats, getAllProgress } from '../utils/storage';
 import { generateStudentInsights } from '../utils/aiFeedback';
@@ -20,6 +20,7 @@ interface StudentDashboardProps {
 export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback, onViewProgress, onNavigate }: StudentDashboardProps) {
   const [stats, setStats] = useState<any>(null);
   const [insights, setInsights] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   
   useEffect(() => {
     // Load real user stats
@@ -27,9 +28,14 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
     setStats(userStats);
     
     // Load progress for insights
+    // Get all progress records for the current user
     const allProgress = getAllProgress(user.id);
-    const scores = allProgress.filter(p => p.completed).map(p => p.score);
-    const completedLessonIds = allProgress.filter(p => p.completed).map(p => p.lessonId);
+    
+    // Extract scores from completed lessons
+    const scores = allProgress.filter(progressItem => progressItem.completed).map(progressItem => progressItem.score);
+    
+    // Extract lesson IDs from completed lessons
+    const completedLessonIds = allProgress.filter(progressItem => progressItem.completed).map(progressItem => progressItem.lessonId);
     
     const aiInsights = generateStudentInsights(completedLessonIds, scores);
     setInsights(aiInsights);
@@ -87,6 +93,12 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
     }
   ];
 
+  // Filter activities based on search
+  const filteredActivities = recentActivities.filter(activity =>
+    activity.module.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    activity.topic.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -97,6 +109,18 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
           <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
           <p className="text-gray-600">Welcome back, {user.name}! Continue your Object-Oriented Programming journey</p>
         </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search modules, topics, or activities..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+        />
       </div>
 
       {/* Stats Cards */}
@@ -209,7 +233,7 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
             <CardContent className="p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Recent CCS108 Activities</h2>
               <div className="space-y-4">
-                {recentActivities.map((activity) => (
+                {filteredActivities.length > 0 ? filteredActivities.map((activity) => (
                   <div key={activity.id} className="border-l-4 border-green-500 pl-4 py-3">
                     <div className="flex justify-between items-start mb-1">
                       <div>
@@ -235,7 +259,11 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
                       )}
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No activities found matching "{searchQuery}"</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

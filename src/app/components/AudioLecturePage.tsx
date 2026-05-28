@@ -53,7 +53,8 @@ export function AudioLecturePage({
   const generateTranscript = (): TranscriptSegment[] => {
     // If we have a stored transcript, parse it into segments
     if (hasAudioFile && audioData.transcript) {
-      const paragraphs = audioData.transcript.split('\n\n').filter(p => p.trim());
+      // Split transcript into paragraphs and filter out empty ones
+      const paragraphs = audioData.transcript.split('\n\n').filter(paragraph => paragraph.trim());
       return paragraphs.map((text, index) => ({
         timestamp: formatTimestamp(index * 30),
         text: text.trim()

@@ -27,7 +27,8 @@ export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutoria
   const [quizStats, setQuizStats] = useState<any>(null);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
 
-  const selectedLesson = module.lessons.find(l => l.id === selectedLessonId);
+  // Find the currently selected lesson from the module's lessons array
+  const selectedLesson = module.lessons.find(lesson => lesson.id === selectedLessonId);
 
   // Quiz handlers
   const handleQuizComplete = (stats: any) => {

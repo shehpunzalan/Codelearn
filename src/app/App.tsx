@@ -21,12 +21,16 @@ import { ReadingContentPage } from './components/ReadingContentPage';
 import { AudioLecturePage } from './components/AudioLecturePage';
 import { InteractiveGamePage } from './components/InteractiveGamePage';
 import { LearningPathReadingPage } from './components/LearningPathReadingPage';
+import { DataViewer } from './components/DataViewer';
 import { toast, Toaster } from 'sonner';
 import { seedDemoStudents } from './utils/demoStudents';
 import * as backendApi from './services/backendApi';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // CodeLearn AI - Neural Network Pattern Recognition System for Java OOP
-function App() {
+function AppContent() {
+  console.log('🚀 App component rendering');
+
   const [user, setUser] = useState<User | null>(null);
   const [showLogin, setShowLogin] = useState(true);
   const [currentView, setCurrentView] = useState('dashboard');
@@ -36,64 +40,85 @@ function App() {
   const [selectedLessonContent, setSelectedLessonContent] = useState<any>(null);
   const [modules, setModules] = useState<Module[]>(mockModules);
   const [editorRefreshKey, setEditorRefreshKey] = useState(0); // Force refresh of code editor
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Seed demo students on initial load
   useEffect(() => {
+    console.log('🎬 Initializing app...');
     seedDemoStudents();
+    setIsInitialized(true);
+    console.log('✅ App initialized');
   }, []);
 
   // Check for existing session on mount
   useEffect(() => {
     const checkSession = async () => {
-      setIsCheckingSession(true);
+      console.log('🔍 Checking session...');
 
-      const currentUser = localStorage.getItem('currentUser');
-      const accessToken = localStorage.getItem('accessToken');
+      try {
+        const currentUser = localStorage.getItem('currentUser');
+        const accessToken = localStorage.getItem('accessToken');
 
-      // If we have demo tokens, use them directly without backend verification
-      if (accessToken === 'demo-token-student' || accessToken === 'demo-token-instructor') {
-        if (currentUser) {
-          try {
+        console.log('📦 Found in localStorage:', {
+          hasUser: !!currentUser,
+          tokenType: accessToken?.substring(0, 10)
+        });
+
+        // If we have demo tokens, use them directly without backend verification
+        if (accessToken === 'demo-token-student' || accessToken === 'demo-token-instructor') {
+          if (currentUser) {
             const parsedUser = JSON.parse(currentUser);
+            console.log('✅ Demo user loaded:', parsedUser.email);
             setUser(parsedUser);
             setShowLogin(false);
-          } catch (error) {
-            console.error('Failed to parse user data:', error);
-            localStorage.removeItem('currentUser');
           }
+          return;
         }
-        setIsCheckingSession(false);
-        return;
-      }
 
-      // For real accounts, verify session with backend
-      if (accessToken && currentUser) {
-        try {
-          const sessionResult = await backendApi.getSession();
-          if (sessionResult.success && sessionResult.data) {
-            const userData = sessionResult.data;
-            const user: User = {
-              id: userData.userId,
-              name: userData.profile?.name || 'User',
-              email: userData.email,
-              role: userData.profile?.role || 'student',
-              enrolledCourses: ['CCS108']
-            };
-            setUser(user);
-            setShowLogin(false);
-          } else {
+        // For real accounts, verify session with backend (with timeout)
+        if (accessToken && currentUser) {
+          console.log('🌐 Verifying session with backend...');
+
+          // Add 2 second timeout to prevent hanging
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Session check timeout')), 2000)
+          );
+
+          try {
+            const sessionResult = await Promise.race([
+              backendApi.getSession(),
+              timeoutPromise
+            ]) as any;
+
+            if (sessionResult.success && sessionResult.data) {
+              const userData = sessionResult.data;
+              const user: User = {
+                id: userData.userId,
+                name: userData.profile?.name || 'User',
+                email: userData.email,
+                role: userData.profile?.role || 'student',
+                enrolledCourses: ['CCS108']
+              };
+              console.log('✅ Backend session verified:', user.email);
+              setUser(user);
+              setShowLogin(false);
+            } else {
+              console.log('❌ Backend session invalid, clearing storage');
+              localStorage.removeItem('currentUser');
+              localStorage.removeItem('accessToken');
+            }
+          } catch (error: any) {
+            console.log('⚠️ Backend unavailable, clearing session:', error.message);
             localStorage.removeItem('currentUser');
             localStorage.removeItem('accessToken');
           }
-        } catch (error) {
-          console.error('Session check failed:', error);
-          localStorage.removeItem('currentUser');
-          localStorage.removeItem('accessToken');
         }
+      } catch (error) {
+        console.error('❌ Session check error:', error);
+      } finally {
+        console.log('✅ Session check complete');
       }
-
-      setIsCheckingSession(false);
     };
 
     checkSession();
@@ -206,43 +231,54 @@ function App() {
     setCurrentView('dashboard');
   };
 
-  // Show loading screen while checking session
-  if (isCheckingSession) {
+  // Show loading while initializing
+  if (!isInitialized) {
+    console.log('⏳ App initializing...');
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50">
+      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading CodeLearn AI...</p>
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading CodeLearn AI...</p>
         </div>
       </div>
     );
   }
 
-  // Authentication screens
-  if (showLogin) {
+  // Authentication screens - simplified logic
+  if (!user) {
+    console.log(showLogin ? '🔐 Rendering login screen' : '📝 Rendering register screen');
+
     return (
-      <Login
-        onLogin={handleLogin}
-        onShowRegister={() => setShowLogin(false)}
-      />
-    );
-  } else if (!user) {
-    return (
-      <Register
-        onRegister={handleRegister}
-        onShowLogin={() => setShowLogin(true)}
-      />
+      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        {showLogin ? (
+          <Login
+            onLogin={handleLogin}
+            onShowRegister={() => setShowLogin(false)}
+          />
+        ) : (
+          <Register
+            onRegister={handleRegister}
+            onShowLogin={() => setShowLogin(true)}
+          />
+        )}
+        <Toaster position="top-right" richColors closeButton />
+      </div>
     );
   }
 
-  const selectedModule = selectedModuleId ? modules.find(m => m.id === selectedModuleId) : null;
-  const selectedLesson = selectedModule && selectedLessonId 
-    ? selectedModule.lessons.find(l => l.id === selectedLessonId) 
+  // Find the currently selected module based on selectedModuleId
+  const selectedModule = selectedModuleId ? modules.find(module => module.id === selectedModuleId) : null;
+
+  // Find the currently selected lesson within the selected module
+  const selectedLesson = selectedModule && selectedLessonId
+    ? selectedModule.lessons.find(lesson => lesson.id === selectedLessonId)
     : null;
 
+  console.log('🎨 Rendering main app - User:', user?.name, 'View:', currentView);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50">
-      <Header 
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50">
+      <Header
         user={user} 
         currentView={currentView}
         onNavigate={handleNavigate}
@@ -369,19 +405,50 @@ function App() {
         )}
 
         {currentView === 'interactive-game' && selectedModuleId && selectedLessonId && (
-          <InteractiveGamePage 
+          <InteractiveGamePage
             moduleId={selectedModuleId}
             lessonId={selectedLessonId}
             lessonTitle={selectedLessonTitle}
             lessonContent={selectedLessonContent || {}}
-            onBack={() => setCurrentView('module')} 
+            onBack={() => setCurrentView('module')}
           />
         )}
+
+        {currentView === 'analytics' && user.role === 'instructor' && (
+          <AnalyticsView user={user} onBack={() => setCurrentView('dashboard')} />
+        )}
+
+        {currentView === 'data-viewer' && (
+          <DataViewer onBack={() => setCurrentView('dashboard')} />
+        )}
+
+        {/* Fallback in case no view matches */}
+        {!['dashboard', 'modules', 'module', 'code-editor', 'feedback', 'progress', 'settings', 'course-management', 'monitoring', 'references', 'video-tutorial', 'learning-path-reading', 'audio-lecture', 'interactive-game', 'analytics', 'data-viewer'].includes(currentView) && (
+          <div className="text-center py-20">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
+            <p className="text-gray-600 mb-6">The view "{currentView}" doesn't exist.</p>
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Return to Dashboard
+            </button>
+          </div>
+        )}
       </main>
-      
+
       {/* Toast Notifications */}
       <Toaster position="top-right" richColors closeButton />
     </div>
+  );
+}
+
+// Wrap with error boundary
+function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 }
 

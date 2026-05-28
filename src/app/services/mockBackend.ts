@@ -162,18 +162,26 @@ export const mockAPI = {
     },
     
     getByLesson: async (userId: string, moduleId: string, lessonId: string) => {
+      // Get all quiz submissions from storage
       const allQuizzes = storage.getByPrefix(`quiz_`);
+      
+      // Filter quizzes by user, module, and lesson, then sort by timestamp (newest first)
       const filtered = allQuizzes
-        .filter(q => q.userId === userId && q.moduleId === moduleId && q.lessonId === lessonId)
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        .filter(quiz => quiz.userId === userId && quiz.moduleId === moduleId && quiz.lessonId === lessonId)
+        .sort((quizA, quizB) => new Date(quizB.timestamp).getTime() - new Date(quizA.timestamp).getTime());
+      
       return { success: true, data: filtered };
     },
     
     getAll: async (userId: string) => {
+      // Get all quiz submissions from storage
       const allQuizzes = storage.getByPrefix(`quiz_`);
+      
+      // Filter quizzes by user, then sort by timestamp (newest first)
       const filtered = allQuizzes
-        .filter(q => q.userId === userId)
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        .filter(quiz => quiz.userId === userId)
+        .sort((quizA, quizB) => new Date(quizB.timestamp).getTime() - new Date(quizA.timestamp).getTime());
+      
       return { success: true, data: filtered };
     }
   },

@@ -167,12 +167,24 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
     } catch (error) {
       console.error('Login error:', error);
       setIsLoading(false);
-      toast.error('Login failed', {
-        description: 'An error occurred. Please try again.',
-      });
-      setErrors({ 
-        password: 'An error occurred during login. Please try again.' 
-      });
+
+      // Check if it's a network error (backend not deployed)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast.error('Backend server unavailable', {
+          description: 'Please use demo accounts: student@demo.com or instructor@demo.com (password: demo123)',
+          duration: 6000,
+        });
+        setErrors({
+          email: 'Backend not deployed. Use demo accounts or deploy the Supabase function.'
+        });
+      } else {
+        toast.error('Login failed', {
+          description: 'An error occurred. Please try again.',
+        });
+        setErrors({
+          password: 'An error occurred during login. Please try again.'
+        });
+      }
     }
   };
 

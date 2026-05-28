@@ -1,0 +1,85 @@
+=================================================================
+SUPABASE EDGE FUNCTION DEPLOYMENT INSTRUCTIONS
+=================================================================
+
+Your Edge Function files are located at:
+/workspaces/default/code/supabase/functions/server/
+
+Files to deploy:
+- index.tsx (main server file)
+- kv_store.tsx (database interface)
+- aiFeedbackAnalysis.tsx (AI analysis endpoints)
+- codeSubmissionEndpoints.tsx (code submission handlers)
+- additionalEndpoints.tsx (notifications & analytics)
+
+=================================================================
+DEPLOYMENT OPTION 1: Using Supabase CLI (Recommended)
+=================================================================
+
+1. Install Supabase CLI:
+   
+   Mac/Linux:
+   brew install supabase/tap/supabase
+   
+   Windows:
+   scoop install supabase
+
+2. Login to Supabase:
+   supabase login
+
+3. Navigate to project directory:
+   cd /workspaces/default/code
+
+4. Link to your project:
+   supabase link --project-ref ebheipblvbpjvoqhshah
+
+5. Deploy the function:
+   supabase functions deploy server --no-verify-jwt
+
+6. Set environment secrets:
+   supabase secrets set SUPABASE_URL=https://ebheipblvbpjvoqhshah.supabase.co
+   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=<your_service_role_key>
+   supabase secrets set SUPABASE_ANON_KEY=<your_anon_key>
+
+=================================================================
+DEPLOYMENT OPTION 2: Manual Upload via Dashboard
+=================================================================
+
+1. Zip the function files:
+   cd supabase/functions
+   zip -r server.zip server/
+
+2. Go to Supabase Dashboard → Edge Functions
+3. Click "Deploy function"
+4. Upload server.zip
+5. Function name: "server"
+6. Click Deploy
+
+Then set secrets in Dashboard:
+- Settings → Edge Functions → Add secret
+- Add: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY
+
+=================================================================
+GET YOUR API KEYS
+=================================================================
+
+In Supabase Dashboard:
+1. Go to Settings → API
+2. Copy these values:
+
+   - Project URL: https://ebheipblvbpjvoqhshah.supabase.co
+   - anon/public key: (starts with eyJ...)
+   - service_role key: (starts with eyJ...) - KEEP SECRET!
+
+=================================================================
+TEST DEPLOYMENT
+=================================================================
+
+After deployment, test with:
+
+curl https://ebheipblvbpjvoqhshah.supabase.co/functions/v1/make-server-aaa3a86f/health
+
+Should return:
+{"status":"ok","timestamp":"..."}
+
+=================================================================

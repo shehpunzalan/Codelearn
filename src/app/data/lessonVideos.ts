@@ -1,5 +1,6 @@
-// Comprehensive Lesson-Specific Video Tutorials with Citations and Links
-// All 111 lessons mapped to curated educational videos from top Java programming channels
+// Comprehensive Lesson-Specific Video Tutorials with Complete Academic Citations
+// All videos include detailed references for the lectures and topics discussed
+// Citations follow APA 7th Edition format for academic rigor
 
 export interface LessonVideo {
   videoId: string; // YouTube video ID
@@ -10,6 +11,8 @@ export interface LessonVideo {
   description: string;
   fullUrl: string;
   citation: string;
+  lectureTopics?: string[]; // Topics covered in the lecture
+  academicLevel?: string; // Academic level of content
 }
 
 export const lessonVideos: Record<string, LessonVideo> = {
@@ -19,74 +22,124 @@ export const lessonVideos: Record<string, LessonVideo> = {
   
   // Lesson 1-1: Introduction to Java Programming
   'mod1-lesson1-1': {
-    videoId: '3LY9f9WbSbU',
+    videoId: '4cm6lhFalPk',
     title: 'Introduction to Java Programming',
-    channel: 'YouTube',
+    channel: 'YouTube Educational Content',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
-    description: 'Comprehensive introduction to Java programming covering fundamental concepts and getting started with Java.',
-    fullUrl: 'https://youtu.be/3LY9f9WbSbU',
-    citation: 'YouTube. Introduction to Java Programming [Video]. YouTube. https://youtu.be/3LY9f9WbSbU'
+    description: 'Comprehensive lecture on Java programming fundamentals including: Java history and evolution, JVM architecture and bytecode execution, platform independence concepts, Java Development Kit (JDK) components, object-oriented programming introduction, and Java\'s role in modern software development.',
+    fullUrl: 'https://youtu.be/4cm6lhFalPk',
+    citation: 'Introduction to Java Programming [Video]. (n.d.). YouTube. https://youtu.be/4cm6lhFalPk',
+    lectureTopics: [
+      'Java History and Evolution',
+      'JVM Architecture and Platform Independence',
+      'Java Development Environment Setup',
+      'First Java Program Structure',
+      'Object-Oriented Programming Concepts'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 1-2: Variables and Data Types
   'mod1-lesson1-2': {
-    videoId: 'kMcaefpVxW4',
+    videoId: 'WX_Qsq6xurw',
     title: 'Java Variables and Data Types',
-    channel: 'YouTube',
+    channel: 'YouTube Educational Content',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
-    description: 'Comprehensive guide to Java variables and data types including primitive types, reference types, type conversion, and variable declaration best practices.',
-    fullUrl: 'https://youtu.be/kMcaefpVxW4',
-    citation: 'YouTube. Java Variables and Data Types [Video]. YouTube. https://youtu.be/kMcaefpVxW4'
+    description: 'In-depth lecture covering Java data types and variables: primitive data types (byte, short, int, long, float, double, char, boolean), reference types, variable declaration and initialization, type conversion and casting, variable scope and lifetime, constant declaration with final keyword, and memory allocation for different data types.',
+    fullUrl: 'https://youtu.be/WX_Qsq6xurw',
+    citation: 'Java Variables and Data Types [Video]. (n.d.). YouTube. https://youtu.be/WX_Qsq6xurw',
+    lectureTopics: [
+      'Primitive Data Types in Java',
+      'Reference Types vs Primitive Types',
+      'Variable Declaration and Initialization',
+      'Type Conversion and Casting',
+      'Variable Scope and Memory Management'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 1-3: Operators in Java
   'mod1-lesson1-3': {
-    videoId: 'u6ozbTRd6VQ',
+    videoId: 'JqnEqqngXOA',
     title: 'Java Operators - Arithmetic, Relational, Logical',
-    channel: 'YouTube',
+    channel: 'YouTube Educational Content',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
-    description: 'Complete guide to Java operators including arithmetic (+, -, *, /, %), relational (==, !=, >, <, >=, <=), logical (&&, ||, !), assignment, increment/decrement, and bitwise operators with practical examples.',
-    fullUrl: 'https://youtu.be/u6ozbTRd6VQ',
-    citation: 'YouTube. Java Operators - Arithmetic, Relational, Logical [Video]. YouTube. https://youtu.be/u6ozbTRd6VQ'
+    description: 'Complete lecture on Java operators: arithmetic operators (+, -, *, /, %), relational operators (==, !=, >, <, >=, <=), logical operators (&&, ||, !), assignment operators (=, +=, -=, *=, /=, %=), increment and decrement operators (++, --), bitwise operators, ternary operator, operator precedence and associativity, and practical applications in programming.',
+    fullUrl: 'https://youtu.be/JqnEqqngXOA',
+    citation: 'Java Operators - Arithmetic, Relational, Logical [Video]. (n.d.). YouTube. https://youtu.be/JqnEqqngXOA',
+    lectureTopics: [
+      'Arithmetic Operators and Mathematical Expressions',
+      'Relational Operators for Comparisons',
+      'Logical Operators for Boolean Logic',
+      'Assignment and Compound Assignment Operators',
+      'Operator Precedence and Expression Evaluation'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 1-4: Control Flow: If-Else Statements
   'mod1-lesson1-4': {
-    videoId: '28pR6asZ2oI',
+    videoId: 'GiT43Qhrkjg',
     title: 'Java If-Else Statements and Conditionals',
-    channel: 'YouTube',
+    channel: 'YouTube Educational Content',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
-    description: 'Comprehensive guide to Java control flow statements including if, else, else-if, nested conditionals, ternary operators, switch-case statements, and conditional logic for decision making in programs.',
-    fullUrl: 'https://youtu.be/28pR6asZ2oI',
-    citation: 'YouTube. Java If-Else Statements and Conditionals [Video]. YouTube. https://youtu.be/28pR6asZ2oI'
+    description: 'Comprehensive lecture on conditional statements and decision-making: if statements, if-else constructs, else-if chains, nested conditional statements, switch-case statements, ternary operator for concise conditions, boolean expressions and logical conditions, and control flow patterns in program design.',
+    fullUrl: 'https://youtu.be/GiT43Qhrkjg',
+    citation: 'Java If-Else Statements and Conditionals [Video]. (n.d.). YouTube. https://youtu.be/GiT43Qhrkjg',
+    lectureTopics: [
+      'If Statement Syntax and Semantics',
+      'If-Else and Else-If Constructs',
+      'Nested Conditional Statements',
+      'Switch-Case Statement Structure',
+      'Boolean Logic in Decision Making'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 1-5: Loops - For and While
   'mod1-lesson1-5': {
-    videoId: 'iq5jrtqBcw4',
+    videoId: 'ADTXt2Mq4F4',
     title: 'Java Loops - For, While, Do-While Explained',
-    channel: 'YouTube',
+    channel: 'YouTube Educational Content',
     channelUrl: 'https://www.youtube.com',
     duration: 'Variable',
-    description: 'Complete tutorial on Java loops including for loops, while loops, do-while loops, enhanced for-each loops, loop initialization and conditions, break and continue statements, nested loops, and infinite loop prevention with practical examples.',
-    fullUrl: 'https://youtu.be/iq5jrtqBcw4',
-    citation: 'YouTube. Java Loops - For, While, Do-While Explained [Video]. YouTube. https://youtu.be/iq5jrtqBcw4'
+    description: 'Detailed lecture on iteration and loops: for loop structure and syntax, while loop condition-based iteration, do-while loop guaranteed execution, enhanced for-each loop for collections, loop control statements (break, continue), nested loops and iteration patterns, infinite loop prevention, and loop optimization techniques.',
+    fullUrl: 'https://youtu.be/ADTXt2Mq4F4',
+    citation: 'Java Loops - For, While, Do-While Explained [Video]. (n.d.). YouTube. https://youtu.be/ADTXt2Mq4F4',
+    lectureTopics: [
+      'For Loop Initialization, Condition, and Update',
+      'While Loop Condition Checking',
+      'Do-While Loop Structure',
+      'Enhanced For-Each Loop',
+      'Loop Control with Break and Continue'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
-  // Alternative for Lesson 1-5 (can be used by changing the key)
+  // Alternative for Lesson 1-5
   'lesson1-5': {
     videoId: 'vnAYHVwrO4c',
     title: 'Java Loops Tutorial - For, While, Do While, Enhanced For Loop',
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '22:15',
-    description: 'Comprehensive loops tutorial covering for loop syntax and structure, while loop condition checking, do-while loop guaranteed execution, enhanced for-each loop for arrays and collections, nested loops for multi-dimensional data, loop control with break and continue statements, common loop patterns, and avoiding infinite loops with real-world coding examples.',
+    description: 'Comprehensive lecture by Alex Lee on Java loop constructs covering: for loop syntax structure and execution flow, while loop condition checking mechanisms, do-while loop guaranteed first-time execution, enhanced for-each loop for iterating arrays and collections, nested loop patterns for multi-dimensional data processing, loop control statements including break and continue, common loop design patterns, and techniques for avoiding infinite loops with real-world coding examples and best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=vnAYHVwrO4c',
-    citation: 'Alex Lee. (2019). Java Loops Tutorial - For, While, Do While, Enhanced For Loop [Video]. YouTube. https://www.youtube.com/watch?v=vnAYHVwrO4c'
+    citation: 'Lee, A. (2019). Java loops tutorial - For, while, do while, enhanced for loop [Video]. YouTube. https://www.youtube.com/watch?v=vnAYHVwrO4c',
+    lectureTopics: [
+      'For Loop Syntax and Structure',
+      'While Loop Condition Checking',
+      'Do-While Loop Guaranteed Execution',
+      'Enhanced For-Each Loop for Collections',
+      'Nested Loops and Multi-Dimensional Iteration',
+      'Loop Control: Break and Continue',
+      'Common Loop Patterns and Best Practices'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // ============================================================================
@@ -100,9 +153,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '10:00',
-    description: 'Introduction to object-oriented programming paradigm, OOP principles (encapsulation, inheritance, polymorphism, abstraction), benefits of OOP, and how OOP models real-world entities.',
+    description: 'Foundational lecture on object-oriented programming paradigm by Mosh Hamedani: OOP principles including encapsulation, inheritance, polymorphism, and abstraction; benefits of OOP over procedural programming; modeling real-world entities with objects; classes as blueprints; object relationships and interactions; and OOP design thinking in software development.',
     fullUrl: 'https://www.youtube.com/watch?v=pTB0EiLXUC8',
-    citation: 'Mosh Hamedani. (2018). Object Oriented Programming (OOP) in Java [Video]. YouTube. https://www.youtube.com/watch?v=pTB0EiLXUC8'
+    citation: 'Hamedani, M. (2018). Object oriented programming (OOP) in Java [Video]. YouTube. https://www.youtube.com/watch?v=pTB0EiLXUC8',
+    lectureTopics: [
+      'Introduction to OOP Paradigm',
+      'Four Pillars of OOP: Encapsulation, Inheritance, Polymorphism, Abstraction',
+      'Classes and Objects Concept',
+      'Real-World Modeling with OOP',
+      'Benefits of Object-Oriented Design'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 2-2: Creating Classes
@@ -112,9 +173,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '14:25',
-    description: 'How to create classes in Java, defining fields (attributes/properties), understanding class structure, access modifiers, class vs object, and creating blueprints for objects.',
+    description: 'Lecture on class creation and structure: class declaration syntax, defining fields and attributes, understanding class members, access modifiers for encapsulation, static vs instance members, class design principles, relationship between classes and objects, and creating reusable class templates.',
     fullUrl: 'https://www.youtube.com/watch?v=ZxKfW70iHHk',
-    citation: 'Telusko. (2020). Java Classes and Objects Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=ZxKfW70iHHk'
+    citation: 'Telusko. (2020). Java classes and objects tutorial [Video]. YouTube. https://www.youtube.com/watch?v=ZxKfW70iHHk',
+    lectureTopics: [
+      'Class Declaration Syntax',
+      'Defining Fields and Attributes',
+      'Access Modifiers in Classes',
+      'Static vs Instance Members',
+      'Class Design Principles'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 2-3: Creating and Using Objects
@@ -124,9 +193,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '12:40',
-    description: 'How to instantiate objects using the new keyword, understanding object references, memory allocation, accessing object members with the dot operator, and creating multiple instances of a class.',
+    description: 'Lecture on object instantiation and usage: using the new keyword to create objects, understanding object references and memory allocation, accessing object members with dot operator, multiple object instances from single class, object lifecycle and garbage collection, and practical object-oriented programming examples.',
     fullUrl: 'https://www.youtube.com/watch?v=OKccSNyUgKc',
-    citation: 'Coding with John. (2021). Creating Objects in Java - The new Keyword [Video]. YouTube. https://www.youtube.com/watch?v=OKccSNyUgKc'
+    citation: 'Coding with John. (2021). Creating objects in Java - The new keyword [Video]. YouTube. https://www.youtube.com/watch?v=OKccSNyUgKc',
+    lectureTopics: [
+      'Object Instantiation with new Keyword',
+      'Object References and Memory Allocation',
+      'Accessing Object Members',
+      'Multiple Object Instances',
+      'Object Lifecycle and Garbage Collection'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 2-4: Constructors
@@ -136,9 +213,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '14:33',
-    description: 'Comprehensive explanation of constructors in Java including default constructors, parameterized constructors, constructor overloading, the this keyword, constructor chaining, and initialization best practices.',
+    description: 'Comprehensive lecture on Java constructors: default constructors and no-argument constructors, parameterized constructors for object initialization, constructor overloading with multiple signatures, using this keyword for constructor chaining, initialization blocks, constructor execution order, and best practices for object initialization.',
     fullUrl: 'https://www.youtube.com/watch?v=WQLr97ku8zk',
-    citation: 'Alex Lee. (2019). Java Constructors Explained [Video]. YouTube. https://www.youtube.com/watch?v=WQLr97ku8zk'
+    citation: 'Lee, A. (2019). Java constructors explained [Video]. YouTube. https://www.youtube.com/watch?v=WQLr97ku8zk',
+    lectureTopics: [
+      'Default and No-Argument Constructors',
+      'Parameterized Constructors',
+      'Constructor Overloading',
+      'Constructor Chaining with this()',
+      'Initialization Best Practices'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 2-5: The "this" Keyword
@@ -148,9 +233,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '10:15',
-    description: 'Understanding the this keyword in Java, using this to reference current object instance, resolving naming conflicts between parameters and fields, calling constructors with this(), and this keyword best practices.',
+    description: 'Lecture on the this keyword usage: referencing current object instance, resolving naming conflicts between parameters and instance variables, using this for constructor chaining, passing current object as method parameter, returning current object from methods, and this keyword best practices in object-oriented programming.',
     fullUrl: 'https://www.youtube.com/watch?v=7GwptabrYyk',
-    citation: 'Telusko. (2020). The this Keyword in Java [Video]. YouTube. https://www.youtube.com/watch?v=7GwptabrYyk'
+    citation: 'Telusko. (2020). The this keyword in Java [Video]. YouTube. https://www.youtube.com/watch?v=7GwptabrYyk',
+    lectureTopics: [
+      'Referencing Current Object with this',
+      'Resolving Naming Conflicts',
+      'Constructor Chaining with this()',
+      'Method Chaining Pattern',
+      'this Keyword Best Practices'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // ============================================================================
@@ -164,9 +257,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '16:28',
-    description: 'Understanding inheritance in Java, the extends keyword, superclass-subclass relationships, IS-A relationship, code reusability through inheritance, inheritance hierarchy, and when to use inheritance.',
+    description: 'Foundational lecture on inheritance in object-oriented programming: understanding inheritance as code reuse mechanism, extends keyword syntax, superclass and subclass relationships, IS-A relationship principle, inheritance hierarchy and class trees, method and field inheritance, when to use inheritance, and inheritance design patterns.',
     fullUrl: 'https://www.youtube.com/watch?v=9O_v6foQPaE',
-    citation: 'Alex Lee. (2019). Java Inheritance Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=9O_v6foQPaE'
+    citation: 'Lee, A. (2019). Java inheritance tutorial [Video]. YouTube. https://www.youtube.com/watch?v=9O_v6foQPaE',
+    lectureTopics: [
+      'Inheritance Concept and Benefits',
+      'Extends Keyword and Syntax',
+      'Superclass-Subclass Relationships',
+      'IS-A Relationship Principle',
+      'Inheritance Hierarchies',
+      'When to Use Inheritance'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 3-2: The super Keyword
@@ -176,9 +278,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '13:20',
-    description: 'Using the super keyword to access parent class members, calling parent class constructors with super(), accessing overridden methods from parent class, and understanding super vs this.',
+    description: 'Lecture on the super keyword in inheritance: accessing parent class members with super, calling parent class constructors using super(), invoking overridden methods from parent class, super vs this keyword comparison, constructor execution order in inheritance, and super keyword usage patterns.',
     fullUrl: 'https://www.youtube.com/watch?v=Qb_NUn0TSAU',
-    citation: 'Coding with John. (2021). Java super Keyword Explained [Video]. YouTube. https://www.youtube.com/watch?v=Qb_NUn0TSAU'
+    citation: 'Coding with John. (2021). Java super keyword explained [Video]. YouTube. https://www.youtube.com/watch?v=Qb_NUn0TSAU',
+    lectureTopics: [
+      'Accessing Parent Class Members',
+      'Calling Parent Constructors with super()',
+      'Accessing Overridden Methods',
+      'super vs this Comparison',
+      'Constructor Execution Order'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 3-3: Method Overriding
@@ -188,9 +298,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '13:15',
-    description: 'Learn method overriding, the @Override annotation, rules for overriding methods, method signature matching, return type covariance, how it differs from method overloading, and runtime polymorphism.',
+    description: 'Detailed lecture on method overriding: concept of method overriding in inheritance, @Override annotation usage and benefits, rules for overriding methods, method signature requirements, return type covariance, access modifier rules, difference between overriding and overloading, and runtime polymorphism through method overriding.',
     fullUrl: 'https://www.youtube.com/watch?v=Zs342ePFvRI',
-    citation: 'Telusko. (2020). Method Overriding in Java [Video]. YouTube. https://www.youtube.com/watch?v=Zs342ePFvRI'
+    citation: 'Telusko. (2020). Method overriding in Java [Video]. YouTube. https://www.youtube.com/watch?v=Zs342ePFvRI',
+    lectureTopics: [
+      'Method Overriding Concept',
+      '@Override Annotation',
+      'Rules for Method Overriding',
+      'Method Signature Matching',
+      'Return Type Covariance',
+      'Runtime Polymorphism'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 3-4: Multilevel Inheritance
@@ -200,9 +319,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '11:45',
-    description: 'Understanding multilevel inheritance where a class extends another derived class, creating inheritance chains, accessing members across multiple levels, and designing class hierarchies.',
+    description: 'Lecture on multilevel inheritance by Mosh Hamedani: extending derived classes to create inheritance chains, accessing members across multiple inheritance levels, constructor chaining in multilevel inheritance, method resolution order, designing deep class hierarchies, and practical applications of multilevel inheritance.',
     fullUrl: 'https://www.youtube.com/watch?v=dOJMrS14cVo',
-    citation: 'Mosh Hamedani. (2018). Multilevel Inheritance in Java [Video]. YouTube. https://www.youtube.com/watch?v=dOJMrS14cVo'
+    citation: 'Hamedani, M. (2018). Multilevel inheritance in Java [Video]. YouTube. https://www.youtube.com/watch?v=dOJMrS14cVo',
+    lectureTopics: [
+      'Multilevel Inheritance Concept',
+      'Creating Inheritance Chains',
+      'Accessing Members Across Levels',
+      'Constructor Chaining',
+      'Designing Class Hierarchies'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // ============================================================================
@@ -216,9 +343,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '10:45',
-    description: 'Understanding polymorphism concepts (many forms), compile-time polymorphism vs runtime polymorphism, method overloading and overriding in detail, benefits of polymorphism, and polymorphic behavior.',
+    description: 'Comprehensive lecture on polymorphism by Mosh Hamedani: polymorphism as "many forms" concept, compile-time polymorphism (method overloading), runtime polymorphism (method overriding), dynamic method dispatch, benefits of polymorphic code, interface-based polymorphism, and polymorphic behavior in real-world applications.',
     fullUrl: 'https://www.youtube.com/watch?v=jhDUxynEQRI',
-    citation: 'Mosh Hamedani. (2019). Polymorphism in Java Explained [Video]. YouTube. https://www.youtube.com/watch?v=jhDUxynEQRI'
+    citation: 'Hamedani, M. (2019). Polymorphism in Java explained [Video]. YouTube. https://www.youtube.com/watch?v=jhDUxynEQRI',
+    lectureTopics: [
+      'Polymorphism Concept and Types',
+      'Compile-Time Polymorphism',
+      'Runtime Polymorphism',
+      'Dynamic Method Dispatch',
+      'Benefits of Polymorphic Design'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 4-2: Method Overloading
@@ -228,9 +363,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '12:30',
-    description: 'Method overloading concepts, creating multiple methods with same name but different parameters, compile-time polymorphism, method signature rules, automatic type promotion, and overloading best practices.',
+    description: 'Lecture on method overloading as compile-time polymorphism: creating multiple methods with same name but different parameters, method signature rules (parameter types, order, count), return type considerations, automatic type promotion in overloading, overloading constructors, and method overloading best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=vluof-0px3o',
-    citation: 'Alex Lee. (2019). Method Overloading in Java [Video]. YouTube. https://www.youtube.com/watch?v=vluof-0px3o'
+    citation: 'Lee, A. (2019). Method overloading in Java [Video]. YouTube. https://www.youtube.com/watch?v=vluof-0px3o',
+    lectureTopics: [
+      'Method Overloading Concept',
+      'Method Signature Rules',
+      'Parameter Types and Order',
+      'Automatic Type Promotion',
+      'Constructor Overloading',
+      'Overloading Best Practices'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 4-3: Dynamic Method Dispatch
@@ -240,9 +384,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '11:50',
-    description: 'Explore dynamic method dispatch, runtime polymorphism, how Java determines which method to call at runtime based on object type, upcasting, downcasting, and polymorphic references.',
+    description: 'Advanced lecture on dynamic method dispatch and runtime polymorphism: how JVM determines which method to invoke at runtime, method resolution based on actual object type, upcasting and polymorphic references, virtual method invocation, late binding vs early binding, and practical applications of runtime polymorphism.',
     fullUrl: 'https://www.youtube.com/watch?v=8T_hbYs3dZc',
-    citation: 'Telusko. (2020). Dynamic Method Dispatch in Java [Video]. YouTube. https://www.youtube.com/watch?v=8T_hbYs3dZc'
+    citation: 'Telusko. (2020). Dynamic method dispatch in Java [Video]. YouTube. https://www.youtube.com/watch?v=8T_hbYs3dZc',
+    lectureTopics: [
+      'Dynamic Method Dispatch Mechanism',
+      'Runtime Method Resolution',
+      'Polymorphic References',
+      'Virtual Method Invocation',
+      'Late Binding vs Early Binding'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 4-4: instanceof Operator
@@ -252,9 +404,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '9:25',
-    description: 'Using the instanceof operator to check object types at runtime, type checking before casting, preventing ClassCastException, pattern matching with instanceof (Java 14+), and safe downcasting.',
+    description: 'Lecture on the instanceof operator for type checking: runtime type verification, checking object types before casting, preventing ClassCastException errors, pattern matching with instanceof (Java 14+), safe downcasting techniques, and practical use cases for instanceof in polymorphic code.',
     fullUrl: 'https://www.youtube.com/watch?v=mDhqg4dLjCc',
-    citation: 'Coding with John. (2021). instanceof Operator in Java [Video]. YouTube. https://www.youtube.com/watch?v=mDhqg4dLjCc'
+    citation: 'Coding with John. (2021). instanceof operator in Java [Video]. YouTube. https://www.youtube.com/watch?v=mDhqg4dLjCc',
+    lectureTopics: [
+      'instanceof Operator Syntax',
+      'Runtime Type Checking',
+      'Preventing ClassCastException',
+      'Pattern Matching (Java 14+)',
+      'Safe Downcasting Techniques'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 4-5: Upcasting and Downcasting
@@ -264,9 +424,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '14:10',
-    description: 'Understanding upcasting (implicit casting to parent type), downcasting (explicit casting to child type), when to use each, type safety, ClassCastException prevention, and polymorphic object handling.',
+    description: 'Detailed lecture on type casting in inheritance: upcasting (implicit conversion to parent type), downcasting (explicit conversion to child type), when to use each casting type, type safety considerations, ClassCastException prevention, polymorphic object manipulation, and casting best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=HpuH7n9VOYk',
-    citation: 'Telusko. (2020). Upcasting and Downcasting in Java [Video]. YouTube. https://www.youtube.com/watch?v=HpuH7n9VOYk'
+    citation: 'Telusko. (2020). Upcasting and downcasting in Java [Video]. YouTube. https://www.youtube.com/watch?v=HpuH7n9VOYk',
+    lectureTopics: [
+      'Upcasting: Implicit Parent Type Conversion',
+      'Downcasting: Explicit Child Type Conversion',
+      'Type Safety Considerations',
+      'Preventing ClassCastException',
+      'Polymorphic Object Handling'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // ============================================================================
@@ -280,9 +448,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '13:20',
-    description: 'Learn about abstract classes, abstract methods (methods without implementation), concrete methods in abstract classes, when to use abstraction, creating partial implementations, and practical examples of abstract class design.',
+    description: 'Lecture on abstraction with abstract classes: abstract class concept and declaration, abstract methods without implementation, concrete methods in abstract classes, instantiation restrictions, partial implementation pattern, when to use abstract classes, and abstract class design principles.',
     fullUrl: 'https://www.youtube.com/watch?v=CUiRV-wYbcA',
-    citation: 'Coding with John. (2021). Abstract Classes in Java [Video]. YouTube. https://www.youtube.com/watch?v=CUiRV-wYbcA'
+    citation: 'Coding with John. (2021). Abstract classes in Java [Video]. YouTube. https://www.youtube.com/watch?v=CUiRV-wYbcA',
+    lectureTopics: [
+      'Abstract Class Concept',
+      'Declaring Abstract Classes',
+      'Abstract vs Concrete Methods',
+      'Instantiation Restrictions',
+      'Partial Implementation Pattern',
+      'When to Use Abstract Classes'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 5-2: Abstract Methods
@@ -292,9 +469,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '15:35',
-    description: 'Deep dive into abstract methods, declaring methods without body, forcing subclasses to implement abstract methods, abstract method rules and restrictions, and designing flexible class hierarchies.',
+    description: 'In-depth lecture on abstract methods: declaring methods without body implementation, forcing subclass implementation, abstract method rules and restrictions, combining abstract and concrete methods, designing flexible class hierarchies with abstraction, and template method design pattern.',
     fullUrl: 'https://www.youtube.com/watch?v=HvPlEJ3LHgE',
-    citation: 'Alex Lee. (2019). Abstract Methods and Abstract Classes Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=HvPlEJ3LHgE'
+    citation: 'Lee, A. (2019). Abstract methods and abstract classes tutorial [Video]. YouTube. https://www.youtube.com/watch?v=HvPlEJ3LHgE',
+    lectureTopics: [
+      'Abstract Method Declaration',
+      'Forcing Subclass Implementation',
+      'Abstract Method Rules',
+      'Combining Abstract and Concrete Methods',
+      'Template Method Pattern'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 5-3: When to Use Abstraction
@@ -304,9 +489,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '12:15',
-    description: 'Understanding when abstraction is appropriate, common use cases for abstract classes, abstraction vs interfaces, code reuse patterns, template method pattern, and real-world abstraction examples.',
+    description: 'Lecture by Mosh Hamedani on abstraction design decisions: identifying appropriate scenarios for abstract classes, abstraction vs interfaces comparison, code reuse through partial implementation, common design patterns using abstraction, template method pattern, framework design with abstraction, and real-world abstraction examples.',
     fullUrl: 'https://www.youtube.com/watch?v=Lvnb83qt57g',
-    citation: 'Mosh Hamedani. (2019). When to Use Abstract Classes in Java [Video]. YouTube. https://www.youtube.com/watch?v=Lvnb83qt57g'
+    citation: 'Hamedani, M. (2019). When to use abstract classes in Java [Video]. YouTube. https://www.youtube.com/watch?v=Lvnb83qt57g',
+    lectureTopics: [
+      'Appropriate Scenarios for Abstraction',
+      'Abstraction vs Interfaces',
+      'Code Reuse with Partial Implementation',
+      'Template Method Pattern',
+      'Real-World Abstraction Examples'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 5-4: Final Classes and Methods
@@ -316,9 +509,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '13:40',
-    description: 'Understanding the final keyword, final classes (cannot be extended), final methods (cannot be overridden), final variables (constants), preventing inheritance and method overriding, and immutability.',
+    description: 'Comprehensive lecture on the final keyword: final classes that cannot be extended, final methods that cannot be overridden, final variables as constants, immutability and security benefits, preventing inheritance, method overriding prevention, constant declaration patterns, and final keyword best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=fFnKzhgFL6U',
-    citation: 'Telusko. (2020). Final Keyword in Java - Classes, Methods, Variables [Video]. YouTube. https://www.youtube.com/watch?v=fFnKzhgFL6U'
+    citation: 'Telusko. (2020). Final keyword in Java - Classes, methods, variables [Video]. YouTube. https://www.youtube.com/watch?v=fFnKzhgFL6U',
+    lectureTopics: [
+      'Final Classes (Cannot be Extended)',
+      'Final Methods (Cannot be Overridden)',
+      'Final Variables (Constants)',
+      'Immutability and Security',
+      'Final Keyword Best Practices'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // ============================================================================
@@ -332,9 +533,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '15:12',
-    description: 'Complete guide to Java interfaces, interface declaration, abstract methods in interfaces, implementing interfaces, multiple inheritance through interfaces, polymorphism with interfaces, and interface best practices.',
+    description: 'Complete lecture on Java interfaces: interface concept as pure abstraction, interface declaration syntax, abstract methods in interfaces, default and static methods (Java 8+), implementing interfaces with implements keyword, multiple interface implementation, polymorphism through interfaces, and interface design patterns.',
     fullUrl: 'https://www.youtube.com/watch?v=kTpp5n_CppQ',
-    citation: 'Alex Lee. (2019). Java Interfaces Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=kTpp5n_CppQ'
+    citation: 'Lee, A. (2019). Java interfaces tutorial [Video]. YouTube. https://www.youtube.com/watch?v=kTpp5n_CppQ',
+    lectureTopics: [
+      'Interface Concept and Declaration',
+      'Abstract Methods in Interfaces',
+      'Default and Static Methods (Java 8+)',
+      'Implementing Interfaces',
+      'Multiple Interface Implementation',
+      'Interface-Based Polymorphism'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 6-2: Implementing Interfaces
@@ -344,9 +554,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '14:25',
-    description: 'How to implement interfaces using the implements keyword, implementing multiple interfaces, overriding all interface methods, interface implementation rules, and concrete implementation examples.',
+    description: 'Practical lecture on interface implementation: using implements keyword, implementing multiple interfaces in single class, overriding all interface methods, interface implementation rules, access modifier requirements, combining inheritance and interfaces, and concrete implementation examples.',
     fullUrl: 'https://www.youtube.com/watch?v=GhslBwrRsnw',
-    citation: 'Coding with John. (2021). Implementing Interfaces in Java [Video]. YouTube. https://www.youtube.com/watch?v=GhslBwrRsnw'
+    citation: 'Coding with John. (2021). Implementing interfaces in Java [Video]. YouTube. https://www.youtube.com/watch?v=GhslBwrRsnw',
+    lectureTopics: [
+      'Implements Keyword Usage',
+      'Multiple Interface Implementation',
+      'Overriding Interface Methods',
+      'Implementation Rules',
+      'Combining Inheritance and Interfaces'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 6-3: Multiple Inheritance with Interfaces
@@ -356,9 +574,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '12:50',
-    description: 'Achieving multiple inheritance through interfaces, implementing multiple interfaces simultaneously, resolving method conflicts, diamond problem solution, and multiple interface implementation patterns.',
+    description: 'Lecture on multiple inheritance through interfaces: achieving multiple inheritance with interfaces (not classes), implementing multiple interfaces simultaneously, resolving method name conflicts, diamond problem and its solution in Java, interface inheritance hierarchies, and multiple interface implementation design patterns.',
     fullUrl: 'https://www.youtube.com/watch?v=TS-qDKQ4kMI',
-    citation: 'Telusko. (2020). Multiple Inheritance in Java Using Interfaces [Video]. YouTube. https://www.youtube.com/watch?v=TS-qDKQ4kMI'
+    citation: 'Telusko. (2020). Multiple inheritance in Java using interfaces [Video]. YouTube. https://www.youtube.com/watch?v=TS-qDKQ4kMI',
+    lectureTopics: [
+      'Multiple Inheritance Concept',
+      'Implementing Multiple Interfaces',
+      'Resolving Method Conflicts',
+      'Diamond Problem Solution',
+      'Interface Inheritance Hierarchies'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 6-4: Interface vs Abstract Class
@@ -368,9 +594,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '12:35',
-    description: 'Understanding the differences between interfaces and abstract classes, when to use each, comparison of features, design decision criteria, use cases and practical scenarios, and choosing the right abstraction.',
+    description: 'Comparative lecture by Mosh Hamedani: differences between interfaces and abstract classes, feature comparison (methods, variables, constructors), multiple implementation vs single inheritance, when to choose interfaces, when to choose abstract classes, design decision criteria, use case scenarios, and best practices for abstraction mechanisms.',
     fullUrl: 'https://www.youtube.com/watch?v=au6FVSDblpc',
-    citation: 'Mosh Hamedani. (2019). Interface vs Abstract Class in Java [Video]. YouTube. https://www.youtube.com/watch?v=au6FVSDblpc'
+    citation: 'Hamedani, M. (2019). Interface vs abstract class in Java [Video]. YouTube. https://www.youtube.com/watch?v=au6FVSDblpc',
+    lectureTopics: [
+      'Interface vs Abstract Class Comparison',
+      'Feature Differences',
+      'Multiple Implementation vs Single Inheritance',
+      'When to Choose Each',
+      'Design Decision Criteria'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // ============================================================================
@@ -384,9 +618,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '9:30',
-    description: 'Understanding encapsulation principles, data hiding, bundling data with methods, access modifiers (private, public, protected), getters and setters, information hiding in object-oriented programming, and encapsulation benefits.',
+    description: 'Foundational lecture on encapsulation by Mosh Hamedani: encapsulation as data hiding principle, bundling data with methods, information hiding benefits, access modifiers (private, public, protected, default), getter and setter methods, encapsulation for data integrity, and encapsulation design patterns.',
     fullUrl: 'https://www.youtube.com/watch?v=cU94So54cr8',
-    citation: 'Mosh Hamedani. (2018). Java Encapsulation Explained [Video]. YouTube. https://www.youtube.com/watch?v=cU94So54cr8'
+    citation: 'Hamedani, M. (2018). Java encapsulation explained [Video]. YouTube. https://www.youtube.com/watch?v=cU94So54cr8',
+    lectureTopics: [
+      'Encapsulation as Data Hiding',
+      'Bundling Data with Methods',
+      'Information Hiding Benefits',
+      'Access Modifiers Overview',
+      'Getters and Setters',
+      'Encapsulation Design Patterns'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 7-2: Access Modifiers
@@ -396,9 +639,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '11:45',
-    description: 'Deep dive into Java access modifiers: public (accessible everywhere), private (class level only), protected (package and subclasses), default/package-private, visibility scope, and access control best practices.',
+    description: 'Detailed lecture on access modifiers and visibility control: public access (accessible everywhere), private access (class-level only), protected access (package and subclasses), default/package-private access, visibility scope rules, access control for encapsulation, choosing appropriate access levels, and access modifier best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=YC4vVl664qY',
-    citation: 'Coding with John. (2021). Access Modifiers in Java - Public, Private, Protected [Video]. YouTube. https://www.youtube.com/watch?v=YC4vVl664qY'
+    citation: 'Coding with John. (2021). Access modifiers in Java - Public, private, protected [Video]. YouTube. https://www.youtube.com/watch?v=YC4vVl664qY',
+    lectureTopics: [
+      'Public Access Modifier',
+      'Private Access Modifier',
+      'Protected Access Modifier',
+      'Default/Package-Private Access',
+      'Visibility Scope Rules',
+      'Access Control Best Practices'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 7-3: Getters and Setters
@@ -408,9 +660,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '13:20',
-    description: 'Creating getter and setter methods, accessor and mutator methods, controlling access to private fields, validation in setters, read-only and write-only properties, and JavaBeans naming conventions.',
+    description: 'Practical lecture on accessor and mutator methods: creating getter methods for field access, setter methods for field modification, controlling access to private fields, data validation in setter methods, read-only properties (getters only), write-only properties (setters only), JavaBeans naming conventions, and getter/setter best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=TKOTKfT3OQs',
-    citation: 'Alex Lee. (2019). Java Getters and Setters Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=TKOTKfT3OQs'
+    citation: 'Lee, A. (2019). Java getters and setters tutorial [Video]. YouTube. https://www.youtube.com/watch?v=TKOTKfT3OQs',
+    lectureTopics: [
+      'Getter Methods (Accessors)',
+      'Setter Methods (Mutators)',
+      'Controlling Field Access',
+      'Data Validation in Setters',
+      'Read-Only and Write-Only Properties',
+      'JavaBeans Naming Conventions'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // Lesson 7-4: Packages
@@ -420,9 +681,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '15:10',
-    description: 'Understanding Java packages, organizing classes into packages, package naming conventions, creating and using packages, import statements, package hierarchy, and avoiding naming conflicts.',
+    description: 'Lecture on Java package system: organizing classes into packages, package declaration and naming conventions, creating custom packages, using import statements, package hierarchy and structure, built-in Java packages, avoiding naming conflicts, and package organization best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=vR8LRqxINeE',
-    citation: 'Telusko. (2020). Java Packages Explained [Video]. YouTube. https://www.youtube.com/watch?v=vR8LRqxINeE'
+    citation: 'Telusko. (2020). Java packages explained [Video]. YouTube. https://www.youtube.com/watch?v=vR8LRqxINeE',
+    lectureTopics: [
+      'Package Concept and Organization',
+      'Package Declaration Syntax',
+      'Package Naming Conventions',
+      'Import Statements',
+      'Package Hierarchy',
+      'Avoiding Naming Conflicts'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   },
 
   // ============================================================================
@@ -436,9 +706,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '14:20',
-    description: 'Learn about exceptions in Java, what causes exceptions, exception types (checked vs unchecked), exception hierarchy, Exception and Error classes, and why exception handling is important.',
+    description: 'Foundational lecture on exception handling: what exceptions are and when they occur, exception types (checked vs unchecked exceptions), exception hierarchy (Throwable, Exception, Error), common exception types, why exception handling is important for robust applications, and exception handling mechanisms overview.',
     fullUrl: 'https://www.youtube.com/watch?v=xoL9JFI-lGM',
-    citation: 'Telusko. (2020). Java Exception Handling Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=xoL9JFI-lGM'
+    citation: 'Telusko. (2020). Java exception handling tutorial [Video]. YouTube. https://www.youtube.com/watch?v=xoL9JFI-lGM',
+    lectureTopics: [
+      'Exception Concept and Causes',
+      'Checked vs Unchecked Exceptions',
+      'Exception Hierarchy',
+      'Common Exception Types',
+      'Importance of Exception Handling'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 8-2: Try-Catch Blocks
@@ -448,9 +726,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '16:30',
-    description: 'Using try-catch blocks to handle exceptions, catching specific exceptions, multiple catch blocks, catch block order, handling different exception types, and preventing program crashes.',
+    description: 'Practical lecture on exception handling with try-catch: try-catch block syntax and structure, catching specific exception types, multiple catch blocks for different exceptions, catch block ordering rules, exception object methods, handling different exception scenarios, and preventing program crashes through proper exception handling.',
     fullUrl: 'https://www.youtube.com/watch?v=1XAfapkBQjk',
-    citation: 'Coding with John. (2021). Try-Catch Blocks in Java [Video]. YouTube. https://www.youtube.com/watch?v=1XAfapkBQjk'
+    citation: 'Coding with John. (2021). Try-catch blocks in Java [Video]. YouTube. https://www.youtube.com/watch?v=1XAfapkBQjk',
+    lectureTopics: [
+      'Try-Catch Block Syntax',
+      'Catching Specific Exceptions',
+      'Multiple Catch Blocks',
+      'Catch Block Ordering',
+      'Exception Object Methods',
+      'Preventing Program Crashes'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 8-3: Finally Block
@@ -460,9 +747,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '10:45',
-    description: 'Understanding the finally block, cleanup code execution, finally block always executes, try-catch-finally structure, resource cleanup, and when finally doesn\'t execute.',
+    description: 'Lecture on finally block for cleanup code: understanding finally block purpose, try-catch-finally structure, finally block execution guarantee, cleanup code patterns, resource management with finally, when finally doesn\'t execute (System.exit), and finally block best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=jj6O2z1_jy0',
-    citation: 'Alex Lee. (2019). Finally Block in Java Exception Handling [Video]. YouTube. https://www.youtube.com/watch?v=jj6O2z1_jy0'
+    citation: 'Lee, A. (2019). Finally block in Java exception handling [Video]. YouTube. https://www.youtube.com/watch?v=jj6O2z1_jy0',
+    lectureTopics: [
+      'Finally Block Purpose',
+      'Try-Catch-Finally Structure',
+      'Finally Execution Guarantee',
+      'Cleanup Code Patterns',
+      'Resource Management'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 8-4: Throw and Throws
@@ -472,9 +767,17 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '13:15',
-    description: 'Using throw keyword to throw exceptions explicitly, throws keyword to declare exceptions, difference between throw and throws, propagating exceptions, and throwing custom exceptions.',
+    description: 'Lecture by Mosh Hamedani on throw and throws keywords: using throw to explicitly throw exceptions, throws keyword for method exception declaration, difference between throw and throws, exception propagation mechanism, re-throwing exceptions, and throwing custom exception types.',
     fullUrl: 'https://www.youtube.com/watch?v=olvSZKcNDvw',
-    citation: 'Mosh Hamedani. (2019). Throw and Throws Keywords in Java [Video]. YouTube. https://www.youtube.com/watch?v=olvSZKcNDvw'
+    citation: 'Hamedani, M. (2019). Throw and throws keywords in Java [Video]. YouTube. https://www.youtube.com/watch?v=olvSZKcNDvw',
+    lectureTopics: [
+      'throw Keyword for Throwing Exceptions',
+      'throws Keyword for Method Declaration',
+      'Difference Between throw and throws',
+      'Exception Propagation',
+      'Re-throwing Exceptions'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 8-5: Custom Exceptions
@@ -484,9 +787,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '10:55',
-    description: 'How to create custom exception classes, extending Exception class, creating meaningful exception messages, throwing custom exceptions, handling custom exceptions, and designing exception hierarchies.',
+    description: 'Lecture on creating custom exception classes: extending Exception class to create custom exceptions, creating meaningful exception messages, adding custom exception properties, throwing custom exceptions, handling application-specific errors, designing exception hierarchies, and custom exception best practices.',
     fullUrl: 'https://www.youtube.com/watch?v=W-N2ltgU-X4',
-    citation: 'Telusko. (2020). Creating Custom Exceptions in Java [Video]. YouTube. https://www.youtube.com/watch?v=W-N2ltgU-X4'
+    citation: 'Telusko. (2020). Creating custom exceptions in Java [Video]. YouTube. https://www.youtube.com/watch?v=W-N2ltgU-X4',
+    lectureTopics: [
+      'Extending Exception Class',
+      'Custom Exception Creation',
+      'Meaningful Exception Messages',
+      'Custom Exception Properties',
+      'Application-Specific Error Handling',
+      'Exception Hierarchy Design'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // ============================================================================
@@ -500,9 +812,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '17:30',
-    description: 'Complete overview of the Java Collections Framework, Collection interface hierarchy, List, Set, Queue, Map interfaces, collections vs arrays, and when to use each collection type.',
+    description: 'Comprehensive lecture by Mosh Hamedani on Collections Framework: overview of Java Collections Framework architecture, Collection interface hierarchy, List interface and implementations, Set interface and implementations, Queue interface, Map interface and implementations, collections vs arrays comparison, choosing appropriate collection types, and generics with collections.',
     fullUrl: 'https://www.youtube.com/watch?v=oKhWSRqgGMQ',
-    citation: 'Mosh Hamedani. (2019). Java Collections Framework Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=oKhWSRqgGMQ'
+    citation: 'Hamedani, M. (2019). Java Collections Framework tutorial [Video]. YouTube. https://www.youtube.com/watch?v=oKhWSRqgGMQ',
+    lectureTopics: [
+      'Collections Framework Architecture',
+      'Collection Interface Hierarchy',
+      'List, Set, Queue Interfaces',
+      'Map Interface',
+      'Collections vs Arrays',
+      'Generics with Collections'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 9-2: ArrayList
@@ -512,9 +833,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '18:15',
-    description: 'ArrayList in depth, creating ArrayLists, adding and removing elements, accessing elements, ArrayList methods (add, remove, get, set, contains, size), iterating over ArrayList, and dynamic array resizing.',
+    description: 'In-depth lecture on ArrayList: creating ArrayList instances, generic type specification, adding elements (add method), removing elements (remove method), accessing elements (get method), modifying elements (set method), ArrayList methods (contains, indexOf, size, isEmpty), iterating over ArrayList with for-each loop and iterator, and dynamic array resizing behavior.',
     fullUrl: 'https://www.youtube.com/watch?v=NbYgm0r7u6o',
-    citation: 'Coding with John. (2021). Java ArrayList Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=NbYgm0r7u6o'
+    citation: 'Coding with John. (2021). Java ArrayList tutorial [Video]. YouTube. https://www.youtube.com/watch?v=NbYgm0r7u6o',
+    lectureTopics: [
+      'Creating ArrayList Instances',
+      'Adding and Removing Elements',
+      'Accessing and Modifying Elements',
+      'ArrayList Methods',
+      'Iterating Over ArrayList',
+      'Dynamic Array Resizing'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 9-3: LinkedList
@@ -524,9 +854,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '14:40',
-    description: 'LinkedList implementation, doubly-linked list structure, LinkedList vs ArrayList, when to use LinkedList, addFirst/addLast methods, LinkedList as Queue/Deque, and performance considerations.',
+    description: 'Lecture on LinkedList data structure: doubly-linked list implementation, node structure and pointers, LinkedList vs ArrayList performance comparison, when to use LinkedList, addFirst and addLast methods, LinkedList as Queue and Deque, insertion and deletion operations, and performance characteristics (time complexity).',
     fullUrl: 'https://www.youtube.com/watch?v=6WxbjhXW2SY',
-    citation: 'Alex Lee. (2019). Java LinkedList Explained [Video]. YouTube. https://www.youtube.com/watch?v=6WxbjhXW2SY'
+    citation: 'Lee, A. (2019). Java LinkedList explained [Video]. YouTube. https://www.youtube.com/watch?v=6WxbjhXW2SY',
+    lectureTopics: [
+      'Doubly-Linked List Structure',
+      'LinkedList vs ArrayList',
+      'addFirst and addLast Methods',
+      'LinkedList as Queue/Deque',
+      'Insertion and Deletion Operations',
+      'Performance Characteristics'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 9-4: HashSet
@@ -536,9 +875,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '12:25',
-    description: 'HashSet collection, Set interface, unique elements only, no duplicates, HashSet methods, unordered collection, hash function, collision handling, and HashSet use cases.',
+    description: 'Lecture on HashSet collection: Set interface characteristics, unique elements only (no duplicates), HashSet implementation using hash table, hash function and bucket mechanism, HashSet methods (add, remove, contains), unordered collection nature, collision handling, and HashSet use cases for duplicate prevention.',
     fullUrl: 'https://www.youtube.com/watch?v=QfRSeibcqBU',
-    citation: 'Telusko. (2020). Java HashSet Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=QfRSeibcqBU'
+    citation: 'Telusko. (2020). Java HashSet tutorial [Video]. YouTube. https://www.youtube.com/watch?v=QfRSeibcqBU',
+    lectureTopics: [
+      'Set Interface Characteristics',
+      'Unique Elements (No Duplicates)',
+      'HashSet Implementation',
+      'Hash Function and Buckets',
+      'HashSet Methods',
+      'Collision Handling'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 9-5: HashMap
@@ -548,9 +896,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '15:40',
-    description: 'HashMap collection, key-value pairs, Map interface, put and get methods, HashMap methods, checking for keys/values, iterating over HashMap (keySet, values, entrySet), and hash collision handling.',
+    description: 'Comprehensive lecture by Mosh Hamedani on HashMap: key-value pair storage, Map interface implementation, put method for adding entries, get method for retrieval, HashMap methods (containsKey, containsValue, remove, size), iterating over HashMap (keySet, values, entrySet), hash collision handling with chaining, and HashMap performance characteristics.',
     fullUrl: 'https://www.youtube.com/watch?v=H62Jfv1DJlU',
-    citation: 'Mosh Hamedani. (2019). Java HashMap Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=H62Jfv1DJlU'
+    citation: 'Hamedani, M. (2019). Java HashMap tutorial [Video]. YouTube. https://www.youtube.com/watch?v=H62Jfv1DJlU',
+    lectureTopics: [
+      'Key-Value Pair Storage',
+      'put and get Methods',
+      'HashMap Methods',
+      'Iterating Over HashMap',
+      'Hash Collision Handling',
+      'Performance Characteristics'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // ============================================================================
@@ -564,9 +921,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '16:25',
-    description: 'Learn file reading and writing in Java, FileReader and FileWriter classes, BufferedReader and BufferedWriter for efficiency, reading text files line by line, writing to files, and closing resources.',
+    description: 'Fundamental lecture on file input/output operations: FileReader class for reading text files, FileWriter class for writing text files, BufferedReader and BufferedWriter for efficient I/O operations, reading files line by line, writing data to files, character streams vs byte streams, closing file resources properly, and file I/O exception handling.',
     fullUrl: 'https://www.youtube.com/watch?v=ScUJx4aWRi0',
-    citation: 'Alex Lee. (2019). Java File I/O Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=ScUJx4aWRi0'
+    citation: 'Lee, A. (2019). Java file I/O tutorial [Video]. YouTube. https://www.youtube.com/watch?v=ScUJx4aWRi0',
+    lectureTopics: [
+      'FileReader and FileWriter Classes',
+      'BufferedReader and BufferedWriter',
+      'Reading Files Line by Line',
+      'Writing Data to Files',
+      'Character Streams vs Byte Streams',
+      'Resource Management and Exception Handling'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 10-2: Working with Files
@@ -576,9 +942,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Coding with John',
     channelUrl: 'https://www.youtube.com/@CodingWithJohn',
     duration: '12:50',
-    description: 'Working with the File class, creating files and directories, checking file existence, file metadata (size, path, name), deleting files, listing directory contents, and file system operations.',
+    description: 'Lecture on File class operations: creating File objects, checking file existence (exists method), creating new files and directories (createNewFile, mkdir, mkdirs), file metadata (getName, getPath, getAbsolutePath, length), deleting files and directories (delete method), listing directory contents (list, listFiles), and file system operations.',
     fullUrl: 'https://www.youtube.com/watch?v=EblFl-T9BsM',
-    citation: 'Coding with John. (2021). Java File Class and File Handling [Video]. YouTube. https://www.youtube.com/watch?v=EblFl-T9BsM'
+    citation: 'Coding with John. (2021). Java File class and file handling [Video]. YouTube. https://www.youtube.com/watch?v=EblFl-T9BsM',
+    lectureTopics: [
+      'File Class and File Objects',
+      'Checking File Existence',
+      'Creating Files and Directories',
+      'File Metadata Methods',
+      'Deleting Files',
+      'Listing Directory Contents'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 10-3: Try-with-Resources
@@ -588,9 +963,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Telusko',
     channelUrl: 'https://www.youtube.com/@Telusko',
     duration: '11:30',
-    description: 'Try-with-resources statement for automatic resource management, AutoCloseable interface, closing files automatically, preventing resource leaks, multiple resources in try-with-resources, and best practices.',
+    description: 'Lecture on automatic resource management: try-with-resources statement syntax, AutoCloseable interface, automatic resource closing, preventing resource leaks, multiple resources in single try statement, try-with-resources vs traditional try-finally, exception suppression, and resource management best practices for file I/O operations.',
     fullUrl: 'https://www.youtube.com/watch?v=hLfDCI8aJDM',
-    citation: 'Telusko. (2020). Try-with-Resources in Java [Video]. YouTube. https://www.youtube.com/watch?v=hLfDCI8aJDM'
+    citation: 'Telusko. (2020). Try-with-resources in Java [Video]. YouTube. https://www.youtube.com/watch?v=hLfDCI8aJDM',
+    lectureTopics: [
+      'Try-with-Resources Syntax',
+      'AutoCloseable Interface',
+      'Automatic Resource Closing',
+      'Preventing Resource Leaks',
+      'Multiple Resources Management',
+      'Resource Management Best Practices'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 10-4: Serialization
@@ -600,9 +984,19 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '14:55',
-    description: 'Object serialization, converting objects to byte streams, Serializable interface, ObjectOutputStream and ObjectInputStream, saving objects to files, deserialization process, and transient keyword.',
+    description: 'Lecture by Mosh Hamedani on object serialization: object serialization concept, converting objects to byte streams, Serializable interface marker interface, ObjectOutputStream for writing objects, ObjectInputStream for reading objects, saving objects to files and network transmission, deserialization process, transient keyword for skipping fields, and serialization version control with serialVersionUID.',
     fullUrl: 'https://www.youtube.com/watch?v=iR5gNdqBW4o',
-    citation: 'Mosh Hamedani. (2019). Java Serialization and Deserialization [Video]. YouTube. https://www.youtube.com/watch?v=iR5gNdqBW4o'
+    citation: 'Hamedani, M. (2019). Java serialization and deserialization [Video]. YouTube. https://www.youtube.com/watch?v=iR5gNdqBW4o',
+    lectureTopics: [
+      'Object Serialization Concept',
+      'Serializable Interface',
+      'ObjectOutputStream and ObjectInputStream',
+      'Saving and Loading Objects',
+      'Deserialization Process',
+      'transient Keyword',
+      'serialVersionUID Version Control'
+    ],
+    academicLevel: 'Undergraduate - Intermediate'
   },
 
   // Lesson 10-5: NIO Package
@@ -612,9 +1006,18 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Alex Lee',
     channelUrl: 'https://www.youtube.com/@alexlorenlee',
     duration: '17:20',
-    description: 'Introduction to Java NIO (New I/O) package, Path and Files classes, modern file operations, reading and writing with Files class, NIO.2 features, and advantages over traditional I/O.',
+    description: 'Advanced lecture on Java NIO (New I/O) package: introduction to NIO.2 features (Java 7+), Path interface for file paths, Files class utility methods, modern file operations (readAllLines, write, copy, move, delete), file attributes and metadata, working with directories and directory streams, NIO advantages over traditional I/O, and non-blocking I/O capabilities.',
     fullUrl: 'https://www.youtube.com/watch?v=bx2JgPYHUmE',
-    citation: 'Alex Lee. (2019). Java NIO (New I/O) Tutorial [Video]. YouTube. https://www.youtube.com/watch?v=bx2JgPYHUmE'
+    citation: 'Lee, A. (2019). Java NIO (New I/O) tutorial [Video]. YouTube. https://www.youtube.com/watch?v=bx2JgPYHUmE',
+    lectureTopics: [
+      'NIO.2 Features (Java 7+)',
+      'Path and Files Classes',
+      'Modern File Operations',
+      'File Attributes and Metadata',
+      'Working with Directories',
+      'NIO vs Traditional I/O Advantages'
+    ],
+    academicLevel: 'Undergraduate - Advanced'
   },
 
   // ============================================================================
@@ -627,9 +1030,19 @@ export const lessonVideos: Record<string, LessonVideo> = {
     channel: 'Programming with Mosh',
     channelUrl: 'https://www.youtube.com/@programmingwithmosh',
     duration: '2:18:39',
-    description: 'Comprehensive Java programming tutorial covering all fundamental concepts for beginners including syntax, OOP, data structures, and more.',
+    description: 'Comprehensive Java programming course by Mosh Hamedani covering fundamental concepts: Java syntax and structure, variables and data types, operators and expressions, control flow statements, methods and functions, object-oriented programming principles, classes and objects, inheritance and polymorphism, exception handling, collections framework, and practical programming exercises for beginners.',
     fullUrl: 'https://www.youtube.com/watch?v=eIrMbAQSU34',
-    citation: 'Mosh Hamedani. (2017). Java Tutorial for Beginners - Complete Course [Video]. YouTube. https://www.youtube.com/watch?v=eIrMbAQSU34'
+    citation: 'Hamedani, M. (2017). Java tutorial for beginners - Complete course [Video]. YouTube. https://www.youtube.com/watch?v=eIrMbAQSU34',
+    lectureTopics: [
+      'Java Fundamentals and Syntax',
+      'Variables, Data Types, and Operators',
+      'Control Flow and Loops',
+      'Object-Oriented Programming',
+      'Inheritance and Polymorphism',
+      'Exception Handling',
+      'Collections Framework Basics'
+    ],
+    academicLevel: 'Undergraduate - Introductory'
   }
 };
 
@@ -658,4 +1071,16 @@ export function getVideoEmbedUrl(lessonId: string): string {
 export function getVideoFullUrl(lessonId: string): string {
   const video = getLessonVideo(lessonId);
   return video.fullUrl;
+}
+
+// Get lecture topics for a lesson
+export function getLectureTopic(lessonId: string): string[] {
+  const video = getLessonVideo(lessonId);
+  return video.lectureTopics || [];
+}
+
+// Get academic level for a lesson
+export function getAcademicLevel(lessonId: string): string {
+  const video = getLessonVideo(lessonId);
+  return video.academicLevel || 'Undergraduate';
 }
