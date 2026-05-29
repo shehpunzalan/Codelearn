@@ -29,7 +29,7 @@ export function AIFeedbackPage({ userId, onBack }: AIFeedbackPageProps) {
     try {
       setLoading(true);
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f/ai-feedback/${userId}`,
+        `https://${projectId}.supabase.co/functions/v1/server/ai-feedback/${userId}`,
         {
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,

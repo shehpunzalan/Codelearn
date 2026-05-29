@@ -1,7 +1,7 @@
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 
 const SUPABASE_URL = `https://${projectId}.supabase.co`;
-const API_BASE_URL = `${SUPABASE_URL}/functions/v1/make-server-aaa3a86f`;
+const API_BASE_URL = `${SUPABASE_URL}/functions/v1/server`;
 
 // Auth storage helpers
 export const authStorage = {

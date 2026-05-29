@@ -72,7 +72,7 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
   const loadMachineProblem = async () => {
     try {
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f/machine-problem/${moduleId}/${lessonId}`,
+        `https://${projectId}.supabase.co/functions/v1/server/machine-problem/${moduleId}/${lessonId}`,
         {
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,
@@ -99,7 +99,7 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
 
     try {
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f/execute-code`,
+        `https://${projectId}.supabase.co/functions/v1/server/execute-code`,
         {
           method: 'POST',
           headers: {
@@ -141,7 +141,7 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
 
     try {
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f/verify-code`,
+        `https://${projectId}.supabase.co/functions/v1/server/verify-code`,
         {
           method: 'POST',
           headers: {

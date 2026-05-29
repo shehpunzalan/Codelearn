@@ -62,7 +62,7 @@ export function StudentDetailView({ studentId, studentName, onBack, modules }: S
 
       // Fetch progress
       const progressResponse = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f/progress/${studentId}`,
+        `https://${projectId}.supabase.co/functions/v1/server/progress/${studentId}`,
         {
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,
@@ -80,7 +80,7 @@ export function StudentDetailView({ studentId, studentName, onBack, modules }: S
 
       // Fetch quiz attempts
       const quizResponse = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f/quiz/attempts/${studentId}`,
+        `https://${projectId}.supabase.co/functions/v1/server/quiz/attempts/${studentId}`,
         {
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,
@@ -98,7 +98,7 @@ export function StudentDetailView({ studentId, studentName, onBack, modules }: S
 
       // Fetch AI feedback
       const feedbackResponse = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-aaa3a86f/feedback/${studentId}`,
+        `https://${projectId}.supabase.co/functions/v1/server/feedback/${studentId}`,
         {
           headers: {
             'Authorization': `Bearer ${publicAnonKey}`,

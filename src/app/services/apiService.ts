@@ -6,7 +6,7 @@
 import { projectId, publicAnonKey } from '../../../utils/supabase/info';
 import { mockAPI } from './mockBackend';
 
-const USE_MOCK = true; // Set to true to bypass 403 error and use localStorage
+const USE_MOCK = false; // Set to true to bypass 403 error and use localStorage
 
 const BASE_URL = `https://${projectId}.supabase.co/functions/v1/server`;
 
