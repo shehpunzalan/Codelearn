@@ -7,6 +7,7 @@ import * as additional from "./additionalEndpoints.ts";
 import * as aiFeedback from "./aiFeedbackAnalysis.ts";
 import * as codeSubmission from "./codeSubmissionEndpoints.ts";
 
+const mainApp = new Hono();
 const app = new Hono();
 
 app.use('*', logger(console.log));
@@ -463,4 +464,7 @@ app.post("/submissions/autosave", codeSubmission.autoSaveCodeHandler);
 app.get("/submissions/draft", codeSubmission.getDraftCodeHandler);
 app.get("/submissions/:submissionId", codeSubmission.getSubmissionHandler);
 
-Deno.serve(app.fetch);
+// Mount the app under /server
+mainApp.route('/server', app);
+
+Deno.serve(mainApp.fetch);
