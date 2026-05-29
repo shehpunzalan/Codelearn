@@ -23,6 +23,7 @@ import { InteractiveGamePage } from './components/InteractiveGamePage';
 import { LearningPathReadingPage } from './components/LearningPathReadingPage';
 import { DataViewer } from './components/DataViewer';
 import { ConnectionTest } from './components/ConnectionTest';
+import { DatabaseTest } from './components/DatabaseTest';
 import { toast, Toaster } from 'sonner';
 import { seedDemoStudents } from './utils/demoStudents';
 import * as backendApi from './services/backendApi';
@@ -429,8 +430,12 @@ function AppContent() {
           <ConnectionTest onBack={() => setCurrentView('settings')} />
         )}
 
+        {currentView === 'database-test' && (
+          <DatabaseTest onBack={() => setCurrentView('settings')} />
+        )}
+
         {/* Fallback in case no view matches */}
-        {!['dashboard', 'modules', 'module', 'code-editor', 'feedback', 'progress', 'settings', 'course-management', 'monitoring', 'references', 'video-tutorial', 'learning-path-reading', 'audio-lecture', 'interactive-game', 'analytics', 'data-viewer', 'connection-test'].includes(currentView) && (
+        {!['dashboard', 'modules', 'module', 'code-editor', 'feedback', 'progress', 'settings', 'course-management', 'monitoring', 'references', 'video-tutorial', 'learning-path-reading', 'audio-lecture', 'interactive-game', 'analytics', 'data-viewer', 'connection-test', 'database-test'].includes(currentView) && (
           <div className="text-center py-20">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
             <p className="text-gray-600 mb-6">The view "{currentView}" doesn't exist.</p>

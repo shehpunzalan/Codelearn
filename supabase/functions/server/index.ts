@@ -6,6 +6,7 @@ import * as kv from "./kv_store.ts";
 import * as additional from "./additionalEndpoints.ts";
 import * as aiFeedback from "./aiFeedbackAnalysis.ts";
 import * as codeSubmission from "./codeSubmissionEndpoints.ts";
+import * as database from "./databaseEndpoints.ts";
 
 const mainApp = new Hono();
 const app = new Hono();
@@ -463,6 +464,14 @@ app.get("/submissions/lesson", codeSubmission.getSubmissionsByLessonHandler);
 app.post("/submissions/autosave", codeSubmission.autoSaveCodeHandler);
 app.get("/submissions/draft", codeSubmission.getDraftCodeHandler);
 app.get("/submissions/:submissionId", codeSubmission.getSubmissionHandler);
+
+// DATABASE ENDPOINTS - Test real Supabase database connection
+app.get("/db/test", database.testDatabaseConnection);
+app.get("/db/students", database.getAllStudents);
+app.get("/db/students/:id", database.getStudentById);
+app.post("/db/students", database.createStudent);
+app.put("/db/students/:id", database.updateStudent);
+app.delete("/db/students/:id", database.deleteStudent);
 
 // Mount the app under /server
 mainApp.route('/server', app);

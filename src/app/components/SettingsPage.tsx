@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { UserCircle, Mail, Save, Globe, Check, Activity } from 'lucide-react';
+import { UserCircle, Mail, Save, Globe, Check, Activity, Database } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
 
@@ -228,7 +228,7 @@ export function SettingsPage({ user, onSave, onNavigate }: SettingsPageProps) {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-200">
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-200 mb-4">
               <h4 className="font-semibold text-gray-900 mb-2">Supabase Connection Test</h4>
               <p className="text-sm text-gray-600 mb-4">
                 Verify that your frontend is properly connected to the Supabase backend. This will test authentication, data persistence, and all API endpoints.
@@ -239,6 +239,23 @@ export function SettingsPage({ user, onSave, onNavigate }: SettingsPageProps) {
               >
                 <Activity className="w-5 h-5 mr-2" />
                 Run Connection Test
+              </Button>
+            </div>
+
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
+              <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <Database className="w-5 h-5 text-green-600" />
+                Database Test (PostgreSQL)
+              </h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Test real Supabase PostgreSQL database connection. Create, read, update, and delete records from the students table to verify database operations.
+              </p>
+              <Button
+                onClick={() => onNavigate('database-test')}
+                className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+              >
+                <Database className="w-5 h-5 mr-2" />
+                Test Database Connection
               </Button>
             </div>
           </CardContent>
