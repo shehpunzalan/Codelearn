@@ -6,16 +6,17 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { UserCircle, Mail, Save, Globe, Check } from 'lucide-react';
+import { UserCircle, Mail, Save, Globe, Check, Activity } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
 
 interface SettingsPageProps {
   user: User;
   onSave: (updatedUser: User) => void;
+  onNavigate?: (view: string) => void;
 }
 
-export function SettingsPage({ user, onSave }: SettingsPageProps) {
+export function SettingsPage({ user, onSave, onNavigate }: SettingsPageProps) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [language, setLanguage] = useState(localStorage.getItem('preferredLanguage') || 'en');
@@ -205,8 +206,8 @@ export function SettingsPage({ user, onSave }: SettingsPageProps) {
           </div>
 
           {/* Save Language Button */}
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-md hover:shadow-lg transition-all"
           >
             <Save className="w-5 h-5 mr-2" />
@@ -214,6 +215,35 @@ export function SettingsPage({ user, onSave }: SettingsPageProps) {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Developer Tools Card */}
+      {onNavigate && (
+        <Card className="shadow-xl border-2 border-purple-200">
+          <CardContent className="p-8 space-y-6">
+            <div className="flex items-center gap-3">
+              <Activity className="w-6 h-6 text-purple-600" />
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">System Tools</h3>
+                <p className="text-gray-600 text-sm">Test backend connectivity and system health</p>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-200">
+              <h4 className="font-semibold text-gray-900 mb-2">Supabase Connection Test</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Verify that your frontend is properly connected to the Supabase backend. This will test authentication, data persistence, and all API endpoints.
+              </p>
+              <Button
+                onClick={() => onNavigate('connection-test')}
+                className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+              >
+                <Activity className="w-5 h-5 mr-2" />
+                Run Connection Test
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

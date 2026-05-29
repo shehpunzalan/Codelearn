@@ -22,6 +22,7 @@ import { AudioLecturePage } from './components/AudioLecturePage';
 import { InteractiveGamePage } from './components/InteractiveGamePage';
 import { LearningPathReadingPage } from './components/LearningPathReadingPage';
 import { DataViewer } from './components/DataViewer';
+import { ConnectionTest } from './components/ConnectionTest';
 import { toast, Toaster } from 'sonner';
 import { seedDemoStudents } from './utils/demoStudents';
 import * as backendApi from './services/backendApi';
@@ -29,7 +30,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 
 // CodeLearn AI - Neural Network Pattern Recognition System for Java OOP
 function AppContent() {
-  console.log('🚀 App component rendering');
+  console.log('🚀 AppContent function called');
+  console.log('🚀 React version:', React.version);
 
   const [user, setUser] = useState<User | null>(null);
   const [showLogin, setShowLogin] = useState(true);
@@ -350,9 +352,10 @@ function AppContent() {
         )}
 
         {currentView === 'settings' && (
-          <SettingsPage 
+          <SettingsPage
             user={user}
             onSave={handleUpdateProfile}
+            onNavigate={setCurrentView}
           />
         )}
 
@@ -422,8 +425,12 @@ function AppContent() {
           <DataViewer onBack={() => setCurrentView('dashboard')} />
         )}
 
+        {currentView === 'connection-test' && (
+          <ConnectionTest onBack={() => setCurrentView('settings')} />
+        )}
+
         {/* Fallback in case no view matches */}
-        {!['dashboard', 'modules', 'module', 'code-editor', 'feedback', 'progress', 'settings', 'course-management', 'monitoring', 'references', 'video-tutorial', 'learning-path-reading', 'audio-lecture', 'interactive-game', 'analytics', 'data-viewer'].includes(currentView) && (
+        {!['dashboard', 'modules', 'module', 'code-editor', 'feedback', 'progress', 'settings', 'course-management', 'monitoring', 'references', 'video-tutorial', 'learning-path-reading', 'audio-lecture', 'interactive-game', 'analytics', 'data-viewer', 'connection-test'].includes(currentView) && (
           <div className="text-center py-20">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
             <p className="text-gray-600 mb-6">The view "{currentView}" doesn't exist.</p>
@@ -445,11 +452,55 @@ function AppContent() {
 
 // Wrap with error boundary
 function App() {
-  return (
-    <ErrorBoundary>
-      <AppContent />
-    </ErrorBoundary>
-  );
+  console.log('🎯 App function called');
+
+  try {
+    return (
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('🔴 App render error:', error);
+    return (
+      <div style={{
+        minHeight: '100vh',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fee',
+        padding: '2rem'
+      }}>
+        <div style={{
+          maxWidth: '600px',
+          backgroundColor: 'white',
+          padding: '2rem',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        }}>
+          <h1 style={{ color: '#dc2626', marginBottom: '1rem' }}>App Error</h1>
+          <p style={{ color: '#4b5563' }}>
+            {error instanceof Error ? error.message : 'Unknown error occurred'}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: '1rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;
