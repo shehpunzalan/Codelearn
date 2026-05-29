@@ -31,8 +31,9 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 
 // CodeLearn AI - Neural Network Pattern Recognition System for Java OOP
 function AppContent() {
-  console.log('🚀 AppContent function called');
-  console.log('🚀 React version:', React.version);
+  console.log('🚀 AppContent rendering - timestamp:', new Date().toISOString());
+  console.log('📦 React version:', React.version);
+  console.log('🌐 Window location:', window.location.href);
 
   const [user, setUser] = useState<User | null>(null);
   const [showLogin, setShowLogin] = useState(true);
@@ -457,9 +458,17 @@ function AppContent() {
 
 // Wrap with error boundary
 function App() {
-  console.log('🎯 App function called');
+  console.log('🎯 App function called - CodeLearn AI starting');
+  console.log('📦 React:', React.version);
+
+  // Safety check - ensure we always return valid JSX
+  if (!React || typeof React.createElement !== 'function') {
+    console.error('❌ React not loaded properly');
+    return null;
+  }
 
   try {
+    console.log('✅ Rendering ErrorBoundary and AppContent');
     return (
       <ErrorBoundary>
         <AppContent />
@@ -467,6 +476,7 @@ function App() {
     );
   } catch (error) {
     console.error('🔴 App render error:', error);
+    // Fallback error UI
     return (
       <div style={{
         minHeight: '100vh',
@@ -474,33 +484,61 @@ function App() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#fee',
-        padding: '2rem'
+        backgroundColor: '#fee2e2',
+        padding: '2rem',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
         <div style={{
           maxWidth: '600px',
           backgroundColor: 'white',
           padding: '2rem',
           borderRadius: '8px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
         }}>
-          <h1 style={{ color: '#dc2626', marginBottom: '1rem' }}>App Error</h1>
-          <p style={{ color: '#4b5563' }}>
-            {error instanceof Error ? error.message : 'Unknown error occurred'}
+          <h1 style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            ⚠️ Application Error
+          </h1>
+          <p style={{ color: '#4b5563', marginBottom: '1rem' }}>
+            {error instanceof Error ? error.message : 'An unknown error occurred while loading CodeLearn AI'}
           </p>
+          {error instanceof Error && error.stack && (
+            <details style={{ marginBottom: '1rem' }}>
+              <summary style={{ cursor: 'pointer', color: '#6b7280', fontSize: '0.875rem' }}>
+                Show error details
+              </summary>
+              <pre style={{
+                marginTop: '0.5rem',
+                padding: '0.75rem',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+                overflow: 'auto',
+                maxHeight: '200px'
+              }}>
+                {error.stack}
+              </pre>
+            </details>
+          )}
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              console.log('🔄 Reloading page...');
+              window.location.reload();
+            }}
             style={{
-              marginTop: '1rem',
-              padding: '0.5rem 1rem',
+              padding: '0.75rem 1.5rem',
               backgroundColor: '#2563eb',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              borderRadius: '6px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              width: '100%'
             }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
           >
-            Reload Page
+            Reload Application
           </button>
         </div>
       </div>
