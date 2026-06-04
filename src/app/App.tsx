@@ -175,6 +175,31 @@ function AppContent() {
     setCurrentView('module');
   };
 
+  const handleLessonComplete = (moduleId: string, completedCount: number, total: number) => {
+    const progress = Math.round((completedCount / total) * 100);
+    setModules(prev => prev.map(m =>
+      m.id === moduleId ? { ...m, progress, completedLessons: completedCount } : m
+    ));
+  };
+
+  const handleModuleComplete = (moduleId: string) => {
+    setModules(prev => prev.map(m =>
+      m.id === moduleId ? { ...m, progress: 100, completedLessons: m.totalLessons } : m
+    ));
+  };
+
+  const handleNextModule = () => {
+    if (!selectedModuleId) return;
+    const currentIndex = modules.findIndex(m => m.id === selectedModuleId);
+    const next = modules[currentIndex + 1];
+    if (next) {
+      setSelectedModuleId(next.id);
+    } else {
+      setCurrentView('modules');
+      setSelectedModuleId(null);
+    }
+  };
+
   const handleStartCoding = (moduleId: string, lessonId: string) => {
     setSelectedModuleId(moduleId);
     setSelectedLessonId(lessonId);
@@ -320,6 +345,7 @@ function AppContent() {
 
         {currentView === 'module' && selectedModule && (
           <LessonViewer
+            key={selectedModule.id}
             module={selectedModule}
             onBack={() => setCurrentView('modules')}
             onViewFeedback={() => setCurrentView('feedback')}
@@ -328,6 +354,9 @@ function AppContent() {
             onOpenReadingContent={handleOpenReadingContent}
             onOpenAudioLecture={handleOpenAudioLecture}
             onOpenInteractiveGame={handleOpenInteractiveGame}
+            onLessonComplete={handleLessonComplete}
+            onModuleComplete={handleModuleComplete}
+            onNextModule={modules.findIndex(m => m.id === selectedModuleId) < modules.length - 1 ? handleNextModule : undefined}
           />
         )}
 

@@ -18,14 +18,23 @@ interface LessonViewerProps {
   onOpenReadingContent?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
   onOpenAudioLecture?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
   onOpenInteractiveGame?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
+  onLessonComplete?: (moduleId: string, completedCount: number, total: number) => void;
+  onModuleComplete?: (moduleId: string) => void;
+  onNextModule?: () => void;
 }
 
-export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutorial, onOpenReadingContent, onOpenAudioLecture, onOpenInteractiveGame }: LessonViewerProps) {
+export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutorial, onOpenReadingContent, onOpenAudioLecture, onOpenInteractiveGame, onLessonComplete, onModuleComplete, onNextModule }: LessonViewerProps) {
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showQuizResults, setShowQuizResults] = useState(false);
+  const [showModuleComplete, setShowModuleComplete] = useState(false);
   const [quizStats, setQuizStats] = useState<any>(null);
-  const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(`completedLessons_${module.id}`);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch { return new Set(); }
+  });
 
   // Find the currently selected lesson from the module's lessons array
   const selectedLesson = module.lessons.find(lesson => lesson.id === selectedLessonId);
@@ -52,6 +61,7 @@ export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutoria
       setCompletedLessons(newCompleted);
       localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...newCompleted]));
       toast.success('🎉 Quiz Passed! Lesson Completed!');
+      onLessonComplete?.(module.id, newCompleted.size, module.lessons.length);
     }
   };
 
@@ -68,7 +78,8 @@ export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutoria
       setSelectedLessonId(module.lessons[currentIndex + 1].id);
       toast.success('🎓 Moving to next lesson!');
     } else {
-      toast.success('🎉 Module completed!');
+      onModuleComplete?.(module.id);
+      setShowModuleComplete(true);
     }
   };
 
@@ -76,6 +87,62 @@ export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutoria
     setShowQuizResults(false);
     setShowQuiz(false);
   };
+
+  // Show module completion screen
+  if (showModuleComplete) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-auto flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+        <div className="max-w-lg w-full mx-4 rounded-2xl p-8 text-center" style={{ backgroundColor: 'var(--color-background-primary)', fontFamily: 'var(--font-sans)' }}>
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'var(--color-success-100)' }}>
+            <Trophy className="w-10 h-10" style={{ color: 'var(--color-success-600)' }} />
+          </div>
+          <h2 className="mb-2" style={{ color: 'var(--color-text-primary)', fontSize: '1.75rem', fontWeight: 700 }}>
+            Module Complete! 🎉
+          </h2>
+          <p className="mb-2" style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem' }}>
+            You've finished <strong>{module.title}</strong>
+          </p>
+          <p className="mb-8" style={{ color: 'var(--color-text-tertiary)' }}>
+            All {module.lessons.length} lessons completed. Great work!
+          </p>
+          <div className="flex flex-col gap-3">
+            {onNextModule && (
+              <button
+                onClick={onNextModule}
+                className="w-full py-3 px-6 rounded-xl transition-all"
+                style={{
+                  backgroundColor: 'var(--color-primary-600)',
+                  color: '#fff',
+                  fontFamily: 'var(--font-sans)',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Continue to Next Module →
+              </button>
+            )}
+            <button
+              onClick={onBack}
+              className="w-full py-3 px-6 rounded-xl transition-all"
+              style={{
+                backgroundColor: 'var(--color-neutral-100)',
+                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-sans)',
+                fontWeight: 600,
+                fontSize: '1rem',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Back to Modules
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show quiz modal
   if (showQuiz && selectedLesson?.content.quiz) {
