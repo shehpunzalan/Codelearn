@@ -2,31 +2,15 @@ import { Module } from '../types';
 import { module1Lessons, module2Lessons, module3Lessons, module4Lessons, module5Lessons } from './lessonsData';
 import { enhanceLesson } from './lessonsDataComplete';
 
-export const mockUsers: User[] = [
-  {
-    id: 'student1',
-    name: 'Alex Johnson',
-    email: 'alex.johnson@example.com',
-    role: 'student',
-    enrolledCourses: ['CCS108']
-  },
-  {
-    id: 'instructor1',
-    name: 'Dr. Sarah Martinez',
-    email: 'sarah.martinez@example.com',
-    role: 'instructor'
-  }
-];
-
 export const mockModules: Module[] = [
   {
     id: 'mod1',
     title: 'Java Fundamentals',
     description: 'Master the basics of Java including syntax, variables, operators, control flow, and loops.',
     difficulty: 'beginner',
-    progress: 40,
+    progress: 0,
     totalLessons: 5,
-    completedLessons: 2,
+    completedLessons: 0,
     lessons: module1Lessons.map(enhanceLesson),
     estimatedTime: '2 hours',
     source: {
@@ -546,135 +530,5 @@ export const mockModules: Module[] = [
         description: 'Interactive guide to design patterns with examples'
       }
     ]
-  }
-];
-
-export const mockAssignments: Assignment[] = [
-  {
-    id: 'assign1',
-    title: 'Create a Student Management Class',
-    description: 'Create a Student class with proper encapsulation, constructors, getters and setters.',
-    dueDate: '2026-03-15',
-    totalPoints: 100,
-    starterCode: `public class Student {
-    // TODO: Add private fields for name, studentId, gpa, major
-    
-    // TODO: Add constructors
-    
-    // TODO: Add getters and setters with validation
-    
-    // TODO: Add a method to display student info
-    
-    public static void main(String[] args) {
-        // Test your Student class here
-    }
-}`,
-    testCases: [
-      { input: 'Student with valid data', expectedOutput: 'Student info displayed correctly' },
-      { input: 'Student with invalid GPA (>4.0)', expectedOutput: 'Validation error' }
-    ]
-  },
-  {
-    id: 'assign2',
-    title: 'Bank Account System',
-    description: 'Implement a BankAccount class with deposit, withdraw, and transfer methods.',
-    dueDate: '2026-03-20',
-    totalPoints: 100,
-    starterCode: `public class BankAccount {
-    // TODO: Add private fields
-    
-    // TODO: Implement deposit method
-    
-    // TODO: Implement withdraw method
-    
-    // TODO: Implement getBalance method
-    
-    public static void main(String[] args) {
-        // Test your BankAccount class
-    }
-}`
-  }
-];
-
-export const mockProgressData: ProgressData = {
-  userId: 'student1',
-  modulesCompleted: 0,
-  lessonsCompleted: 2,
-  totalSubmissions: 8,
-  successRate: 75,
-  commonPatterns: [
-    'Missing access modifiers',
-    'Not using "this" keyword',
-    'Insufficient validation in setters'
-  ],
-  strengths: [
-    'Class structure and organization',
-    'Method naming conventions',
-    'Code readability and comments'
-  ],
-  areasForImprovement: [
-    'Exception handling',
-    'Input validation',
-    'Following OOP principles consistently'
-  ],
-  oopMastery: {
-    encapsulation: 72,
-    inheritance: 45,
-    polymorphism: 38,
-    abstraction: 30,
-    overall: 46
-  }
-};
-
-export const mockStudentPerformances: StudentPerformance[] = [
-  {
-    studentId: 's1',
-    studentName: 'Maria Santos',
-    progress: 94,
-    averageScore: 94,
-    modulesCompleted: 8,
-    totalSubmissions: 45,
-    lastActive: '2 hours ago',
-    performanceLevel: 'HIGH'
-  },
-  {
-    studentId: 's2',
-    studentName: 'John Carlo Reyes',
-    progress: 91,
-    averageScore: 91,
-    modulesCompleted: 7,
-    totalSubmissions: 42,
-    lastActive: '5 hours ago',
-    performanceLevel: 'HIGH'
-  },
-  {
-    studentId: 's3',
-    studentName: 'Sarah Mae Gonzales',
-    progress: 89,
-    averageScore: 89,
-    modulesCompleted: 7,
-    totalSubmissions: 38,
-    lastActive: '1 hour ago',
-    performanceLevel: 'HIGH'
-  },
-  {
-    studentId: 's4',
-    studentName: 'Jerome Santos',
-    progress: 78,
-    averageScore: 78,
-    modulesCompleted: 5,
-    totalSubmissions: 26,
-    lastActive: '8 hours ago',
-    performanceLevel: 'MEDIUM'
-  },
-  {
-    studentId: 's5',
-    studentName: 'Daniel Patrick Lopez',
-    progress: 52,
-    averageScore: 52,
-    modulesCompleted: 1,
-    totalSubmissions: 11,
-    lastActive: '3 days ago',
-    performanceLevel: 'LOW'
   }
 ];

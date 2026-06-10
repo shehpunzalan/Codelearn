@@ -237,30 +237,34 @@ export function ProgressView({ onBack }: ProgressViewProps) {
               <h3 className="text-base font-bold text-gray-900 mb-4">Weekly Score Trend</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis 
+                  <CartesianGrid key="grid" strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis
+                    key="xaxis"
                     dataKey="week"
                     tick={{ fontSize: 11 }}
                     stroke="#6B7280"
                   />
-                  <YAxis 
+                  <YAxis
+                    key="yaxis"
                     domain={[0, 100]}
                     tick={{ fontSize: 11 }}
                     stroke="#6B7280"
                   />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    key="tooltip"
+                    contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #E5E7EB',
                       borderRadius: '8px',
                       fontSize: '12px'
                     }}
                   />
-                  <Line 
-                    type="monotone" 
+                  <Line
+                    key="line"
+                    type="monotone"
                     dataKey="score"
                     name="Score"
-                    stroke="#3B82F6" 
+                    stroke="#3B82F6"
                     strokeWidth={2}
                     dot={{ fill: '#3B82F6', r: 4 }}
                     activeDot={{ r: 6 }}
@@ -279,29 +283,32 @@ export function ProgressView({ onBack }: ProgressViewProps) {
               <h3 className="text-base font-bold text-gray-900 mb-4">OOP Principles Mastery</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={oopPrinciplesData} layout="vertical" margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis 
-                    type="number" 
+                  <CartesianGrid key="grid" strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
+                  <XAxis
+                    key="xaxis"
+                    type="number"
                     domain={[0, 100]}
                     tick={{ fontSize: 11 }}
                     stroke="#6B7280"
                   />
-                  <YAxis 
+                  <YAxis
+                    key="yaxis"
                     type="category"
-                    dataKey="principle" 
+                    dataKey="principle"
                     tick={{ fontSize: 11 }}
                     stroke="#6B7280"
                     width={90}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    key="tooltip"
+                    contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #E5E7EB',
                       borderRadius: '8px',
                       fontSize: '12px'
                     }}
                   />
-                  <Bar dataKey="score" name="Mastery" fill="#8B5CF6" radius={[0, 8, 8, 0]} />
+                  <Bar key="bar" dataKey="score" name="Mastery" fill="#8B5CF6" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
               <div className="mt-3 bg-purple-50 rounded-lg p-3">

@@ -465,6 +465,28 @@ app.post("/submissions/autosave", codeSubmission.autoSaveCodeHandler);
 app.get("/submissions/draft", codeSubmission.getDraftCodeHandler);
 app.get("/submissions/:submissionId", codeSubmission.getSubmissionHandler);
 
+// USER POSITION (last module/lesson the user was on)
+app.post("/user-position", async (c) => {
+  try {
+    const { userId, moduleId, lessonId, moduleTitle, lessonTitle } = await c.req.json();
+    const positionData = { userId, moduleId, lessonId, moduleTitle: moduleTitle || '', lessonTitle: lessonTitle || '', savedAt: new Date().toISOString() };
+    await kv.set(`user_position_${userId}`, positionData);
+    return c.json({ success: true, data: positionData });
+  } catch (error) {
+    return c.json({ success: false, error: String(error) }, 500);
+  }
+});
+
+app.get("/user-position/:userId", async (c) => {
+  try {
+    const { userId } = c.req.param();
+    const position = await kv.get(`user_position_${userId}`);
+    return c.json({ success: true, data: position });
+  } catch (error) {
+    return c.json({ success: false, error: String(error) }, 500);
+  }
+});
+
 // DATABASE ENDPOINTS - Test real Supabase database connection
 app.get("/db/test", database.testDatabaseConnection);
 app.get("/db/students", database.getAllStudents);

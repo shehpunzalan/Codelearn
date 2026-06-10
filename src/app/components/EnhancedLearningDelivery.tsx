@@ -41,13 +41,14 @@ interface EnhancedLearningDeliveryProps {
   onOpenReadingContent?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
   onOpenAudioLecture?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
   onOpenInteractiveGame?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
+  onQuizComplete?: (stats: { totalQuestions: number; correctAnswers: number; accuracy: number; passed: boolean }) => void;
 }
 
 type LearningMode = 'read' | 'video' | 'interactive';
 
-export function EnhancedLearningDelivery({ 
-  moduleId, 
-  lessonId, 
+export function EnhancedLearningDelivery({
+  moduleId,
+  lessonId,
   lessonTitle,
   lessonContent,
   onComplete,
@@ -55,7 +56,8 @@ export function EnhancedLearningDelivery({
   onOpenVideoTutorial,
   onOpenReadingContent,
   onOpenAudioLecture,
-  onOpenInteractiveGame
+  onOpenInteractiveGame,
+  onQuizComplete
 }: EnhancedLearningDeliveryProps) {
   const [selectedMode, setSelectedMode] = useState<LearningMode>('read');
   const [isPlaying, setIsPlaying] = useState(false);
@@ -1100,17 +1102,23 @@ export function EnhancedLearningDelivery({
                       correct++;
                     }
                   });
+                  const total = quizQuestions.length;
+                  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                  const passed = accuracy >= 70;
+
                   setQuizScore(correct);
                   setQuizSubmitted(true);
-                  
-                  // Mark section as completed if passed (70% or higher)
-                  if ((correct / quizQuestions.length) * 100 >= 70) {
+
+                  if (passed) {
                     const newCompleted = new Set(completedSections);
                     newCompleted.add(learningSections[currentSection].id);
                     setCompletedSections(newCompleted);
-                    toast.success(`🎉 Quiz Passed! You scored ${correct}/${quizQuestions.length}`);
+                    toast.success(`🎉 Quiz Passed! You scored ${correct}/${total}`);
+                    // Notify parent so lesson can be marked complete
+                    onQuizComplete?.({ totalQuestions: total, correctAnswers: correct, accuracy, passed });
                   } else {
-                    toast.error(`Quiz score: ${correct}/${quizQuestions.length}. You need 70% to pass.`);
+                    toast.error(`Quiz score: ${correct}/${total}. You need 70% to pass.`);
+                    onQuizComplete?.({ totalQuestions: total, correctAnswers: correct, accuracy, passed });
                   }
                 };
 

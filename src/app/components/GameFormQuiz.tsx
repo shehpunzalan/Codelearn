@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -40,6 +40,17 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
   const [bestStreak, setBestStreak] = useState(0);
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+
+  // Keep synchronous totals for the final question. React state updates are
+  // async, so reading state immediately after the last answer used to drop
+  // that answer from the final score and prevented lessons/modules completing.
+  const quizTotalsRef = useRef({
+    correctCount: 0,
+    incorrectCount: 0,
+    totalXP: 0,
+    bestStreak: 0,
+    totalTimeSpent: 0,
+  });
 
   // Current question with shuffled options
   const [currentShuffledQuestion, setCurrentShuffledQuestion] = useState<Challenge | null>(null);
@@ -109,13 +120,18 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
       const streakBonus = newStreak >= 3 ? newStreak * 10 : 0;
       const totalEarnedXP = baseXP + streakBonus;
       
-      setCorrectCount(prev => prev + 1);
+      const nextCorrectCount = quizTotalsRef.current.correctCount + 1;
+      const nextTotalXP = quizTotalsRef.current.totalXP + totalEarnedXP;
+      const nextBestStreak = Math.max(quizTotalsRef.current.bestStreak, newStreak);
+
+      quizTotalsRef.current.correctCount = nextCorrectCount;
+      quizTotalsRef.current.totalXP = nextTotalXP;
+      quizTotalsRef.current.bestStreak = nextBestStreak;
+
+      setCorrectCount(nextCorrectCount);
       setCurrentStreak(newStreak);
-      setTotalXP(prev => prev + totalEarnedXP);
-      
-      if (newStreak > bestStreak) {
-        setBestStreak(newStreak);
-      }
+      setTotalXP(nextTotalXP);
+      setBestStreak(nextBestStreak);
 
       // Dynamic success messages based on streak
       if (newStreak >= 5) {
@@ -135,7 +151,10 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
         });
       }
     } else {
-      setIncorrectCount(prev => prev + 1);
+      const nextIncorrectCount = quizTotalsRef.current.incorrectCount + 1;
+      quizTotalsRef.current.incorrectCount = nextIncorrectCount;
+
+      setIncorrectCount(nextIncorrectCount);
       setCurrentStreak(0);
       
       toast.error('❌ Incorrect!', {
@@ -146,7 +165,9 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
 
     // Track time spent on this question
     const questionTime = (Date.now() - questionStartTime) / 1000;
-    setTotalTimeSpent(prev => prev + questionTime);
+    const nextTotalTimeSpent = quizTotalsRef.current.totalTimeSpent + questionTime;
+    quizTotalsRef.current.totalTimeSpent = nextTotalTimeSpent;
+    setTotalTimeSpent(nextTotalTimeSpent);
   };
 
   const nextQuestion = () => {
@@ -166,14 +187,15 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
   };
 
   const finishQuiz = () => {
+    const totals = quizTotalsRef.current;
     const stats: QuizStats = {
       totalQuestions: questions.length,
-      correctAnswers: correctCount,
-      incorrectAnswers: incorrectCount,
-      totalXP,
-      streak: bestStreak,
-      accuracy: Math.round((correctCount / questions.length) * 100),
-      timeSpent: Math.round(totalTimeSpent)
+      correctAnswers: totals.correctCount,
+      incorrectAnswers: totals.incorrectCount,
+      totalXP: totals.totalXP,
+      streak: totals.bestStreak,
+      accuracy: Math.round((totals.correctCount / questions.length) * 100),
+      timeSpent: Math.round(totals.totalTimeSpent)
     };
 
     onComplete(stats);

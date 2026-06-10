@@ -25,9 +25,9 @@ import { DataViewer } from './components/DataViewer';
 import { ConnectionTest } from './components/ConnectionTest';
 import { DatabaseTest } from './components/DatabaseTest';
 import { toast, Toaster } from 'sonner';
-import { seedDemoStudents } from './utils/demoStudents';
 import * as backendApi from './services/backendApi';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { getUserStats } from './utils/storage';
 
 // CodeLearn AI - Neural Network Pattern Recognition System for Java OOP
 function AppContent() {
@@ -38,21 +38,39 @@ function AppContent() {
   const [user, setUser] = useState<User | null>(null);
   const [showLogin, setShowLogin] = useState(true);
   const [currentView, setCurrentView] = useState('dashboard');
+  const [resumePrompt, setResumePrompt] = useState<{ moduleId: string; lessonId: string; moduleTitle: string; lessonTitle: string } | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [selectedLessonTitle, setSelectedLessonTitle] = useState<string>('');
   const [selectedLessonContent, setSelectedLessonContent] = useState<any>(null);
-  const [modules, setModules] = useState<Module[]>(mockModules);
+  const [modules, setModules] = useState<Module[]>(() => {
+    // Restore persisted progress on top of mock data so progress survives page reloads
+    return mockModules.map(m => {
+      try {
+        const saved = localStorage.getItem(`moduleProgress_${m.id}`);
+        if (saved) {
+          const { progress, completedLessons } = JSON.parse(saved);
+          return { ...m, progress, completedLessons };
+        }
+      } catch {}
+      return m;
+    });
+  });
   const [editorRefreshKey, setEditorRefreshKey] = useState(0); // Force refresh of code editor
   const [isCheckingSession, setIsCheckingSession] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Seed demo students on initial load
   useEffect(() => {
-    console.log('🎬 Initializing app...');
-    seedDemoStudents();
+    // Remove any previously seeded demo users so the dashboard only shows real registrations
+    try {
+      const usersRaw = localStorage.getItem('registeredUsers');
+      if (usersRaw) {
+        const users = JSON.parse(usersRaw);
+        const realUsers = users.filter((u: any) => !u.id?.startsWith('student-2014-'));
+        localStorage.setItem('registeredUsers', JSON.stringify(realUsers));
+      }
+    } catch {}
     setIsInitialized(true);
-    console.log('✅ App initialized');
   }, []);
 
   // Check for existing session on mount
@@ -128,10 +146,25 @@ function AppContent() {
     checkSession();
   }, []);
 
-  const handleLogin = (loggedInUser: User) => {
+  const handleLogin = async (loggedInUser: User) => {
     setUser(loggedInUser);
     setCurrentView('dashboard');
     setShowLogin(false);
+    // Fetch last saved position and prompt to resume (skip for demo accounts)
+    const token = localStorage.getItem('accessToken');
+    if (token && token !== 'demo-token-student' && token !== 'demo-token-instructor') {
+      try {
+        const res = await backendApi.getUserPosition(loggedInUser.id);
+        if (res?.data?.moduleId && res?.data?.lessonId) {
+          setResumePrompt({
+            moduleId: res.data.moduleId,
+            lessonId: res.data.lessonId,
+            moduleTitle: res.data.moduleTitle || 'Module',
+            lessonTitle: res.data.lessonTitle || 'Lesson',
+          });
+        }
+      } catch (_) { /* silently ignore – backend may not have a saved position */ }
+    }
   };
 
   const handleRegister = (newUser: User) => {
@@ -175,17 +208,67 @@ function AppContent() {
     setCurrentView('module');
   };
 
+  /** Persist the user's current lesson position to the backend so they can resume later. */
+  const savePosition = (moduleId: string, lessonId: string) => {
+    if (!user) return;
+    const mod = modules.find(m => m.id === moduleId);
+    const lesson = mod?.lessons.find(l => l.id === lessonId);
+    backendApi.saveUserPosition({
+      userId: user.id,
+      moduleId,
+      lessonId,
+      moduleTitle: mod?.title,
+      lessonTitle: lesson?.title,
+    });
+  };
+
   const handleLessonComplete = (moduleId: string, completedCount: number, total: number) => {
     const progress = Math.round((completedCount / total) * 100);
+    // Persist so progress survives navigation / reload
+    localStorage.setItem(`moduleProgress_${moduleId}`, JSON.stringify({ progress, completedLessons: completedCount }));
     setModules(prev => prev.map(m =>
       m.id === moduleId ? { ...m, progress, completedLessons: completedCount } : m
     ));
+    // Keep UserStats in sync so the dashboard counter is accurate
+    if (user) syncUserStats(user.id);
   };
 
   const handleModuleComplete = (moduleId: string) => {
-    setModules(prev => prev.map(m =>
-      m.id === moduleId ? { ...m, progress: 100, completedLessons: m.totalLessons } : m
-    ));
+    setModules(prev => {
+      const updated = prev.map(m => {
+        if (m.id === moduleId) {
+          localStorage.setItem(`moduleProgress_${moduleId}`, JSON.stringify({ progress: 100, completedLessons: m.totalLessons }));
+          return { ...m, progress: 100, completedLessons: m.totalLessons };
+        }
+        return m;
+      });
+      // Sync stats after state is committed
+      if (user) setTimeout(() => syncUserStats(user.id), 0);
+      return updated;
+    });
+  };
+
+  /** Write a current snapshot of module progress into UserStats localStorage so the dashboard reads it. */
+  const syncUserStats = (userId: string) => {
+    const allModuleProgress = mockModules.map(m => {
+      try {
+        const saved = localStorage.getItem(`moduleProgress_${m.id}`);
+        return saved ? { ...m, ...JSON.parse(saved) } : m;
+      } catch { return m; }
+    });
+    const completedModules = allModuleProgress.filter(m => m.progress === 100).map(m => m.id);
+    const totalLessonsCompleted = allModuleProgress.reduce((s, m) => s + (m.completedLessons || 0), 0);
+
+    const existing = getUserStats(userId);
+    const updated = {
+      ...(existing ?? {}),
+      userId,
+      totalLessonsCompleted,
+      totalModulesCompleted: completedModules.length,
+      completedModules,
+      lastActiveDate: new Date().toISOString(),
+    };
+    localStorage.setItem(`stats_${userId}`, JSON.stringify(updated));
   };
 
   const handleNextModule = () => {
@@ -204,7 +287,8 @@ function AppContent() {
     setSelectedModuleId(moduleId);
     setSelectedLessonId(lessonId);
     setCurrentView('code-editor');
-    setEditorRefreshKey(prevKey => prevKey + 1); // Force refresh of code editor
+    setEditorRefreshKey(prevKey => prevKey + 1);
+    savePosition(moduleId, lessonId);
   };
 
   const handleOpenVideoTutorial = (moduleId: string, lessonId: string, lessonTitle: string) => {
@@ -212,6 +296,7 @@ function AppContent() {
     setSelectedLessonId(lessonId);
     setSelectedLessonTitle(lessonTitle);
     setCurrentView('video-tutorial');
+    savePosition(moduleId, lessonId);
   };
 
   const handleOpenReadingContent = (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => {
@@ -220,6 +305,7 @@ function AppContent() {
     setSelectedLessonTitle(lessonTitle);
     setSelectedLessonContent(lessonContent);
     setCurrentView('learning-path-reading');
+    savePosition(moduleId, lessonId);
   };
 
   const handleOpenAudioLecture = (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => {
@@ -228,6 +314,7 @@ function AppContent() {
     setSelectedLessonTitle(lessonTitle);
     setSelectedLessonContent(lessonContent);
     setCurrentView('audio-lecture');
+    savePosition(moduleId, lessonId);
   };
 
   const handleOpenInteractiveGame = (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => {
@@ -236,6 +323,7 @@ function AppContent() {
     setSelectedLessonTitle(lessonTitle);
     setSelectedLessonContent(lessonContent);
     setCurrentView('interactive-game');
+    savePosition(moduleId, lessonId);
   };
 
   const handleUpdateProfile = (updatedUser: User) => {
@@ -307,6 +395,74 @@ function AppContent() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50">
+      {resumePrompt && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '1.5rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg, 12px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            padding: '1rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            maxWidth: '480px',
+            width: 'calc(100vw - 2rem)',
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontWeight: 600, color: 'var(--foreground)', fontSize: '0.95rem' }}>
+              Resume where you left off?
+            </p>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted-foreground)', fontSize: '0.82rem' }}>
+              {resumePrompt.moduleTitle} &rsaquo; {resumePrompt.lessonTitle}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const mod = modules.find(m => m.id === resumePrompt.moduleId);
+              if (mod) {
+                setSelectedModuleId(resumePrompt.moduleId);
+                setCurrentView('module');
+              }
+              setResumePrompt(null);
+            }}
+            style={{
+              background: 'var(--primary)',
+              color: 'var(--primary-foreground)',
+              border: 'none',
+              borderRadius: 'var(--radius-md, 8px)',
+              padding: '0.45rem 1rem',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Resume
+          </button>
+          <button
+            onClick={() => setResumePrompt(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--muted-foreground)',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              lineHeight: 1,
+              padding: '0 0.25rem',
+            }}
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <Header
         user={user} 
         currentView={currentView}
@@ -357,6 +513,7 @@ function AppContent() {
             onLessonComplete={handleLessonComplete}
             onModuleComplete={handleModuleComplete}
             onNextModule={modules.findIndex(m => m.id === selectedModuleId) < modules.length - 1 ? handleNextModule : undefined}
+            onLessonOpen={savePosition}
           />
         )}
 

@@ -409,8 +409,69 @@ export async function getLeaderboard(moduleId?: string) {
 }
 
 export async function getUserRank(userId: string, moduleId?: string) {
-  const endpoint = moduleId 
+  const endpoint = moduleId
     ? `/leaderboard/rank/${userId}?moduleId=${moduleId}`
     : `/leaderboard/rank/${userId}`;
   return apiRequest(endpoint);
+}
+
+// ============================================
+// USER POSITION (resume last lesson)
+// localStorage-first with optional backend sync
+// ============================================
+export async function saveUserPosition(data: {
+  userId: string;
+  moduleId: string;
+  lessonId: string;
+  moduleTitle?: string;
+  lessonTitle?: string;
+}) {
+  // Always save to localStorage immediately
+  const positionData = { ...data, savedAt: new Date().toISOString() };
+  try {
+    localStorage.setItem(`userPosition_${data.userId}`, JSON.stringify(positionData));
+  } catch {}
+  // Fire-and-forget backend sync — swallow any errors silently
+  try {
+    const url = `${API_BASE_URL}/user-position`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
+      body: JSON.stringify(data),
+    });
+    if (response.ok) {
+      const text = await response.text();
+      try { JSON.parse(text); } catch {}
+    }
+  } catch {}
+}
+
+export async function getUserPosition(userId: string): Promise<{ data: { moduleId: string; lessonId: string; moduleTitle?: string; lessonTitle?: string } | null }> {
+  // Try localStorage first — it's always available
+  try {
+    const local = localStorage.getItem(`userPosition_${userId}`);
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (parsed?.moduleId && parsed?.lessonId) {
+        return { data: parsed };
+      }
+    }
+  } catch {}
+  // Attempt backend as fallback — silently fail
+  try {
+    const url = `${API_BASE_URL}/user-position/${userId}`;
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
+    });
+    if (response.ok) {
+      const text = await response.text();
+      try {
+        const json = JSON.parse(text);
+        if (json?.data?.moduleId && json?.data?.lessonId) {
+          return { data: json.data };
+        }
+      } catch {}
+    }
+  } catch {}
+  return { data: null };
 }
