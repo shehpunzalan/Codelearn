@@ -7,6 +7,7 @@ import { EnhancedLearningDelivery } from './EnhancedLearningDelivery';
 import { GameFormQuiz } from './GameFormQuiz';
 import { QuizResultsPage } from './QuizResultsPage';
 import { toast } from 'sonner';
+import { saveProgress } from '../utils/storage';
 import type { Module } from '../types';
 
 interface LessonViewerProps {
@@ -23,7 +24,18 @@ interface LessonViewerProps {
   onNextModule?: () => void;
 }
 
-export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutorial, onOpenReadingContent, onOpenAudioLecture, onOpenInteractiveGame, onLessonComplete, onModuleComplete, onNextModule }: LessonViewerProps) {
+export function LessonViewer({
+  module,
+  onBack,
+  onStartCoding,
+  onOpenVideoTutorial,
+  onOpenReadingContent,
+  onOpenAudioLecture,
+  onOpenInteractiveGame,
+  onLessonComplete,
+  onModuleComplete,
+  onNextModule
+}: LessonViewerProps) {
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showQuizResults, setShowQuizResults] = useState(false);
@@ -36,32 +48,70 @@ export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutoria
     } catch { return new Set(); }
   });
 
-  // Find the currently selected lesson from the module's lessons array
   const selectedLesson = module.lessons.find(lesson => lesson.id === selectedLessonId);
+
+  // Get current user ID for saveProgress
+  const getCurrentUserId = (): string => {
+    try {
+      const currentUser = localStorage.getItem('currentUser');
+      return currentUser ? JSON.parse(currentUser).id : 'guest';
+    } catch { return 'guest'; }
+  };
+
+  // Central function: mark a lesson complete, persist, and notify App.tsx
+  const markLessonComplete = (lessonId: string, score: number = 100) => {
+    const newCompleted = new Set(completedLessons);
+    newCompleted.add(lessonId);
+    setCompletedLessons(newCompleted);
+
+    // Persist to localStorage
+    localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...newCompleted]));
+
+    // Save to storage.ts so stats and instructor dashboard update too
+    saveProgress({
+      userId: getCurrentUserId(),
+      moduleId: module.id,
+      lessonId,
+      completed: true,
+      score,
+      attempts: 1,
+      lastAttempt: new Date().toISOString(),
+      code: '',
+      feedback: '',
+      timeSpent: 0,
+    });
+
+    // Notify App.tsx so module.progress updates in state
+    onLessonComplete?.(module.id, newCompleted.size, module.lessons.length);
+
+    // If all lessons done, fire module complete
+    if (newCompleted.size === module.lessons.length) {
+      onModuleComplete?.(module.id);
+      setShowModuleComplete(true);
+    }
+  };
 
   // Quiz handlers
   const handleQuizComplete = (stats: any) => {
     setQuizStats(stats);
     setShowQuiz(false);
     setShowQuizResults(true);
-    
+
     // Save quiz results
-    const quizData = {
-      lessonId: selectedLessonId,
-      moduleId: module.id,
-      stats,
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem(`quiz_${module.id}_${selectedLessonId}`, JSON.stringify(quizData));
-    
-    // Mark lesson as completed if passed
-    if (stats.accuracy >= 70) {
-      const newCompleted = new Set(completedLessons);
-      newCompleted.add(selectedLessonId!);
-      setCompletedLessons(newCompleted);
-      localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...newCompleted]));
+    localStorage.setItem(
+      `quiz_${module.id}_${selectedLessonId}`,
+      JSON.stringify({
+        lessonId: selectedLessonId,
+        moduleId: module.id,
+        stats,
+        timestamp: new Date().toISOString(),
+      })
+    );
+
+    // Mark lesson complete if passed
+    if (stats.accuracy >= 70 && selectedLessonId) {
+      markLessonComplete(selectedLessonId, Math.round(stats.accuracy));
       toast.success('🎉 Quiz Passed! Lesson Completed!');
-      onLessonComplete?.(module.id, newCompleted.size, module.lessons.length);
     }
   };
 
@@ -187,6 +237,17 @@ export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutoria
         </div>
       </div>
 
+      {/* Module progress bar */}
+      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+        <div
+          className="h-2 rounded-full bg-blue-500 transition-all"
+          style={{ width: `${Math.round((completedLessons.size / module.lessons.length) * 100)}%` }}
+        />
+      </div>
+      <p className="text-sm text-gray-500 mb-4">
+        {completedLessons.size} of {module.lessons.length} lessons completed
+      </p>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Lessons Sidebar */}
         <Card className="border-0 shadow-md lg:col-span-1">
@@ -235,13 +296,45 @@ export function LessonViewer({ module, onBack, onStartCoding, onOpenVideoTutoria
                 lessonContent={selectedLesson.content}
                 onStartCoding={onStartCoding}
                 onComplete={() => {
-                  toast.success('📚 Lesson content reviewed!');
+                  // Mark lesson complete when the user finishes reading/watching content
+                  if (!completedLessons.has(selectedLesson.id)) {
+                    markLessonComplete(selectedLesson.id, 100);
+                    toast.success('📚 Lesson completed!');
+                  } else {
+                    toast.success('📚 Lesson content reviewed!');
+                  }
+
+                  // Auto-open quiz if available
+                  if (selectedLesson.content.quiz && selectedLesson.content.quiz.length > 0) {
+                    setTimeout(() => setShowQuiz(true), 800);
+                  }
                 }}
                 onOpenVideoTutorial={onOpenVideoTutorial}
                 onOpenReadingContent={onOpenReadingContent}
                 onOpenAudioLecture={onOpenAudioLecture}
                 onOpenInteractiveGame={onOpenInteractiveGame}
               />
+
+              {/* Quiz button — shown when lesson has a quiz */}
+              {selectedLesson.content.quiz && selectedLesson.content.quiz.length > 0 && (
+                <Card className="border-2 border-orange-200 bg-amber-50">
+                  <CardContent className="p-6 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-gray-900 mb-1">Knowledge Check</h3>
+                      <p className="text-sm text-gray-600">
+                        {selectedLesson.content.quiz.length} questions · 70% to pass
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => setShowQuiz(true)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                    >
+                      <Trophy className="w-4 h-4 mr-2" />
+                      Take Quiz
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           ) : (
             <Card className="border-0 shadow-md h-full">
