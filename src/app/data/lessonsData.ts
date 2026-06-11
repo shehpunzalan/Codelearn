@@ -5,7 +5,7 @@ export const module1Lessons: Lesson[] = [
     id: 'lesson1-1',
     title: 'Introduction to Java',
     duration: '15 min',
-    completed: true,
+    completed: false,
     locked: false,
     content: {
       introduction: 'Java is a high-level, class-based, object-oriented programming language designed to have as few implementation dependencies as possible. It was developed by James Gosling at Sun Microsystems and released in 1995.',
@@ -104,7 +104,7 @@ export const module1Lessons: Lesson[] = [
     id: 'lesson1-2',
     title: 'Variables and Data Types',
     duration: '20 min',
-    completed: true,
+    completed: false,
     locked: false,
     content: {
       introduction: 'Variables are containers for storing data values. In Java, every variable must be declared with a data type. Java has two categories of data types: primitive types and reference types.',

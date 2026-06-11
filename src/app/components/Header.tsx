@@ -135,53 +135,76 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
 
   // Role-specific navigation items based on use case diagram
   const studentNavItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'modules', label: 'Learning Modules', icon: BookOpen },
-    { id: 'progress', label: 'Performance Monitoring', icon: TrendingUp },
+    { id: 'dashboard', label: 'Home', icon: Home },
+    { id: 'modules', label: 'Modules', icon: BookOpen },
+    { id: 'progress', label: 'Progress', icon: TrendingUp },
   ];
 
   const instructorNavItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'course-management', label: 'Course Management', icon: BookOpen },
+    { id: 'dashboard', label: 'Home', icon: Home },
+    { id: 'course-management', label: 'Courses', icon: BookOpen },
     { id: 'monitoring', label: 'Monitoring', icon: Code },
   ];
 
   const navItems = user.role === 'student' ? studentNavItems : instructorNavItems;
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <header
+      style={{
+        background: 'var(--card)',
+        borderBottom: '1px solid var(--border)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo and Brand */}
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Brain className="w-6 h-6 text-white" />
+          {/* Logo — clicking it goes Home */}
+          <button
+            onClick={() => onNavigate('dashboard')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            <div style={{ background: 'var(--primary)', padding: '0.45rem', borderRadius: 'var(--radius-md, 8px)', display: 'flex', alignItems: 'center' }}>
+              <Brain style={{ width: 22, height: 22, color: 'var(--primary-foreground)' }} />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">CodeLearn AI</h1>
-              <p className="text-xs text-gray-500">Neural Network Powered Learning</p>
+            <div style={{ textAlign: 'left' }}>
+              <p style={{ margin: 0, fontWeight: 700, color: 'var(--foreground)', fontSize: '1rem', lineHeight: 1.2 }}>CodeLearn AI</p>
+              <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.7rem' }}>Neural Network Powered</p>
             </div>
-          </div>
+          </button>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentView === item.id || 
+              const isActive = currentView === item.id ||
                 (currentView === 'module' && item.id === 'modules') ||
                 (currentView === 'lesson' && item.id === 'modules');
-              
+
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.45rem 0.85rem',
+                    borderRadius: 'var(--radius-md, 8px)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: isActive ? 700 : 500,
+                    background: isActive ? 'var(--accent)' : 'transparent',
+                    color: isActive ? 'var(--primary)' : 'var(--muted-foreground)',
+                    transition: 'background 0.15s, color 0.15s',
+                  }}
+                  onMouseEnter={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.background = 'var(--muted)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--foreground)'; } }}
+                  onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted-foreground)'; } }}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon style={{ width: 16, height: 16 }} />
                   <span>{item.label}</span>
                 </button>
               );
@@ -191,8 +214,8 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
           {/* User Menu */}
           <div className="flex items-center gap-3">
             <div className="hidden sm:block text-right">
-              <p className="text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+              <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--foreground)' }}>{user.name}</p>
+              <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--muted-foreground)', textTransform: 'capitalize' }}>{user.role}</p>
             </div>
             
             {/* Notification Bell - Students Only */}

@@ -222,13 +222,44 @@ export function LessonViewer({
 
     return (
       <div style={{ fontFamily: 'var(--font-sans)' }}>
-        {/* Back nav */}
-        <button
-          onClick={() => setScreen('list')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-600)', fontFamily: 'var(--font-sans)', fontWeight: 500, marginBottom: '1.25rem', padding: '0.25rem 0', fontSize: '0.95rem' }}
+        {/* Sticky back bar for lesson content — always reachable without scrolling */}
+        <div
+          style={{
+            position: 'sticky',
+            top: 64,
+            zIndex: 40,
+            background: 'var(--background)',
+            borderBottom: '1px solid var(--border)',
+            padding: '0.6rem 0',
+            marginBottom: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+          }}
         >
-          <ArrowLeft size={16} /> Back to Lessons
-        </button>
+          <button
+            onClick={() => setScreen('list')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', fontFamily: 'var(--font-sans)', fontWeight: 600, padding: '0.35rem 0.75rem', fontSize: '0.875rem', borderRadius: 'var(--radius-md, 8px)' }}
+          >
+            <ArrowLeft size={15} /> Lesson List
+          </button>
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--muted-foreground)', overflow: 'hidden' }}>
+            <span>Modules</span>
+            <ChevronRight size={12} />
+            <span>{module.title}</span>
+            <ChevronRight size={12} />
+            <span style={{ color: 'var(--foreground)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeLesson.title}</span>
+          </div>
+          {/* Quick quiz shortcut */}
+          <button
+            onClick={startQuiz}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--primary)', color: 'var(--primary-foreground)', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontWeight: 600, padding: '0.35rem 0.85rem', fontSize: '0.78rem', borderRadius: 'var(--radius-md, 8px)', whiteSpace: 'nowrap' }}
+          >
+            <Play size={13} /> Take Quiz
+          </button>
+        </div>
 
         {/* Lesson header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -336,25 +367,51 @@ export function LessonViewer({
   // ── Lesson List (default) ────────────────────────────────────────────────────
   return (
     <div style={{ fontFamily: 'var(--font-sans)' }}>
-      {/* Back */}
-      <button
-        onClick={onBack}
-        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-600)', fontFamily: 'var(--font-sans)', fontWeight: 500, marginBottom: '1.25rem', padding: '0.25rem 0', fontSize: '0.95rem' }}
+      {/* ── Sticky breadcrumb / back bar ── */}
+      <div
+        style={{
+          position: 'sticky',
+          top: 64, // below the 64px app header
+          zIndex: 40,
+          background: 'var(--background)',
+          borderBottom: '1px solid var(--border)',
+          padding: '0.6rem 0',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+        }}
       >
-        <ArrowLeft size={16} /> Back to Modules
-      </button>
+        <button
+          onClick={onBack}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', fontFamily: 'var(--font-sans)', fontWeight: 600, padding: '0.35rem 0.75rem', fontSize: '0.875rem', borderRadius: 'var(--radius-md, 8px)' }}
+        >
+          <ArrowLeft size={15} /> Back to Modules
+        </button>
+        {/* Breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--muted-foreground)' }}>
+          <span>Modules</span>
+          <ChevronRight size={12} />
+          <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>{module.title}</span>
+        </div>
+        {/* Progress pill */}
+        <span style={{ background: 'var(--accent)', color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', whiteSpace: 'nowrap' }}>
+          {completedLessons.size}/{module.lessons.length} done
+        </span>
+      </div>
 
       {/* Module header */}
       <div style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span style={{ backgroundColor: 'var(--color-primary-600)', color: '#fff', fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)' }}>
+          <span style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)' }}>
             Module {module.id.replace('mod', '')}
           </span>
-          <h1 style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '1.875rem', margin: 0 }}>
+          <h1 style={{ color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '1.625rem', margin: 0 }}>
             {module.title}
           </h1>
         </div>
-        <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-sans)', margin: 0 }}>{module.description}</p>
+        <p style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)', margin: 0 }}>{module.description}</p>
       </div>
 
       {/* Progress bar */}
@@ -381,8 +438,19 @@ export function LessonViewer({
         </p>
       </div>
 
-      {/* Lessons list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* Lessons list — scrollable so the page doesn't grow endlessly */}
+      <div
+        style={{
+          maxHeight: 'calc(100vh - 260px)',
+          overflowY: 'auto',
+          paddingRight: '0.25rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--border) transparent',
+        }}
+      >
         {module.lessons.map((lesson, index) => {
           const isCompleted = completedLessons.has(lesson.id) || lesson.completed;
           const isLocked = lesson.locked;

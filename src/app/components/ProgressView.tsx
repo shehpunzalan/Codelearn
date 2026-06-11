@@ -2,740 +2,559 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { 
-  TrendingUp, Target, Award, CalendarDays, Activity, Timer, Keyboard, 
-  Zap, Code, Brain, CheckCircle, Flame, Trophy
+import {
+  TrendingUp, Target, Award, CalendarDays, Activity,
+  Zap, Brain, CheckCircle, Flame, Trophy, BookOpen, BarChart2
 } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { ScrollArea } from './ui/scroll-area';
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts';
 import { mockModules } from '../data/mockData';
-import { getUserStats, getAllProgress, getAllSubmissions } from '../utils/storage';
+import { getUserStats } from '../utils/storage';
 
 interface ProgressViewProps {
   onBack: () => void;
 }
 
-interface PerformanceMetrics {
-  totalTimeSpent: number;
-  totalKeystrokes: number;
-  totalSubmissions: number;
-  averageSessionTime: number;
-  codingStreak: number;
-  lastActiveDate: string;
+// Mapping from moduleId → OOP topic label
+const MODULE_TOPICS: Record<string, string> = {
+  mod1: 'Java Fundamentals',
+  mod2: 'Classes & Objects',
+  mod3: 'Encapsulation',
+  mod4: 'Inheritance',
+  mod5: 'Polymorphism',
+  mod6: 'Abstraction',
+  mod7: 'Interfaces',
+  mod8: 'Exceptions',
+  mod9: 'Collections',
+  mod10: 'Advanced OOP',
+};
+
+interface ModuleStats {
+  id: string;
+  title: string;
+  topic: string;
+  avgScore: number;
+  completedLessons: number;
+  totalLessons: number;
+  progress: number;
+  quizzesTaken: number;
+}
+
+interface WeeklyPoint {
+  week: string;
+  score: number;
+  quizzes: number;
 }
 
 export function ProgressView({ onBack }: ProgressViewProps) {
-  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics>({
-    totalTimeSpent: 0,
-    totalKeystrokes: 0,
-    totalSubmissions: 0,
-    averageSessionTime: 0,
-    codingStreak: 7,
-    lastActiveDate: new Date().toISOString()
-  });
+  const [userId, setUserId] = useState<string | null>(null);
+  const [moduleStats, setModuleStats] = useState<ModuleStats[]>([]);
+  const [weeklyData, setWeeklyData] = useState<WeeklyPoint[]>([]);
+  const [totalCompleted, setTotalCompleted] = useState(0);
+  const [totalLessons, setTotalLessons] = useState(0);
+  const [completedModules, setCompletedModules] = useState(0);
+  const [averageScore, setAverageScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [totalQuizzes, setTotalQuizzes] = useState(0);
 
-  // Load performance data from localStorage
   useEffect(() => {
-    // Get current user
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) return;
-    
-    const user = JSON.parse(currentUser);
-    const userStats = getUserStats(user.id);
-    const allSubmissions = getAllSubmissions(user.id);
-    
-    let totalTime = 0;
-    let totalKeys = 0;
-    let totalSubs = allSubmissions.length;
-    
-    // Calculate from actual submissions
-    const allProgress = getAllProgress(user.id);
-    allProgress.forEach((progress: any) => {
-      totalTime += progress.timeSpent || 0;
+    // ── 1. Get current user ──────────────────────────────────────────────────
+    let uid: string | null = null;
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (raw) uid = JSON.parse(raw)?.id ?? null;
+    } catch {}
+    setUserId(uid);
+
+    // ── 2. Read streak from stats store ──────────────────────────────────────
+    if (uid) {
+      const stats = getUserStats(uid);
+      setStreak(stats?.streak ?? 0);
+    }
+
+    // ── 3. Collect all quiz_* entries ────────────────────────────────────────
+    //   Written by LessonViewerSimple as: quiz_${moduleId}_${lessonId}
+    //   Shape: { lessonId, moduleId, stats: { accuracy, ... }, timestamp }
+    const quizByModule: Record<string, number[]> = {}; // moduleId → [accuracy]
+    const allQuizTimestamps: { ts: number; score: number }[] = [];
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith('quiz_')) continue;
+      try {
+        const entry = JSON.parse(localStorage.getItem(key)!);
+        const score = entry?.stats?.accuracy ?? 0;
+        const modId = entry?.moduleId as string;
+        const ts = entry?.timestamp ? new Date(entry.timestamp).getTime() : 0;
+        if (modId) {
+          if (!quizByModule[modId]) quizByModule[modId] = [];
+          quizByModule[modId].push(score);
+        }
+        if (ts) allQuizTimestamps.push({ ts, score });
+      } catch {}
+    }
+
+    // ── 4. Build per-module stats ─────────────────────────────────────────────
+    let sumScores = 0;
+    let countScores = 0;
+    let totalCompleted = 0;
+    let completedModCount = 0;
+    const totalLessonsAll = mockModules.reduce((s, m) => s + m.totalLessons, 0);
+
+    const modStats: ModuleStats[] = mockModules.map(m => {
+      // Real lesson completion from localStorage
+      let completedLessonsCount = 0;
+      let progress = 0;
+      try {
+        const saved = localStorage.getItem(`moduleProgress_${m.id}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          completedLessonsCount = parsed.completedLessons ?? 0;
+          progress = parsed.progress ?? 0;
+        }
+      } catch {}
+
+      totalCompleted += completedLessonsCount;
+      if (progress === 100) completedModCount++;
+
+      const scores = quizByModule[m.id] ?? [];
+      const avgScore = scores.length > 0
+        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+        : 0;
+
+      if (scores.length > 0) {
+        sumScores += scores.reduce((a, b) => a + b, 0);
+        countScores += scores.length;
+      }
+
+      return {
+        id: m.id,
+        title: m.title,
+        topic: MODULE_TOPICS[m.id] ?? m.title,
+        avgScore,
+        completedLessons: completedLessonsCount,
+        totalLessons: m.totalLessons,
+        progress,
+        quizzesTaken: scores.length,
+      };
     });
 
-    const avgSessionTime = totalSubs > 0 ? Math.round(totalTime / totalSubs) : 0;
+    setModuleStats(modStats);
+    setTotalCompleted(totalCompleted);
+    setTotalLessons(totalLessonsAll);
+    setCompletedModules(completedModCount);
+    setAverageScore(countScores > 0 ? Math.round(sumScores / countScores) : 0);
+    setTotalQuizzes(Object.values(quizByModule).reduce((s, arr) => s + arr.length, 0));
 
-    setPerformanceMetrics({
-      totalTimeSpent: totalTime,
-      totalKeystrokes: totalKeys,
-      totalSubmissions: totalSubs,
-      averageSessionTime: avgSessionTime,
-      codingStreak: 7,
-      lastActiveDate: new Date().toISOString()
-    });
+    // ── 5. Build last-6-weeks chart ───────────────────────────────────────────
+    const now = Date.now();
+    const weeks: WeeklyPoint[] = [];
+    for (let w = 5; w >= 0; w--) {
+      const start = now - (w + 1) * 7 * 86400000;
+      const end   = now - w * 7 * 86400000;
+      const inWindow = allQuizTimestamps.filter(q => q.ts >= start && q.ts < end);
+      const weekLabel = w === 0 ? 'This week'
+        : w === 1 ? 'Last week'
+        : `${w + 1}w ago`;
+      weeks.push({
+        week: weekLabel,
+        score: inWindow.length > 0
+          ? Math.round(inWindow.reduce((s, q) => s + q.score, 0) / inWindow.length)
+          : 0,
+        quizzes: inWindow.length,
+      });
+    }
+    setWeeklyData(weeks);
   }, []);
 
-  // Calculate overall statistics
-  const calculateOverallStats = () => {
-    const allSubmissions = JSON.parse(localStorage.getItem('allSubmissions') || '[]');
-    const averageScore = allSubmissions.length > 0
-      ? Math.round(allSubmissions.reduce((sum: number, s: any) => sum + s.score, 0) / allSubmissions.length)
-      : 0;
-    
-    const modules = mockModules;
-    const totalLessons = modules.reduce((sum, m) => sum + m.totalLessons, 0);
-    // Calculate total completed lessons across all modules
-    const completedLessons = modules.reduce((sum, module) => sum + module.completedLessons, 0);
-    
-    // Count modules with 100% completion
-    const completedModules = modules.filter(module => module.progress === 100).length;
-    
-    return {
-      averageScore,
-      totalLessons,
-      completedLessons,
-      totalModules: modules.length,
-      completedModules
-    };
-  };
+  // ── Derived chart data ──────────────────────────────────────────────────────
+  // OOP principles bar chart — modules that have quizzes taken
+  const oopChartData = moduleStats
+    .filter(m => m.quizzesTaken > 0 || m.completedLessons > 0)
+    .slice(0, 7)
+    .map(m => ({ principle: m.topic.replace('Java ', '').replace(' & Objects', ''), score: m.avgScore || m.progress }));
 
-  const stats = calculateOverallStats();
+  // Pie chart: mastered / proficient / learning / not started
+  const mastered   = moduleStats.filter(m => m.avgScore >= 80 && m.quizzesTaken > 0).length;
+  const proficient = moduleStats.filter(m => m.avgScore >= 60 && m.avgScore < 80 && m.quizzesTaken > 0).length;
+  const learning   = moduleStats.filter(m => m.avgScore > 0  && m.avgScore < 60 && m.quizzesTaken > 0).length;
+  const notStarted = moduleStats.filter(m => m.quizzesTaken === 0 && m.completedLessons === 0).length;
 
-  // Weekly Progress Data
-  const weeklyData = [
-    { id: 'w1', week: 'Week 1', score: 68, time: 3.2 },
-    { id: 'w2', week: 'Week 2', score: 72, time: 4.1 },
-    { id: 'w3', week: 'Week 3', score: 78, time: 3.8 },
-    { id: 'w4', week: 'Week 4', score: 82, time: 4.5 },
-    { id: 'w5', week: 'Week 5', score: 88, time: 3.9 },
-    { id: 'w6', week: 'Week 6', score: 92, time: 4.2 },
-  ];
+  const pieData = [
+    { name: 'Mastered (≥80%)',   value: mastered,   color: 'var(--success)' },
+    { name: 'Proficient (60–79%)', value: proficient, color: 'var(--primary)' },
+    { name: 'Learning (<60%)',    value: learning,   color: 'var(--warning)' },
+    { name: 'Not Started',        value: notStarted, color: 'var(--muted-foreground)' },
+  ].filter(d => d.value > 0);
 
-  // OOP Principles Mastery Data
-  const oopPrinciplesData = [
-    { id: 'oop1', principle: 'Classes', score: 95 },
-    { id: 'oop2', principle: 'Encapsulation', score: 85 },
-    { id: 'oop3', principle: 'Inheritance', score: 78 },
-    { id: 'oop4', principle: 'Polymorphism', score: 72 },
-    { id: 'oop5', principle: 'Abstraction', score: 68 },
-    { id: 'oop6', principle: 'Interfaces', score: 60 },
-  ];
-
-  // Topic Mastery Distribution
-  const topicDistributionData = [
-    { id: 'mastered', name: 'Mastered', value: 40, color: '#10B981' },
-    { id: 'proficient', name: 'Proficient', value: 35, color: '#3B82F6' },
-    { id: 'learning', name: 'Learning', value: 25, color: '#F59E0B' },
-  ];
-
-  // Java OOP Achievements
+  // Achievements — all based on real data
   const achievements = [
     {
       id: 1,
-      title: 'First Java Class',
-      description: 'Create your first class',
-      date: 'Feb 15, 2024',
+      title: 'First Quiz Passed',
+      description: 'Score ≥70% on any lesson quiz',
       icon: '🎯',
-      color: 'bg-yellow-100',
-      unlocked: true
+      unlocked: totalQuizzes > 0 && averageScore >= 70,
     },
     {
       id: 2,
-      title: 'OOP Master',
-      description: 'Master all OOP modules',
-      date: stats.completedModules === stats.totalModules ? 'Feb 20, 2024' : 'Locked',
-      icon: '🎯',
-      color: 'bg-blue-100',
-      unlocked: stats.completedModules === stats.totalModules
+      title: 'Module Complete',
+      description: 'Finish all lessons in a module',
+      icon: '📦',
+      unlocked: completedModules >= 1,
     },
     {
       id: 3,
-      title: 'Perfect Score',
-      description: 'Score 100% on assignment',
-      date: stats.averageScore >= 100 ? 'Feb 25, 2024' : 'Locked',
-      icon: '💯',
-      color: 'bg-pink-100',
-      unlocked: stats.averageScore >= 100
+      title: 'OOP Master',
+      description: 'Complete all 10 modules',
+      icon: '🏆',
+      unlocked: completedModules >= 10,
     },
     {
       id: 4,
-      title: 'Fast Learner',
-      description: 'Complete 5 lessons in a day',
-      date: 'Mar 01, 2024',
+      title: 'High Scorer',
+      description: 'Achieve ≥80% average across all quizzes',
+      icon: '💯',
+      unlocked: averageScore >= 80,
+    },
+    {
+      id: 5,
+      title: 'Learning Streak',
+      description: 'Maintain a 3-day streak',
+      icon: '🔥',
+      unlocked: streak >= 3,
+    },
+    {
+      id: 6,
+      title: 'Quiz Champion',
+      description: 'Complete 10 or more quizzes',
       icon: '⚡',
-      color: 'bg-yellow-100',
-      unlocked: true
+      unlocked: totalQuizzes >= 10,
     },
   ];
 
-  // Format time
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
+  const completionPct = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
+
+  const tooltipStyle = {
+    backgroundColor: 'var(--card)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md, 8px)',
+    fontSize: '12px',
+    color: 'var(--foreground)',
   };
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6, 1.5rem)' }}>
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Badge className="bg-purple-600 text-white px-3 py-1">CCS108</Badge>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <Button variant="outline" size="sm" onClick={onBack}>← Back</Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Progress & Performance</h1>
-          <p className="text-gray-600">Track your learning journey and performance metrics powered by AI</p>
+          <h1 style={{ margin: 0, color: 'var(--foreground)' }} className="text-2xl font-bold">
+            Progress & Performance
+          </h1>
+          <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.875rem' }}>
+            Your real-time learning data for CCS108
+          </p>
         </div>
       </div>
 
-      {/* ============================================ */}
-      {/* LEARNING PROGRESS SECTION */}
-      {/* ============================================ */}
-      <Card className="border-2 border-blue-200 shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Activity className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Learning Progress</h2>
-            <Badge className="bg-blue-600 text-white ml-auto">CCS108 - Java OOP</Badge>
-          </div>
+      {/* ── Summary Stats ── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          {
+            icon: <Award style={{ width: 28, height: 28, color: 'var(--primary-foreground)' }} />,
+            label: 'Avg Quiz Score',
+            value: `${averageScore}%`,
+            sub: totalQuizzes > 0 ? `from ${totalQuizzes} quizzes` : 'No quizzes yet',
+            bg: 'linear-gradient(135deg, var(--primary), var(--brand-blue-dark, #1e40af))',
+            fg: 'var(--primary-foreground)',
+          },
+          {
+            icon: <CheckCircle style={{ width: 28, height: 28, color: 'var(--success-foreground)' }} />,
+            label: 'Lessons Done',
+            value: `${totalCompleted}/${totalLessons}`,
+            sub: `${completionPct}% complete`,
+            bg: 'linear-gradient(135deg, var(--success), #15803d)',
+            fg: 'var(--success-foreground)',
+          },
+          {
+            icon: <BookOpen style={{ width: 28, height: 28, color: 'var(--secondary-foreground)' }} />,
+            label: 'Modules Done',
+            value: `${completedModules}/${mockModules.length}`,
+            sub: completedModules > 0 ? 'Great progress!' : 'Keep going!',
+            bg: 'linear-gradient(135deg, var(--secondary), var(--brand-purple-dark, #7e22ce))',
+            fg: 'var(--secondary-foreground)',
+          },
+          {
+            icon: <Flame style={{ width: 28, height: 28, color: 'var(--warning-foreground)' }} />,
+            label: 'Day Streak',
+            value: `${streak}`,
+            sub: streak > 0 ? '🔥 Keep it up!' : 'Start today!',
+            bg: 'linear-gradient(135deg, var(--warning), #dc2626)',
+            fg: 'var(--warning-foreground)',
+          },
+        ].map((card, i) => (
+          <Card key={i} className="border-0 shadow-md" style={{ background: card.bg }}>
+            <CardContent className="p-5">
+              <div style={{ marginBottom: 8 }}>{card.icon}</div>
+              <p style={{ margin: '0 0 2px', color: card.fg, fontSize: '0.8rem', fontWeight: 500 }}>{card.label}</p>
+              <p style={{ margin: 0, color: card.fg, fontSize: '1.75rem', fontWeight: 700 }}>{card.value}</p>
+              <p style={{ margin: '4px 0 0', color: card.fg, fontSize: '0.72rem', opacity: 0.8 }}>{card.sub}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-          {/* Learning Overview Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Award className="w-5 h-5 text-blue-600" />
-                <p className="text-xs text-gray-700 font-medium">Average Score</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{stats.averageScore}%</p>
-              <p className="text-xs text-gray-600 mt-1">Overall performance</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Target className="w-5 h-5 text-green-600" />
-                <p className="text-xs text-gray-700 font-medium">Lessons Completed</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{stats.completedLessons}/{stats.totalLessons}</p>
-              <p className="text-xs text-gray-600 mt-1">{Math.round((stats.completedLessons / stats.totalLessons) * 100)}% complete</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="w-5 h-5 text-purple-600" />
-                <p className="text-xs text-gray-700 font-medium">Modules Completed</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{stats.completedModules}/{stats.totalModules}</p>
-              <p className="text-xs text-gray-600 mt-1">Learning modules</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Flame className="w-5 h-5 text-orange-600" />
-                <p className="text-xs text-gray-700 font-medium">Current Streak</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{performanceMetrics.codingStreak}</p>
-              <p className="text-xs text-gray-600 mt-1">Days active</p>
-            </div>
-          </div>
-
-          {/* Learning Progress Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Weekly Progress Trend */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-base font-bold text-gray-900 mb-4">Weekly Score Trend</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                  <CartesianGrid key="grid" strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis
-                    key="xaxis"
-                    dataKey="week"
-                    tick={{ fontSize: 11 }}
-                    stroke="#6B7280"
-                  />
-                  <YAxis
-                    key="yaxis"
-                    domain={[0, 100]}
-                    tick={{ fontSize: 11 }}
-                    stroke="#6B7280"
-                  />
-                  <Tooltip
-                    key="tooltip"
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #E5E7EB',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Line
-                    key="line"
-                    type="monotone"
-                    dataKey="score"
-                    name="Score"
-                    stroke="#3B82F6"
-                    strokeWidth={2}
-                    dot={{ fill: '#3B82F6', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-              <div className="mt-3 bg-blue-50 rounded-lg p-3">
-                <p className="text-xs text-gray-900">
-                  📈 <span className="font-semibold">27-point improvement</span> detected by neural network over 6 weeks
-                </p>
-              </div>
-            </div>
-
-            {/* OOP Principles Mastery */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-base font-bold text-gray-900 mb-4">OOP Principles Mastery</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={oopPrinciplesData} layout="vertical" margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <CartesianGrid key="grid" strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
-                  <XAxis
-                    key="xaxis"
-                    type="number"
-                    domain={[0, 100]}
-                    tick={{ fontSize: 11 }}
-                    stroke="#6B7280"
-                  />
-                  <YAxis
-                    key="yaxis"
-                    type="category"
-                    dataKey="principle"
-                    tick={{ fontSize: 11 }}
-                    stroke="#6B7280"
-                    width={90}
-                  />
-                  <Tooltip
-                    key="tooltip"
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #E5E7EB',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Bar key="bar" dataKey="score" name="Mastery" fill="#8B5CF6" radius={[0, 8, 8, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="mt-3 bg-purple-50 rounded-lg p-3">
-                <p className="text-xs text-gray-900">
-                  💡 <span className="font-semibold">Focus on Polymorphism and Abstraction</span> for balanced OOP knowledge
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ============================================ */}
-      {/* AI PATTERN RECOGNITION METRICS SECTION */}
-      {/* ============================================ */}
-      <Card className="border-2 border-indigo-200 shadow-lg bg-gradient-to-br from-indigo-50 to-purple-50">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Brain className="w-6 h-6 text-indigo-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Neural Network Pattern Recognition</h2>
-            <Badge className="bg-indigo-600 text-white ml-auto">AI-Powered Analysis</Badge>
-          </div>
-
-          {/* Pattern Recognition Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg p-4 border-2 border-purple-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">🔍</span>
-                <p className="text-xs text-gray-700 font-medium">Patterns Detected</p>
-              </div>
-              <p className="text-3xl font-bold text-purple-700">189</p>
-              <p className="text-xs text-gray-600 mt-1">Across all modules</p>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 border-2 border-blue-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">💻</span>
-                <p className="text-xs text-gray-700 font-medium">Code Examples</p>
-              </div>
-              <p className="text-3xl font-bold text-blue-700">235</p>
-              <p className="text-xs text-gray-600 mt-1">Practical samples</p>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 border-2 border-green-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">✅</span>
-                <p className="text-xs text-gray-700 font-medium">OOP Principles</p>
-              </div>
-              <p className="text-3xl font-bold text-green-700">28</p>
-              <p className="text-xs text-gray-600 mt-1">Concepts identified</p>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 border-2 border-orange-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">🎯</span>
-                <p className="text-xs text-gray-700 font-medium">Recognition Rate</p>
-              </div>
-              <p className="text-3xl font-bold text-orange-700">94%</p>
-              <p className="text-xs text-gray-600 mt-1">Accuracy score</p>
-            </div>
-          </div>
-
-          {/* Module-wise Pattern Analysis */}
-          <div className="bg-white rounded-lg p-5 border border-gray-200 mb-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Code className="w-5 h-5 text-indigo-600" />
-              Module Pattern Analysis
-            </h3>
-            <div className="space-y-3">
-              {mockModules.slice(0, 6).map((module, idx) => (
-                <div key={module.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900 text-sm">{module.title}</p>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <span className="font-semibold text-purple-700">🔍 {module.patternMetrics?.patternsDetected || 0}</span> patterns
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="font-semibold text-blue-700">💻 {module.patternMetrics?.codeExamples || 0}</span> examples
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-1 max-w-xs">
-                    {module.patternMetrics?.oopPrinciples?.slice(0, 2).map((principle, pidx) => (
-                      <Badge key={pidx} className="text-xs px-2 py-0 bg-indigo-100 text-indigo-700 border-indigo-200">
-                        {principle}
-                      </Badge>
-                    ))}
-                    {(module.patternMetrics?.oopPrinciples?.length || 0) > 2 && (
-                      <Badge className="text-xs px-2 py-0 bg-gray-100 text-gray-600">
-                        +{(module.patternMetrics?.oopPrinciples?.length || 0) - 2}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* AI Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg p-4 border border-purple-200">
-              <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <span>🧠</span> Neural Network Insights
-              </h4>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 mt-0.5">✓</span>
-                  <span><strong>Strong:</strong> Class structure and encapsulation patterns</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 mt-0.5">✓</span>
-                  <span><strong>Good:</strong> Constructor usage and method organization</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-600 mt-0.5">→</span>
-                  <span><strong>Improve:</strong> Inheritance hierarchies and polymorphic behavior</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-600 mt-0.5">→</span>
-                  <span><strong>Practice:</strong> Abstract classes and interface implementations</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 border border-blue-200">
-              <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <span>📊</span> Pattern Recognition Sources
-              </h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
-                  <div className="flex items-center gap-2">
-                    <Badge className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 border-purple-200">
-                      🧠 AI Neural Network
-                    </Badge>
-                    <span className="text-sm text-gray-700">4 modules</span>
-                  </div>
-                  <span className="text-sm font-semibold text-purple-700">87 patterns</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-green-50 rounded border border-green-100">
-                  <div className="flex items-center gap-2">
-                    <Badge className="text-xs px-2 py-0.5 bg-green-100 text-green-700 border-green-200">
-                      👨‍🏫 Instructor
-                    </Badge>
-                    <span className="text-sm text-gray-700">4 modules</span>
-                  </div>
-                  <span className="text-sm font-semibold text-green-700">51 patterns</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-orange-50 rounded border border-orange-100">
-                  <div className="flex items-center gap-2">
-                    <Badge className="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 border-orange-200">
-                      📖 Curriculum
-                    </Badge>
-                    <span className="text-sm text-gray-700">3 modules</span>
-                  </div>
-                  <span className="text-sm font-semibold text-orange-700">39 patterns</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-100">
-                  <div className="flex items-center gap-2">
-                    <Badge className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 border-blue-200">
-                      🤖 AI Generated
-                    </Badge>
-                    <span className="text-sm text-gray-700">1 module</span>
-                  </div>
-                  <span className="text-sm font-semibold text-blue-700">14 patterns</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ============================================ */}
-      {/* PERFORMANCE ANALYTICS SECTION */}
-      {/* ============================================ */}
-      <Card className="border-2 border-purple-200 shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <TrendingUp className="w-6 h-6 text-purple-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Performance Analytics</h2>
-            <Badge className="bg-purple-600 text-white ml-auto">Real-Time Tracking</Badge>
-          </div>
-
-          {/* Performance Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Timer className="w-5 h-5 text-blue-600" />
-                <p className="text-xs text-gray-700 font-medium">Total Study Time</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatTime(performanceMetrics.totalTimeSpent)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">Across all sessions</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Keyboard className="w-5 h-5 text-green-600" />
-                <p className="text-xs text-gray-700 font-medium">Total Keystrokes</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">
-                {performanceMetrics.totalKeystrokes.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">Code typing activity</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Code className="w-5 h-5 text-purple-600" />
-                <p className="text-xs text-gray-700 font-medium">Code Submissions</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">
-                {performanceMetrics.totalSubmissions}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">Total assignments</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-5 h-5 text-orange-600" />
-                <p className="text-xs text-gray-700 font-medium">Avg Session Time</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatTime(performanceMetrics.averageSessionTime)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">Per coding session</p>
-            </div>
-          </div>
-
-          {/* Performance Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-5 border border-blue-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Timer className="w-6 h-6 text-blue-600" />
-                <p className="text-sm font-semibold text-gray-900">Study Pattern</p>
-              </div>
-              <p className="text-sm text-gray-900">
-                {performanceMetrics.codingStreak >= 5 
-                  ? '🔥 You\'re on fire! Excellent consistency'
-                  : 'Keep building your learning streak'}
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-5 border border-green-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="w-6 h-6 text-green-600" />
-                <p className="text-sm font-semibold text-gray-900">Code Quality</p>
-              </div>
-              <p className="text-sm text-gray-900">
-                {stats.averageScore >= 80
-                  ? '⭐ Outstanding code quality maintained'
-                  : 'Focus on OOP principles for better scores'}
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-5 border border-purple-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-6 h-6 text-purple-600" />
-                <p className="text-sm font-semibold text-gray-900">Coding Velocity</p>
-              </div>
-              <p className="text-sm text-gray-900">
-                {performanceMetrics.totalKeystrokes > 5000
-                  ? '🚀 High coding velocity detected'
-                  : 'Building momentum with practice'}
-              </p>
-            </div>
-          </div>
-
-          {/* AI-Powered Performance Insights */}
-          <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-5 border-2 border-purple-300">
-            <div className="flex items-center gap-2 mb-4">
-              <Brain className="w-6 h-6 text-purple-600" />
-              <h3 className="text-lg font-bold text-gray-900">AI-Powered Performance Insights</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
-                <p className="text-sm text-gray-900">You excel at class structures and constructors. Keep it up!</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
-                <p className="text-sm text-gray-900">Consider reviewing encapsulation principles for better scores</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
-                <p className="text-sm text-gray-900">Your coding efficiency has improved by 15% this week</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ============================================ */}
-      {/* ADDITIONAL ANALYTICS */}
-      {/* ============================================ */}
+      {/* ── Charts Row ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Topic Mastery Distribution */}
+        {/* Weekly Quiz Score */}
         <Card className="border-0 shadow-md">
           <CardContent className="p-6">
-            <h3 className="text-base font-bold text-gray-900 mb-4">Topic Mastery Distribution</h3>
-            <div className="flex items-center justify-center">
-              <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={topicDistributionData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      paddingAngle={2}
-                      dataKey="value"
-                      nameKey="name"
-                    >
-                      {topicDistributionData.map((entry, index) => (
-                        <Cell key={`cell-${entry.id}-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+              <TrendingUp style={{ width: 20, height: 20, color: 'var(--primary)' }} />
+              <h3 style={{ margin: 0, color: 'var(--foreground)' }} className="text-base font-bold">
+                Weekly Quiz Scores
+              </h3>
             </div>
-            <div className="grid grid-cols-3 gap-3 mt-3">
-              <div className="text-center bg-white rounded-lg p-2 border border-gray-200">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <p className="text-lg font-bold text-gray-900">40%</p>
-                </div>
-                <p className="text-xs text-gray-600">Mastered</p>
+            {weeklyData.every(w => w.quizzes === 0) ? (
+              <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', textAlign: 'center' }}>
+                  Complete lessons and pass quizzes to see your weekly trend here.
+                </p>
               </div>
-              <div className="text-center bg-white rounded-lg p-2 border border-gray-200">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <p className="text-lg font-bold text-gray-900">35%</p>
-                </div>
-                <p className="text-xs text-gray-600">Proficient</p>
-              </div>
-              <div className="text-center bg-white rounded-lg p-2 border border-gray-200">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                  <p className="text-lg font-bold text-gray-900">25%</p>
-                </div>
-                <p className="text-xs text-gray-600">Learning</p>
-              </div>
-            </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                  <CartesianGrid key="grid" strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis key="xaxis" dataKey="week" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} stroke="var(--border)" />
+                  <YAxis key="yaxis" domain={[0, 100]} tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} stroke="var(--border)" />
+                  <Tooltip key="tooltip" contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, 'Avg Score']} />
+                  <Line key="line" type="monotone" dataKey="score" name="Score" stroke="var(--primary)" strokeWidth={2} dot={{ fill: 'var(--primary)', r: 4 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+            <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
+              {weeklyData.filter(w => w.quizzes > 0).length} active weeks out of last 6
+            </p>
           </CardContent>
         </Card>
 
-        {/* Java OOP Achievements */}
+        {/* OOP Mastery Per Module */}
         <Card className="border-0 shadow-md">
           <CardContent className="p-6">
-            <h3 className="text-base font-bold text-gray-900 mb-4">Java OOP Achievements</h3>
-              <ScrollArea className="h-[200px]">
-                <div className="space-y-2 pr-4">
-                  {achievements.map((achievement) => (
-                    <div 
-                      key={achievement.id}
-                      className={`flex items-center gap-3 p-2 rounded-lg border ${
-                        achievement.unlocked 
-                          ? 'bg-yellow-50 border-yellow-400' 
-                          : 'bg-gray-100 border-gray-300 opacity-60'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${achievement.color} text-xl`}>
-                        {achievement.unlocked ? achievement.icon : '🔒'}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm text-gray-900">{achievement.title}</h4>
-                        <p className="text-xs text-gray-600">{achievement.description}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{achievement.date}</p>
-                      </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+              <BarChart2 style={{ width: 20, height: 20, color: 'var(--secondary)' }} />
+              <h3 style={{ margin: 0, color: 'var(--foreground)' }} className="text-base font-bold">
+                Module Quiz Scores
+              </h3>
+            </div>
+            {oopChartData.length === 0 ? (
+              <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', textAlign: 'center' }}>
+                  Take quizzes to see your module performance here.
+                </p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={oopChartData} layout="vertical" margin={{ top: 5, right: 10, left: 5, bottom: 5 }}>
+                  <CartesianGrid key="grid" strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                  <XAxis key="xaxis" type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} stroke="var(--border)" />
+                  <YAxis key="yaxis" type="category" dataKey="principle" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} stroke="var(--border)" width={80} />
+                  <Tooltip key="tooltip" contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, 'Score']} />
+                  <Bar key="bar" dataKey="score" name="Score" fill="var(--secondary)" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── Module Progress Cards ── */}
+      <Card className="border-0 shadow-md">
+        <CardContent className="p-6">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+            <Activity style={{ width: 20, height: 20, color: 'var(--primary)' }} />
+            <h3 style={{ margin: 0, color: 'var(--foreground)' }} className="text-base font-bold">
+              Module-by-Module Progress
+            </h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {moduleStats.map(mod => (
+              <div key={mod.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {/* Title */}
+                <div style={{ width: 180, minWidth: 180 }}>
+                  <p style={{ margin: 0, fontWeight: 600, color: 'var(--foreground)', fontSize: '0.85rem' }}>{mod.title}</p>
+                  <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.72rem' }}>
+                    {mod.completedLessons}/{mod.totalLessons} lessons
+                    {mod.quizzesTaken > 0 ? ` · ${mod.avgScore}% avg` : ' · No quizzes'}
+                  </p>
+                </div>
+                {/* Progress bar */}
+                <div style={{ flex: 1, height: 8, background: 'var(--muted)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${mod.progress}%`,
+                    background: mod.progress === 100 ? 'var(--success)'
+                      : mod.progress > 0 ? 'var(--primary)'
+                      : 'var(--muted)',
+                    borderRadius: 4,
+                    transition: 'width 0.4s ease',
+                  }} />
+                </div>
+                {/* Percentage */}
+                <div style={{ width: 44, textAlign: 'right' }}>
+                  <span style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: mod.progress === 100 ? 'var(--success)'
+                      : mod.progress > 0 ? 'var(--primary)'
+                      : 'var(--muted-foreground)',
+                  }}>
+                    {mod.progress}%
+                  </span>
+                </div>
+                {/* Badge */}
+                {mod.progress === 100 && (
+                  <Badge className="text-xs" style={{ background: 'var(--success)', color: 'var(--success-foreground)', border: 'none' }}>
+                    Done
+                  </Badge>
+                )}
+                {mod.progress > 0 && mod.progress < 100 && (
+                  <Badge className="text-xs" style={{ background: 'var(--accent)', color: 'var(--accent-foreground)', border: 'none' }}>
+                    In Progress
+                  </Badge>
+                )}
+                {mod.progress === 0 && (
+                  <Badge className="text-xs" style={{ background: 'var(--muted)', color: 'var(--muted-foreground)', border: 'none' }}>
+                    Not Started
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Topic Distribution + Achievements ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Pie chart */}
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+              <Target style={{ width: 20, height: 20, color: 'var(--primary)' }} />
+              <h3 style={{ margin: 0, color: 'var(--foreground)' }} className="text-base font-bold">
+                Module Mastery Distribution
+              </h3>
+            </div>
+            {pieData.length === 0 ? (
+              <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem' }}>
+                  Complete quizzes to see your mastery breakdown.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={2}
+                        dataKey="value"
+                        nameKey="name"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${entry.name}-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} modules`, '']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
+                  {pieData.map(entry => (
+                    <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: entry.color, flexShrink: 0 }} />
+                      <span style={{ color: 'var(--muted-foreground)', fontSize: '0.78rem', flex: 1 }}>{entry.name}</span>
+                      <span style={{ color: 'var(--foreground)', fontSize: '0.78rem', fontWeight: 600 }}>{entry.value}</span>
                     </div>
                   ))}
                 </div>
-            </ScrollArea>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Achievements */}
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+              <Trophy style={{ width: 20, height: 20, color: '#ca8a04' }} />
+              <h3 style={{ margin: 0, color: 'var(--foreground)' }} className="text-base font-bold">
+                Achievements
+              </h3>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              {achievements.map(a => (
+                <div
+                  key={a.id}
+                  style={{
+                    padding: '0.75rem',
+                    borderRadius: 'var(--radius-md, 8px)',
+                    border: `1px solid ${a.unlocked ? 'var(--success)' : 'var(--border)'}`,
+                    background: a.unlocked ? 'color-mix(in srgb, var(--success) 8%, var(--card))' : 'var(--muted)',
+                    opacity: a.unlocked ? 1 : 0.6,
+                  }}
+                >
+                  <div style={{ fontSize: '1.4rem', marginBottom: 4 }}>{a.icon}</div>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, color: 'var(--foreground)', fontSize: '0.78rem' }}>{a.title}</p>
+                  <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.7rem' }}>{a.description}</p>
+                  {a.unlocked && (
+                    <Badge className="mt-1 text-xs" style={{ background: 'var(--success)', color: 'var(--success-foreground)', border: 'none' }}>
+                      ✓ Unlocked
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* ============================================ */}
-      {/* PROGRESS SUMMARY */}
-      {/* ============================================ */}
-      <Card className="border-0 shadow-md bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* ── Overall Completion Bar ── */}
+      <Card className="border-0 shadow-md" style={{ background: 'linear-gradient(135deg, var(--accent), #dbeafe)' }}>
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Trophy className="w-6 h-6 text-yellow-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Progress Summary</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Zap style={{ width: 20, height: 20, color: 'var(--primary)' }} />
+              <h3 style={{ margin: 0, color: 'var(--foreground)' }} className="text-base font-bold">
+                Overall Course Completion
+              </h3>
+            </div>
+            <span style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '1.1rem' }}>{completionPct}%</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-                <p className="text-sm font-semibold text-gray-900">Overall Average</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{stats.averageScore}%</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Target className="w-5 h-5 text-blue-600" />
-                <p className="text-sm font-semibold text-gray-900">Lessons Completed</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{stats.completedLessons}/{stats.totalLessons}</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Award className="w-5 h-5 text-purple-600" />
-                <p className="text-sm font-semibold text-gray-900">Achievements</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{achievements.filter(achievement => achievement.unlocked).length}</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-              <div className="flex items-center gap-2 mb-2">
-                <CalendarDays className="w-5 h-5 text-orange-600" />
-                <p className="text-sm font-semibold text-gray-900">Days Active</p>
-              </div>
-              <p className="text-3xl font-bold text-gray-900">42</p>
-            </div>
+          <div style={{ height: 12, background: 'var(--card)', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <div style={{
+              height: '100%',
+              width: `${completionPct}%`,
+              background: completionPct === 100
+                ? 'var(--success)'
+                : 'linear-gradient(90deg, var(--primary), var(--secondary))',
+              borderRadius: 6,
+              transition: 'width 0.5s ease',
+            }} />
           </div>
+          <p style={{ margin: '0.5rem 0 0', color: 'var(--muted-foreground)', fontSize: '0.8rem' }}>
+            {totalCompleted} of {totalLessons} lessons completed across {mockModules.length} modules
+          </p>
         </CardContent>
       </Card>
-
-      {/* Back Button */}
-      <div className="flex justify-start">
-        <Button onClick={onBack} variant="outline" className="gap-2">
-          ← Back to Dashboard
-        </Button>
-      </div>
     </div>
   );
 }

@@ -70,6 +70,39 @@ function AppContent() {
         localStorage.setItem('registeredUsers', JSON.stringify(realUsers));
       }
     } catch {}
+
+    // One-time fix: remove falsely pre-completed lesson1-1 and lesson1-2
+    // that were seeded by hardcoded `completed: true` in lessonsData.ts (now fixed).
+    const fixKey = 'v2_lesson_defaults_fixed';
+    if (!localStorage.getItem(fixKey)) {
+      // Clear completedLessons entries that contain lesson1-1 or lesson1-2 if they
+      // were never earned via a real quiz (no matching quiz_ entry exists).
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('completedLessons_mod1')) {
+          try {
+            const arr: string[] = JSON.parse(localStorage.getItem(key)!);
+            const hasRealQuiz1 = !!localStorage.getItem('quiz_mod1_lesson1-1');
+            const hasRealQuiz2 = !!localStorage.getItem('quiz_mod1_lesson1-2');
+            const cleaned = arr.filter(id =>
+              (id !== 'lesson1-1' || hasRealQuiz1) &&
+              (id !== 'lesson1-2' || hasRealQuiz2)
+            );
+            if (cleaned.length !== arr.length) {
+              localStorage.setItem(key, JSON.stringify(cleaned));
+              // Recalculate moduleProgress for mod1
+              const mod = mockModules.find(m => m.id === 'mod1');
+              if (mod) {
+                const pct = Math.round((cleaned.length / mod.totalLessons) * 100);
+                localStorage.setItem('moduleProgress_mod1', JSON.stringify({ progress: pct, completedLessons: cleaned.length }));
+              }
+            }
+          } catch {}
+        }
+      }
+      localStorage.setItem(fixKey, '1');
+    }
+
     setIsInitialized(true);
   }, []);
 
