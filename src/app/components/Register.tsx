@@ -138,14 +138,56 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     }
 
     setIsLoading(true);
-
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
-    // --- Step 1: Create user locally right away ---
-    const localId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // --- Step 1: Save directly to Supabase Auth ---
+    const supabaseResult = role === 'student'
+      ? await registerStudentInSupabase({
+          email: trimmedEmail, password, name: trimmedName,
+          studentId, section: department, yearLevel: '1st Year',
+        })
+      : await registerInstructorInSupabase({
+          email: trimmedEmail, password, name: trimmedName, department,
+        });
+
+    if (supabaseResult.error) {
+      // Handle known errors
+      const err = supabaseResult.error.toLowerCase();
+      if (err.includes('already registered') || err.includes('already exists') || err.includes('user already')) {
+        setErrors({ email: 'This email is already registered in Supabase.' });
+        toast.error('Email already registered', {
+          description: 'This email already has an account. Please log in instead.',
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (err.includes('failed to fetch') || err.includes('networkerror') || err.includes('fetch')) {
+        toast.error('Cannot reach Supabase', {
+          description: 'Your Supabase project may be paused. Go to supabase.com/dashboard and resume it, then try again.',
+          duration: 8000,
+        });
+        setIsLoading(false);
+        return;
+      }
+      // Other error — still fail so user knows
+      toast.error('Registration failed', { description: supabaseResult.error, duration: 6000 });
+      setIsLoading(false);
+      return;
+    }
+
+    // --- Step 2: Supabase save succeeded — use the real Supabase UUID ---
+    const supabaseUserId = supabaseResult.userId || `user_${Date.now()}`;
+
+    // Save to localStorage so the app session and instructor dashboard work
+    let existingUsers: any[] = [];
+    try {
+      const raw = localStorage.getItem('registeredUsers');
+      existingUsers = raw ? JSON.parse(raw) : [];
+    } catch (_e: unknown) { existingUsers = []; }
+
     const newUser = {
-      id: localId,
+      id: supabaseUserId,
       name: trimmedName,
       email: trimmedEmail,
       role,
@@ -153,32 +195,18 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       department: role === 'instructor' ? department : undefined,
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
       registeredAt: new Date().toISOString(),
-      pendingSync: true, // flag: not yet saved to Supabase
+      pendingSync: false,
     };
 
-    // Check for duplicate email in localStorage
-    let existingUsers: any[] = [];
-    try {
-      const raw = localStorage.getItem('registeredUsers');
-      existingUsers = raw ? JSON.parse(raw) : [];
-    } catch (_e: unknown) { existingUsers = []; }
-
-    if (existingUsers.some((u: any) => u.email === trimmedEmail)) {
-      setErrors({ email: 'This email is already registered' });
-      toast.error('Email already registered', { description: 'Please log in instead.' });
-      setIsLoading(false);
-      return;
+    if (!existingUsers.some((u: any) => u.email === trimmedEmail)) {
+      existingUsers.push(newUser);
+      localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
     }
+    localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: supabaseUserId }));
 
-    // Save to localStorage immediately
-    existingUsers.push(newUser);
-    localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
-    // Save credentials for login (hashed would be better in production)
-    localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: localId }));
-
-    // Log in the user right away
+    // --- Step 3: Log in ---
     const appUser: User = {
-      id: localId,
+      id: supabaseUserId,
       name: trimmedName,
       email: trimmedEmail,
       role,
@@ -186,50 +214,10 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     };
 
     toast.success('Registration successful!', {
-      description: `Welcome to CodeLearn AI, ${trimmedName}!`,
+      description: `Welcome to CodeLearn AI, ${trimmedName}! Account saved to Supabase.`,
     });
     setIsLoading(false);
     onRegister(appUser);
-
-    // --- Step 2: Save to Supabase Auth directly (appears in Authentication → Users) ---
-    const supabaseRegister = role === 'student'
-      ? registerStudentInSupabase({
-          email: trimmedEmail, password, name: trimmedName,
-          studentId, section: department, yearLevel: '1st Year',
-        })
-      : registerInstructorInSupabase({
-          email: trimmedEmail, password, name: trimmedName, department,
-        });
-
-    supabaseRegister.then(({ userId, error }) => {
-      if (error) {
-        console.warn('⚠️ Supabase sync failed:', error);
-        toast.warning('Saved locally only', {
-          description: `Supabase sync failed: ${error}. Account works but won't appear in Supabase dashboard.`,
-          duration: 6000,
-        });
-        return;
-      }
-      toast.info('Synced to Supabase ✓', {
-        description: `${role === 'student' ? 'Student' : 'Instructor'} account saved to Supabase Auth.`,
-        duration: 4000,
-      });
-      // Update localStorage with the real Supabase user ID
-      if (userId) {
-        try {
-          const raw = localStorage.getItem('registeredUsers');
-          const users: any[] = raw ? JSON.parse(raw) : [];
-          const idx = users.findIndex((u: any) => u.id === localId);
-          if (idx !== -1) {
-            users[idx].id = userId;
-            users[idx].pendingSync = false;
-            localStorage.setItem('registeredUsers', JSON.stringify(users));
-            localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: userId }));
-          }
-        } catch (_e: unknown) {}
-      }
-    });
-
   };
 
   const getPasswordStrength = (password: string): { strength: string; color: string; width: string } => {
