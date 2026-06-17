@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { createModuleNotification, createActivityNotification, createAnnouncementNotification } from '../utils/notifications';
 import { getAllProgress, getAllSubmissions, getUserStats } from '../utils/storage';
+import { syncBackendStudentsToLocalStorage } from '../utils/syncStudents';
 import { AllStudentsView } from './AllStudentsView';
 import { StudentDetailView } from './StudentDetailView';
 
@@ -48,6 +49,11 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
   const [needsAttention, setNeedsAttention] = useState<StudentSummary[]>([]);
 
   const totalLessons = modules.reduce((sum, m) => sum + m.totalLessons, 0);
+
+  // Fetch students from Supabase backend and merge into localStorage
+  useEffect(() => {
+    syncBackendStudentsToLocalStorage().catch(() => {});
+  }, []);
 
   useEffect(() => {
     try {

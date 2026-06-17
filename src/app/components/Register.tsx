@@ -149,12 +149,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       });
 
       if (result.success) {
-        // Also save to localStorage as fallback
+        // Save to localStorage so instructor dashboard can see this user immediately
         const newUser = {
           id: result.data.userId,
           name: name.trim(),
           email: email.trim(),
-          password: password,
           role: role,
           studentId: role === 'student' ? studentId : undefined,
           department: role === 'instructor' ? department : undefined,
@@ -164,8 +163,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
 
         const usersData = localStorage.getItem('registeredUsers');
         const registeredUsers = usersData ? JSON.parse(usersData) : [];
-        registeredUsers.push(newUser);
-        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+        // Avoid duplicate entries
+        if (!registeredUsers.some((u: any) => u.id === newUser.id)) {
+          registeredUsers.push(newUser);
+          localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+        }
 
         // Create user object for app state
         const user: User = {
@@ -187,15 +189,21 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       console.error('Registration error:', error);
       setIsLoading(false);
 
-      // Check if it's a network error (backend not deployed)
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        toast.error('Backend server unavailable', {
-          description: 'Registration requires backend deployment. Use demo accounts: student@demo.com or instructor@demo.com (password: demo123)',
-          duration: 6000,
+      const errMsg = String(error);
+      if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exists') || errMsg.toLowerCase().includes('duplicate')) {
+        toast.error('Email already registered', {
+          description: 'This email is already in use. Please log in or use a different email.',
+          duration: 5000,
+        });
+        setErrors({ email: 'This email is already registered' });
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast.error('Cannot connect to server', {
+          description: 'Please check your internet connection and try again.',
+          duration: 5000,
         });
       } else {
         toast.error('Registration failed', {
-          description: String(error) || 'Please try again or contact support.',
+          description: errMsg || 'Please try again or contact support.',
         });
       }
     }
@@ -220,23 +228,23 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
   const passwordStrength = getPasswordStrength(password);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 py-8">
+    <div className="min-h-screen flex items-center justify-center p-4 py-8" style={{ background: 'var(--background)' }}>
       <div className="w-full max-w-2xl">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-blue-600 p-4 rounded-2xl shadow-lg">
-              <Brain className="w-12 h-12 text-white" />
+            <div className="p-4 rounded-2xl shadow-lg" style={{ background: 'var(--primary)' }}>
+              <Brain className="w-12 h-12" style={{ color: 'var(--primary-foreground)' }} />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Join CodeLearn AI</h1>
-          <p className="text-gray-600">Create your account and start learning</p>
+          <h1 className="mb-2" style={{ color: 'var(--foreground)' }}>Join CodeLearn AI</h1>
+          <p style={{ color: 'var(--muted-foreground)' }}>Create your account and start learning</p>
         </div>
 
-        <Card className="shadow-xl border-0">
+        <Card className="shadow-xl" style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-bold">Register</CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardTitle style={{ color: 'var(--foreground)' }}>Register</CardTitle>
+            <CardDescription style={{ color: 'var(--muted-foreground)' }}>
               Fill in your information to create a new account
             </CardDescription>
           </CardHeader>
@@ -248,35 +256,33 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => {
-                      setRole('student');
-                      setDepartment('');
-                      setErrors({ ...errors, department: undefined });
+                    onClick={() => { setRole('student'); setDepartment(''); setErrors({ ...errors, department: undefined }); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                      padding: '0.75rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 500,
+                      border: `2px solid ${role === 'student' ? 'var(--primary)' : 'var(--border)'}`,
+                      background: role === 'student' ? 'var(--accent)' : 'var(--card)',
+                      color: role === 'student' ? 'var(--primary)' : 'var(--muted-foreground)',
+                      transition: 'all 0.15s',
                     }}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                      role === 'student'
-                        ? 'border-blue-600 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                    }`}
                   >
                     <UserIcon className="w-5 h-5" />
-                    <span className="font-medium">Student</span>
+                    <span>Student</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setRole('instructor');
-                      setStudentId('');
-                      setErrors({ ...errors, studentId: undefined });
+                    onClick={() => { setRole('instructor'); setStudentId(''); setErrors({ ...errors, studentId: undefined }); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                      padding: '0.75rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 500,
+                      border: `2px solid ${role === 'instructor' ? 'var(--primary)' : 'var(--border)'}`,
+                      background: role === 'instructor' ? 'var(--accent)' : 'var(--card)',
+                      color: role === 'instructor' ? 'var(--primary)' : 'var(--muted-foreground)',
+                      transition: 'all 0.15s',
                     }}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                      role === 'instructor'
-                        ? 'border-blue-600 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                    }`}
                   >
                     <GraduationCap className="w-5 h-5" />
-                    <span className="font-medium">Instructor</span>
+                    <span>Instructor</span>
                   </button>
                 </div>
               </div>
@@ -564,9 +570,10 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
               </div>
 
               {/* Submit Button */}
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium text-base"
+              <Button
+                type="submit"
+                className="w-full h-12 font-medium text-base"
+                style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -581,11 +588,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
 
               {/* Login Link */}
               <div className="text-center text-sm">
-                <span className="text-gray-600">Already have an account? </span>
+                <span style={{ color: 'var(--muted-foreground)' }}>Already have an account? </span>
                 <button
                   type="button"
                   onClick={onShowLogin}
-                  className="text-blue-600 font-medium hover:underline"
+                  style={{ color: 'var(--primary)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   Log In
                 </button>

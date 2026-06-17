@@ -1,12 +1,10 @@
-// Supabase Configuration
-const projectId = "hovedryqutuucipuqxca";
-const publicAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0";
+import { projectId, publicAnonKey } from '/utils/supabase/info';
 
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/server`;
+const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c61d3fdc`;
 
 // Helper to get auth token
 function getAuthToken(): string {
-  return localStorage.getItem('accessToken') || publicAnonKey;
+  return localStorage.getItem('accessToken') || (publicAnonKey as string);
 }
 
 // Helper function to make API requests
@@ -316,6 +314,10 @@ export async function deleteAssignment(assignmentId: string) {
 // ============================================
 export async function getAllStudentsAnalytics() {
   return apiRequest('/analytics/students');
+}
+
+export async function getAllRegisteredUsers() {
+  return apiRequest('/users/registered');
 }
 
 export async function getStudentAnalytics(userId: string) {

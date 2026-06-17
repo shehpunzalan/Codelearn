@@ -7,16 +7,19 @@ import * as additional from "./additionalEndpoints.ts";
 import * as aiFeedback from "./aiFeedbackAnalysis.ts";
 import * as codeSubmission from "./codeSubmissionEndpoints.ts";
 
-const app = new Hono();
-
-app.use('*', logger(console.log));
-app.use("/*", cors({
+const base = new Hono();
+base.use('*', logger(console.log));
+base.use("/*", cors({
   origin: "*",
   allowHeaders: ["Content-Type", "Authorization"],
   allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   exposeHeaders: ["Content-Length"],
   maxAge: 600,
 }));
+
+// All routes mounted under the function prefix
+const app = new Hono();
+base.route('/make-server-c61d3fdc', app);
 
 app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
 
@@ -332,6 +335,38 @@ app.get("/analytics/student/:userId", async (c) => {
   }
 });
 
+// USER POSITION (resume last lesson)
+app.post("/user-position", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { userId, moduleId, lessonId, moduleTitle, lessonTitle } = body;
+    await kv.set(`userPosition_${userId}`, { userId, moduleId, lessonId, moduleTitle, lessonTitle, savedAt: new Date().toISOString() });
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ success: false, error: String(error) }, 500);
+  }
+});
+
+app.get("/user-position/:userId", async (c) => {
+  try {
+    const { userId } = c.req.param();
+    const position = await kv.get(`userPosition_${userId}`);
+    return c.json({ success: true, data: position });
+  } catch (error) {
+    return c.json({ success: false, error: String(error) }, 500);
+  }
+});
+
+// REGISTERED USERS LIST (for instructor dashboard)
+app.get("/users/registered", async (c) => {
+  try {
+    const allProfiles = await kv.getByPrefix(`profile_`);
+    return c.json({ success: true, data: allProfiles });
+  } catch (error) {
+    return c.json({ success: false, error: String(error) }, 500);
+  }
+});
+
 // FRONTEND COMPATIBILITY ENDPOINTS
 app.get("/quiz/attempts/:userId", async (c) => {
   try {
@@ -463,4 +498,4 @@ app.post("/submissions/autosave", codeSubmission.autoSaveCodeHandler);
 app.get("/submissions/draft", codeSubmission.getDraftCodeHandler);
 app.get("/submissions/:submissionId", codeSubmission.getSubmissionHandler);
 
-Deno.serve(app.fetch);
+Deno.serve(base.fetch);
