@@ -1,51 +1,56 @@
-import { getAllRegisteredUsers } from '../services/backendApi';
+import { fetchStudentsFromSupabase, fetchInstructorsFromSupabase } from './supabaseClient';
 
 /**
- * Fetches all registered users from the Supabase backend and merges them
- * into localStorage 'registeredUsers' so instructor views stay up-to-date
- * even when students registered on different devices.
+ * Fetches all registered users directly from the Supabase KV store
+ * (student_ and instructor_ prefixed records) and merges them into
+ * localStorage 'registeredUsers' so all instructor views stay current.
  */
 export async function syncBackendStudentsToLocalStorage(): Promise<void> {
   try {
-    const result = await getAllRegisteredUsers();
-    if (!result?.data || !Array.isArray(result.data)) return;
+    const [students, instructors] = await Promise.all([
+      fetchStudentsFromSupabase(),
+      fetchInstructorsFromSupabase(),
+    ]);
 
-    const backendUsers: any[] = result.data;
-    const local: any[] = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const backendUsers = [...students, ...instructors];
+    if (backendUsers.length === 0) return;
+
+    let local: any[] = [];
+    try {
+      local = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    } catch (_e: unknown) { local = []; }
 
     const localById = new Map(local.map((u: any) => [u.id, u]));
 
-    for (const backendUser of backendUsers) {
-      const userId = backendUser.userId || backendUser.id;
-      if (!userId) continue;
-      if (!localById.has(userId)) {
-        // Add missing user from backend
-        localById.set(userId, {
-          id: userId,
-          name: backendUser.name || '',
-          email: backendUser.email || '',
-          role: backendUser.role || 'student',
-          studentId: backendUser.studentId || '',
-          department: backendUser.department || '',
-          enrolledCourses: backendUser.role === 'student' ? ['CCS108'] : [],
-          registeredAt: backendUser.createdAt || new Date().toISOString(),
-          fromBackend: true,
+    for (const bu of backendUsers) {
+      const uid = bu.userId || bu.id;
+      if (!uid) continue;
+      if (!localById.has(uid)) {
+        localById.set(uid, {
+          id: uid,
+          name: bu.name || '',
+          email: bu.email || '',
+          role: bu.role || 'student',
+          studentId: bu.studentId || '',
+          department: bu.department || '',
+          enrolledCourses: bu.enrolledCourses || (bu.role === 'student' ? ['CCS108'] : []),
+          registeredAt: bu.registeredAt || new Date().toISOString(),
+          pendingSync: false,
         });
       } else {
-        // Update existing local entry with backend data (non-destructively)
-        const existing = localById.get(userId)!;
-        localById.set(userId, {
+        const existing = localById.get(uid)!;
+        localById.set(uid, {
           ...existing,
-          name: backendUser.name || existing.name,
-          email: backendUser.email || existing.email,
-          role: backendUser.role || existing.role,
-          fromBackend: true,
+          name: bu.name || existing.name,
+          email: bu.email || existing.email,
+          role: bu.role || existing.role,
+          pendingSync: false,
         });
       }
     }
 
     localStorage.setItem('registeredUsers', JSON.stringify(Array.from(localById.values())));
-  } catch {
-    // Silently ignore — backend may not be deployed yet
+  } catch (_e: unknown) {
+    // Silently ignore — Supabase may not be accessible
   }
 }

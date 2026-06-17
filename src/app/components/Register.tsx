@@ -8,6 +8,7 @@ import { Checkbox } from './ui/checkbox';
 import { Brain, Mail, Lock, UserCircle as UserIcon, GraduationCap, Shield, FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import * as backendApi from '../services/backendApi';
+import { saveStudentToSupabase, saveInstructorToSupabase } from '../utils/supabaseClient';
 
 interface RegisterProps {
   onRegister: (user: User) => void;
@@ -190,36 +191,46 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     setIsLoading(false);
     onRegister(appUser);
 
-    // --- Step 2: Try to sync to Supabase backend in the background ---
-    backendApi.signUp({
-      email: trimmedEmail,
-      password,
-      name: trimmedName,
-      role,
-      studentId: role === 'student' ? studentId : undefined,
-      section: role === 'student' ? department : undefined,
-      yearLevel: role === 'student' ? '1st Year' : undefined,
-    }).then((result) => {
-      if (result?.data?.userId) {
-        // Update the local record with the real Supabase userId
+    // --- Step 2: Save directly to Supabase KV store (no edge function needed) ---
+    const registeredAt = new Date().toISOString();
+    const saveToSupabase = role === 'student'
+      ? saveStudentToSupabase({
+          userId: localId,
+          name: trimmedName,
+          email: trimmedEmail,
+          studentId,
+          section: department,
+          yearLevel: '1st Year',
+          registeredAt,
+        })
+      : saveInstructorToSupabase({
+          userId: localId,
+          name: trimmedName,
+          email: trimmedEmail,
+          department,
+          registeredAt,
+        });
+
+    saveToSupabase
+      .then(() => {
+        console.log(`✅ ${role} saved to Supabase (key: ${role}_${localId})`);
+        // Mark as synced in localStorage
         try {
           const raw = localStorage.getItem('registeredUsers');
           const users: any[] = raw ? JSON.parse(raw) : [];
           const idx = users.findIndex((u: any) => u.id === localId);
-          if (idx !== -1) {
-            users[idx].id = result.data.userId;
-            users[idx].pendingSync = false;
-            localStorage.setItem('registeredUsers', JSON.stringify(users));
-            // Update credentials key too
-            localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: result.data.userId }));
-          }
+          if (idx !== -1) { users[idx].pendingSync = false; localStorage.setItem('registeredUsers', JSON.stringify(users)); }
         } catch (_e: unknown) {}
-        console.log('✅ User synced to Supabase:', result.data.userId);
-      }
-    }).catch((syncErr: unknown) => {
-      // Non-blocking — user is already logged in, just note the sync failed
-      console.warn('⚠️ Background Supabase sync failed (user is still registered locally):', syncErr);
-    });
+      })
+      .catch((err: unknown) => {
+        console.warn('⚠️ Supabase direct save failed:', err);
+        // Fall back to edge function as secondary attempt
+        backendApi.signUp({ email: trimmedEmail, password, name: trimmedName, role,
+          studentId: role === 'student' ? studentId : undefined,
+          section: role === 'student' ? department : undefined,
+          yearLevel: role === 'student' ? '1st Year' : undefined,
+        }).catch(() => {});
+      });
 
   };
 
