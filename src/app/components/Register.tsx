@@ -74,12 +74,14 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     } else if (!validateEmail(email)) {
       newErrors.email = 'Please enter a valid email address';
     } else {
-      // Check if email already exists
-      const usersData = localStorage.getItem('registeredUsers');
-      const registeredUsers = usersData ? JSON.parse(usersData) : [];
-      if (registeredUsers.some((u: any) => u.email === email)) {
-        newErrors.email = 'This email is already registered';
-      }
+      // Check if email already exists locally
+      try {
+        const usersData = localStorage.getItem('registeredUsers');
+        const registeredUsers: any[] = usersData ? JSON.parse(usersData) : [];
+        if (registeredUsers.some((u: any) => u.email === email)) {
+          newErrors.email = 'This email is already registered';
+        }
+      } catch (_e: unknown) { /* ignore malformed localStorage */ }
     }
 
     // Password validation
@@ -161,8 +163,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
           registeredAt: new Date().toISOString(),
         };
 
-        const usersData = localStorage.getItem('registeredUsers');
-        const registeredUsers = usersData ? JSON.parse(usersData) : [];
+        let registeredUsers: any[] = [];
+        try {
+          const usersData = localStorage.getItem('registeredUsers');
+          registeredUsers = usersData ? JSON.parse(usersData) : [];
+        } catch (_e: unknown) { registeredUsers = []; }
         // Avoid duplicate entries
         if (!registeredUsers.some((u: any) => u.id === newUser.id)) {
           registeredUsers.push(newUser);

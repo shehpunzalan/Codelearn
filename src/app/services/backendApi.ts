@@ -7,8 +7,17 @@ function getAuthToken(): string {
   return localStorage.getItem('accessToken') || (publicAnonKey as string);
 }
 
+// Safely parse JSON from a string — never throws, returns null on failure
+function safeParseJSON(text: string): any {
+  try {
+    return JSON.parse(text);
+  } catch (_e: unknown) {
+    return null;
+  }
+}
+
 // Helper function to make API requests
-async function apiRequest(endpoint: string, options: RequestInit = {}) {
+async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
   const url = `${API_BASE_URL}${endpoint}`;
 
   const defaultHeaders: Record<string, string> = {
@@ -16,24 +25,31 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
     'Authorization': `Bearer ${getAuthToken()}`,
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers: { ...defaultHeaders, ...options.headers },
-  });
+  let response: Response;
+  let text: string;
 
-  // Safely parse the response — the server may return HTML on error
-  const text = await response.text();
-  let data: any = null;
   try {
-    data = JSON.parse(text);
-  } catch {
-    // Response was not JSON (e.g. HTML error page from Supabase)
-    console.error(`API Error (${endpoint}): Non-JSON response (${response.status}):`, text.slice(0, 200));
-    throw new Error(`Server unreachable or returned an unexpected response (HTTP ${response.status}). Please ensure the Supabase edge function is deployed.`);
+    response = await fetch(url, {
+      ...options,
+      headers: { ...defaultHeaders, ...options.headers },
+    });
+    text = await response.text();
+  } catch (networkErr: unknown) {
+    const msg = 'Cannot reach the server. Please check your connection.';
+    console.error(`API Network Error (${endpoint}):`, networkErr);
+    throw new Error(msg);
   }
 
-  if (!response.ok || !data?.success) {
-    const msg = data?.error || `API request failed: ${response.status}`;
+  const data = safeParseJSON(text);
+
+  if (data === null) {
+    // Server returned non-JSON (HTML error page, empty body, etc.)
+    console.error(`API Error (${endpoint}): non-JSON response [HTTP ${response!.status}]:`, text.slice(0, 300));
+    throw new Error(`Server returned an unexpected response (HTTP ${response!.status}). Please redeploy the Supabase edge function.`);
+  }
+
+  if (!response!.ok || data.success === false) {
+    const msg = (data && data.error) ? String(data.error) : `Request failed (HTTP ${response!.status})`;
     console.error(`API Error (${endpoint}):`, msg);
     throw new Error(msg);
   }
