@@ -141,7 +141,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
-    // --- Step 1: Save directly to Supabase Auth ---
+    // --- Step 1: Try Supabase Auth first ---
     const supabaseResult = role === 'student'
       ? await registerStudentInSupabase({
           email: trimmedEmail, password, name: trimmedName,
@@ -151,43 +151,39 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
           email: trimmedEmail, password, name: trimmedName, department,
         });
 
-    if (supabaseResult.error) {
-      // Handle known errors
-      const err = supabaseResult.error.toLowerCase();
-      if (err.includes('already registered') || err.includes('already exists') || err.includes('user already')) {
-        setErrors({ email: 'This email is already registered in Supabase.' });
-        toast.error('Email already registered', {
-          description: 'This email already has an account. Please log in instead.',
-        });
-        setIsLoading(false);
-        return;
-      }
-      if (err.includes('failed to fetch') || err.includes('networkerror') || err.includes('fetch')) {
-        toast.error('Cannot reach Supabase', {
-          description: 'Your Supabase project may be paused. Go to supabase.com/dashboard and resume it, then try again.',
-          duration: 8000,
-        });
-        setIsLoading(false);
-        return;
-      }
-      // Other error — still fail so user knows
-      toast.error('Registration failed', { description: supabaseResult.error, duration: 6000 });
-      setIsLoading(false);
-      return;
-    }
-
-    // --- Step 2: Supabase save succeeded — use the real Supabase UUID ---
-    const supabaseUserId = supabaseResult.userId || `user_${Date.now()}`;
-
-    // Save to localStorage so the app session and instructor dashboard work
+    // Check for duplicate email (even if Supabase is down, check locally)
     let existingUsers: any[] = [];
     try {
       const raw = localStorage.getItem('registeredUsers');
       existingUsers = raw ? JSON.parse(raw) : [];
     } catch (_e: unknown) { existingUsers = []; }
 
+    if (!supabaseResult.error) {
+      // Supabase succeeded — check duplicate from Supabase error first
+    } else {
+      const err = supabaseResult.error.toLowerCase();
+      if (err.includes('already registered') || err.includes('already exists') || err.includes('user already')) {
+        setErrors({ email: 'This email is already registered.' });
+        toast.error('Email already registered', { description: 'Please log in instead.' });
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    if (existingUsers.some((u: any) => u.email === trimmedEmail)) {
+      setErrors({ email: 'This email is already registered.' });
+      toast.error('Email already registered', { description: 'Please log in instead.' });
+      setIsLoading(false);
+      return;
+    }
+
+    // --- Step 2: Create account (with or without Supabase) ---
+    const supabaseUserId = supabaseResult.userId;
+    const userId = supabaseUserId || `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const savedToSupabase = !!supabaseUserId;
+
     const newUser = {
-      id: supabaseUserId,
+      id: userId,
       name: trimmedName,
       email: trimmedEmail,
       role,
@@ -195,27 +191,53 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       department: role === 'instructor' ? department : undefined,
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
       registeredAt: new Date().toISOString(),
-      pendingSync: false,
+      pendingSync: !savedToSupabase,
     };
 
-    if (!existingUsers.some((u: any) => u.email === trimmedEmail)) {
-      existingUsers.push(newUser);
-      localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
-    }
-    localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: supabaseUserId }));
+    existingUsers.push(newUser);
+    localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+    localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: userId }));
 
     // --- Step 3: Log in ---
     const appUser: User = {
-      id: supabaseUserId,
+      id: userId,
       name: trimmedName,
       email: trimmedEmail,
       role,
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
     };
 
-    toast.success('Registration successful!', {
-      description: `Welcome to CodeLearn AI, ${trimmedName}! Account saved to Supabase.`,
-    });
+    if (savedToSupabase) {
+      toast.success('Registration successful!', {
+        description: `Welcome to CodeLearn AI, ${trimmedName}! Account saved to Supabase.`,
+      });
+    } else {
+      toast.success('Registration successful!', {
+        description: `Welcome, ${trimmedName}! Account created locally. It will sync to Supabase once your project is resumed.`,
+        duration: 6000,
+      });
+      // Retry Supabase sync in the background every 30 seconds for up to 5 minutes
+      const retrySync = async () => {
+        for (let i = 0; i < 10; i++) {
+          await new Promise(r => setTimeout(r, 30000));
+          const retry = role === 'student'
+            ? await registerStudentInSupabase({ email: trimmedEmail, password, name: trimmedName, studentId, section: department, yearLevel: '1st Year' })
+            : await registerInstructorInSupabase({ email: trimmedEmail, password, name: trimmedName, department });
+          if (retry.userId) {
+            try {
+              const raw = localStorage.getItem('registeredUsers');
+              const users: any[] = raw ? JSON.parse(raw) : [];
+              const idx = users.findIndex((u: any) => u.id === userId);
+              if (idx !== -1) { users[idx].id = retry.userId; users[idx].pendingSync = false; localStorage.setItem('registeredUsers', JSON.stringify(users)); localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: retry.userId })); }
+            } catch (_e: unknown) {}
+            toast.success('Account synced to Supabase ✓', { description: 'Your account is now saved in the database.' });
+            break;
+          }
+        }
+      };
+      retrySync();
+    }
+
     setIsLoading(false);
     onRegister(appUser);
   };
