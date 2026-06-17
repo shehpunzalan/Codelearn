@@ -249,13 +249,6 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
           }}
         />
       </div>
-      <Button
-        variant="outline"
-        onClick={handleClearStaleUsers}
-        style={{ whiteSpace: 'nowrap', color: 'var(--destructive)', borderColor: 'var(--destructive)', flexShrink: 0 }}
-      >
-        Clear Local Data
-      </Button>
       </div>
 
       {/* Stats Overview */}
