@@ -8,7 +8,6 @@ import { Checkbox } from './ui/checkbox';
 import { Brain, Mail, Lock, UserCircle as UserIcon, GraduationCap, Shield, FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import * as backendApi from '../services/backendApi';
-import { registerStudentInSupabase, registerInstructorInSupabase } from '../utils/supabaseClient';
 
 interface RegisterProps {
   onRegister: (user: User) => void;
@@ -141,50 +140,12 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
-    // --- Debug: test connection before attempting signup ---
-    try {
-      const testRes = await fetch('https://hoofdryqutuucipuqxca.supabase.co/auth/v1/health', {
-        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0' }
-      });
-      console.log('🔗 Supabase health check:', testRes.status, testRes.ok ? 'OK' : 'FAIL');
-    } catch (connErr: unknown) {
-      console.error('🔗 Supabase connection test FAILED:', connErr);
-      toast.error('Cannot reach Supabase', {
-        description: `Connection error: ${String(connErr)}. Open DevTools > Console for details.`,
-        duration: 8000,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    // --- Step 1: Try Supabase Auth first ---
-    const supabaseResult = role === 'student'
-      ? await registerStudentInSupabase({
-          email: trimmedEmail, password, name: trimmedName,
-          studentId, section: department, yearLevel: '1st Year',
-        })
-      : await registerInstructorInSupabase({
-          email: trimmedEmail, password, name: trimmedName, department,
-        });
-
-    // Check for duplicate email (even if Supabase is down, check locally)
+    // Check local duplicate first
     let existingUsers: any[] = [];
     try {
       const raw = localStorage.getItem('registeredUsers');
       existingUsers = raw ? JSON.parse(raw) : [];
     } catch (_e: unknown) { existingUsers = []; }
-
-    if (!supabaseResult.error) {
-      // Supabase succeeded — check duplicate from Supabase error first
-    } else {
-      const err = supabaseResult.error.toLowerCase();
-      if (err.includes('already registered') || err.includes('already exists') || err.includes('user already')) {
-        setErrors({ email: 'This email is already registered.' });
-        toast.error('Email already registered', { description: 'Please log in instead.' });
-        setIsLoading(false);
-        return;
-      }
-    }
 
     if (existingUsers.some((u: any) => u.email === trimmedEmail)) {
       setErrors({ email: 'This email is already registered.' });
@@ -193,11 +154,35 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       return;
     }
 
-    // --- Step 2: Create account (with or without Supabase) ---
-    const supabaseUserId = supabaseResult.userId;
-    const userId = supabaseUserId || `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const savedToSupabase = !!supabaseUserId;
+    // --- Save to Supabase via the backend API (server-side, not blocked by CSP) ---
+    let supabaseUserId: string | null = null;
+    try {
+      const result = await backendApi.signUp({
+        email: trimmedEmail,
+        password,
+        name: trimmedName,
+        role,
+        studentId: role === 'student' ? studentId : undefined,
+        section: role === 'student' ? department : undefined,
+        yearLevel: role === 'student' ? '1st Year' : undefined,
+      });
+      supabaseUserId = result?.data?.userId || null;
+      console.log('✅ Saved to Supabase via backend, userId:', supabaseUserId);
+    } catch (apiErr: unknown) {
+      const msg = String(apiErr);
+      console.warn('⚠️ Backend signup failed:', msg);
+      if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('exists')) {
+        setErrors({ email: 'This email is already registered.' });
+        toast.error('Email already registered', { description: 'Please log in instead.' });
+        setIsLoading(false);
+        return;
+      }
+      // Backend unreachable — continue with local save
+    }
 
+    const userId = supabaseUserId || `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    // Save to localStorage
     const newUser = {
       id: userId,
       name: trimmedName,
@@ -207,14 +192,12 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       department: role === 'instructor' ? department : undefined,
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
       registeredAt: new Date().toISOString(),
-      pendingSync: !savedToSupabase,
+      pendingSync: !supabaseUserId,
     };
-
     existingUsers.push(newUser);
     localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
     localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: userId }));
 
-    // --- Step 3: Log in ---
     const appUser: User = {
       id: userId,
       name: trimmedName,
@@ -223,37 +206,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
     };
 
-    if (savedToSupabase) {
-      toast.success('Registration successful!', {
-        description: `Welcome to CodeLearn AI, ${trimmedName}! Account saved to Supabase.`,
-      });
-    } else {
-      toast.success('Registration successful!', {
-        description: `Welcome, ${trimmedName}! Account created locally. It will sync to Supabase once your project is resumed.`,
-        duration: 6000,
-      });
-      // Retry Supabase sync in the background every 30 seconds for up to 5 minutes
-      const retrySync = async () => {
-        for (let i = 0; i < 10; i++) {
-          await new Promise(r => setTimeout(r, 30000));
-          const retry = role === 'student'
-            ? await registerStudentInSupabase({ email: trimmedEmail, password, name: trimmedName, studentId, section: department, yearLevel: '1st Year' })
-            : await registerInstructorInSupabase({ email: trimmedEmail, password, name: trimmedName, department });
-          if (retry.userId) {
-            try {
-              const raw = localStorage.getItem('registeredUsers');
-              const users: any[] = raw ? JSON.parse(raw) : [];
-              const idx = users.findIndex((u: any) => u.id === userId);
-              if (idx !== -1) { users[idx].id = retry.userId; users[idx].pendingSync = false; localStorage.setItem('registeredUsers', JSON.stringify(users)); localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: retry.userId })); }
-            } catch (_e: unknown) {}
-            toast.success('Account synced to Supabase ✓', { description: 'Your account is now saved in the database.' });
-            break;
-          }
-        }
-      };
-      retrySync();
-    }
-
+    toast.success('Registration successful!', {
+      description: supabaseUserId
+        ? `Welcome to CodeLearn AI, ${trimmedName}! Account saved to database.`
+        : `Welcome, ${trimmedName}! Account created locally.`,
+    });
     setIsLoading(false);
     onRegister(appUser);
   };

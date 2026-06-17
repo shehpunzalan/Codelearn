@@ -24,19 +24,46 @@ app.post("/auth/signup", async (c) => {
   try {
     const body = await c.req.json();
     const { email, password, name, role, studentId, section, yearLevel } = body;
-    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-    const { data, error } = await supabase.auth.admin.createUser({
-      email, password, user_metadata: { name, role: role || 'student', studentId, section, yearLevel }, email_confirm: true
+
+    // Save to the user's real Supabase project (server-side, no CSP restriction)
+    const USER_PROJECT_URL = 'https://hoofdryqutuucipuqxca.supabase.co';
+    const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
+
+    const signupRes = await fetch(`${USER_PROJECT_URL}/auth/v1/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': USER_ANON_KEY,
+        'Authorization': `Bearer ${USER_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        data: { name, role: role || 'student', studentId: studentId || '', section: section || '', yearLevel: yearLevel || '1st Year', registeredAt: new Date().toISOString() }
+      }),
     });
-    if (error) return c.json({ success: false, error: error.message }, 400);
-    if (data.user) {
-      await kv.set(`profile_${data.user.id}`, {
-        userId: data.user.id, name, email, role: role || 'student', studentId: studentId || '',
-        section: section || '', yearLevel: yearLevel || '', avatar: '', bio: '',
+
+    const signupText = await signupRes.text();
+    let signupData: any = null;
+    try { signupData = JSON.parse(signupText); } catch { /* non-JSON */ }
+
+    if (!signupRes.ok) {
+      const errMsg = signupData?.msg || signupData?.message || signupData?.error_description || signupData?.error || `HTTP ${signupRes.status}`;
+      return c.json({ success: false, error: errMsg }, 400);
+    }
+
+    const userId = signupData?.id || signupData?.user?.id;
+
+    // Also save profile to KV store for quick lookup
+    if (userId) {
+      await kv.set(`profile_${userId}`, {
+        userId, name, email, role: role || 'student',
+        studentId: studentId || '', section: section || '', yearLevel: yearLevel || '',
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
       });
     }
-    return c.json({ success: true, data: { userId: data.user?.id, email: data.user?.email, name, role: role || 'student' } });
+
+    return c.json({ success: true, data: { userId, email, name, role: role || 'student' } });
   } catch (error) {
     return c.json({ success: false, error: String(error) }, 500);
   }
@@ -45,11 +72,27 @@ app.post("/auth/signup", async (c) => {
 app.post("/auth/signin", async (c) => {
   try {
     const { email, password } = await c.req.json();
-    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return c.json({ success: false, error: error.message }, 400);
-    const profile = await kv.get(`profile_${data.user.id}`);
-    return c.json({ success: true, data: { userId: data.user.id, email: data.user.email, accessToken: data.session.access_token, refreshToken: data.session.refresh_token, profile } });
+    const USER_PROJECT_URL = 'https://hoofdryqutuucipuqxca.supabase.co';
+    const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
+
+    const signinRes = await fetch(`${USER_PROJECT_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': USER_ANON_KEY, 'Authorization': `Bearer ${USER_ANON_KEY}` },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const signinText = await signinRes.text();
+    let signinData: any = null;
+    try { signinData = JSON.parse(signinText); } catch { /* non-JSON */ }
+
+    if (!signinRes.ok) {
+      const errMsg = signinData?.error_description || signinData?.msg || signinData?.error || 'Invalid credentials';
+      return c.json({ success: false, error: errMsg }, 400);
+    }
+
+    const user = signinData?.user;
+    const profile = await kv.get(`profile_${user?.id}`);
+    return c.json({ success: true, data: { userId: user?.id, email: user?.email, accessToken: signinData?.access_token, refreshToken: signinData?.refresh_token, profile: profile || user?.user_metadata } });
   } catch (error) {
     return c.json({ success: false, error: String(error) }, 500);
   }
