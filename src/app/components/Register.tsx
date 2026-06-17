@@ -141,6 +141,22 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
+    // --- Debug: test connection before attempting signup ---
+    try {
+      const testRes = await fetch('https://hoofdryqutuucipuqxca.supabase.co/auth/v1/health', {
+        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0' }
+      });
+      console.log('🔗 Supabase health check:', testRes.status, testRes.ok ? 'OK' : 'FAIL');
+    } catch (connErr: unknown) {
+      console.error('🔗 Supabase connection test FAILED:', connErr);
+      toast.error('Cannot reach Supabase', {
+        description: `Connection error: ${String(connErr)}. Open DevTools > Console for details.`,
+        duration: 8000,
+      });
+      setIsLoading(false);
+      return;
+    }
+
     // --- Step 1: Try Supabase Auth first ---
     const supabaseResult = role === 'student'
       ? await registerStudentInSupabase({
