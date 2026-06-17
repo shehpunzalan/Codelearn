@@ -10,32 +10,35 @@ function getAuthToken(): string {
 // Helper function to make API requests
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${getAuthToken()}`
+    'Authorization': `Bearer ${getAuthToken()}`,
   };
 
+  const response = await fetch(url, {
+    ...options,
+    headers: { ...defaultHeaders, ...options.headers },
+  });
+
+  // Safely parse the response — the server may return HTML on error
+  const text = await response.text();
+  let data: any = null;
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || `API request failed: ${response.status}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
-    throw error;
+    data = JSON.parse(text);
+  } catch {
+    // Response was not JSON (e.g. HTML error page from Supabase)
+    console.error(`API Error (${endpoint}): Non-JSON response (${response.status}):`, text.slice(0, 200));
+    throw new Error(`Server unreachable or returned an unexpected response (HTTP ${response.status}). Please ensure the Supabase edge function is deployed.`);
   }
+
+  if (!response.ok || !data?.success) {
+    const msg = data?.error || `API request failed: ${response.status}`;
+    console.error(`API Error (${endpoint}):`, msg);
+    throw new Error(msg);
+  }
+
+  return data;
 }
 
 // ============================================

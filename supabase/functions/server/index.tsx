@@ -7,19 +7,15 @@ import * as additional from "./additionalEndpoints.ts";
 import * as aiFeedback from "./aiFeedbackAnalysis.ts";
 import * as codeSubmission from "./codeSubmissionEndpoints.ts";
 
-const base = new Hono();
-base.use('*', logger(console.log));
-base.use("/*", cors({
+const app = new Hono();
+app.use('*', logger(console.log));
+app.use("/*", cors({
   origin: "*",
   allowHeaders: ["Content-Type", "Authorization"],
   allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   exposeHeaders: ["Content-Length"],
   maxAge: 600,
 }));
-
-// All routes mounted under the function prefix
-const app = new Hono();
-base.route('/make-server-c61d3fdc', app);
 
 app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
 
@@ -498,4 +494,4 @@ app.post("/submissions/autosave", codeSubmission.autoSaveCodeHandler);
 app.get("/submissions/draft", codeSubmission.getDraftCodeHandler);
 app.get("/submissions/:submissionId", codeSubmission.getSubmissionHandler);
 
-Deno.serve(base.fetch);
+Deno.serve(app.fetch);

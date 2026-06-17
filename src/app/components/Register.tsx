@@ -190,20 +190,21 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       setIsLoading(false);
 
       const errMsg = String(error);
-      if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exists') || errMsg.toLowerCase().includes('duplicate')) {
+      if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exists') || errMsg.toLowerCase().includes('duplicate') || errMsg.toLowerCase().includes('user already')) {
         toast.error('Email already registered', {
           description: 'This email is already in use. Please log in or use a different email.',
           duration: 5000,
         });
         setErrors({ email: 'This email is already registered' });
-      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+      } else if (errMsg.includes('unreachable') || errMsg.includes('edge function') || (error instanceof TypeError && error.message.includes('fetch'))) {
         toast.error('Cannot connect to server', {
-          description: 'Please check your internet connection and try again.',
-          duration: 5000,
+          description: 'The backend is not reachable. Please deploy the Supabase edge function from Make settings, then try again.',
+          duration: 7000,
         });
       } else {
         toast.error('Registration failed', {
-          description: errMsg || 'Please try again or contact support.',
+          description: errMsg || 'Please try again.',
+          duration: 5000,
         });
       }
     }
