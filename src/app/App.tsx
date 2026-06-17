@@ -61,13 +61,25 @@ function AppContent() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Remove any previously seeded demo users so the dashboard only shows real registrations
+    // Remove stale local-only users — keep only those with real Supabase UUIDs.
+    // Local-only accounts created before Supabase sync have IDs like "user_<timestamp>_<random>".
+    // Real Supabase accounts have UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     try {
       const usersRaw = localStorage.getItem('registeredUsers');
       if (usersRaw) {
         const users = JSON.parse(usersRaw);
-        const realUsers = users.filter((u: any) => !u.id?.startsWith('student-2014-'));
-        localStorage.setItem('registeredUsers', JSON.stringify(realUsers));
+        const currentUserRaw = localStorage.getItem('currentUser');
+        const currentUserId = currentUserRaw ? JSON.parse(currentUserRaw)?.id : null;
+        const verified = users.filter((u: any) => {
+          // Keep current logged-in user regardless
+          if (u.id === currentUserId) return true;
+          // Keep demo users
+          if (u.id === 'demo-student' || u.id === 'demo-instructor') return true;
+          // Keep only real Supabase UUID accounts
+          return uuidPattern.test(u.id || '');
+        });
+        localStorage.setItem('registeredUsers', JSON.stringify(verified));
       }
     } catch {}
 

@@ -126,6 +126,27 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
     s.issues.some(i => i.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const handleClearStaleUsers = () => {
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    try {
+      const raw = localStorage.getItem('registeredUsers');
+      const users: any[] = raw ? JSON.parse(raw) : [];
+      const before = users.length;
+      const cleaned = users.filter((u: any) =>
+        u.id === 'demo-student' || u.id === 'demo-instructor' || uuidPattern.test(u.id || '')
+      );
+      localStorage.setItem('registeredUsers', JSON.stringify(cleaned));
+      const removed = before - cleaned.length;
+      toast.success(`Removed ${removed} local-only account${removed !== 1 ? 's' : ''}`, {
+        description: `${cleaned.length} verified Supabase account${cleaned.length !== 1 ? 's' : ''} remain.`,
+      });
+      // Reload data
+      window.location.reload();
+    } catch (_e: unknown) {
+      toast.error('Failed to clear stale data');
+    }
+  };
+
   const handleSendIntervention = (student: StudentSummary) => {
     setSelectedStudent(student);
     const issueText = student.issues.length > 0 ? student.issues.join(' and ') : 'certain OOP concepts';
@@ -193,8 +214,9 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div style={{ position: 'relative' }}>
+      {/* Search Bar + Clear Stale Data */}
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+      <div style={{ position: 'relative', flex: 1 }}>
         <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted-foreground)', width: 20, height: 20 }} />
         <input
           type="text"
@@ -212,6 +234,14 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
             boxSizing: 'border-box',
           }}
         />
+      </div>
+      <Button
+        variant="outline"
+        onClick={handleClearStaleUsers}
+        style={{ whiteSpace: 'nowrap', color: 'var(--destructive)', borderColor: 'var(--destructive)', flexShrink: 0 }}
+      >
+        Clear Local Data
+      </Button>
       </div>
 
       {/* Stats Overview */}
