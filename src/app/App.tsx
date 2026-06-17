@@ -61,27 +61,33 @@ function AppContent() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Remove stale local-only users — keep only those with real Supabase UUIDs.
-    // Local-only accounts created before Supabase sync have IDs like "user_<timestamp>_<random>".
-    // Real Supabase accounts have UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    try {
-      const usersRaw = localStorage.getItem('registeredUsers');
-      if (usersRaw) {
-        const users = JSON.parse(usersRaw);
+    // One-time wipe of ALL stale local user data.
+    // Runs once per browser — after that, only Supabase-registered users appear.
+    if (!localStorage.getItem('v3_local_users_wiped')) {
+      try {
         const currentUserRaw = localStorage.getItem('currentUser');
-        const currentUserId = currentUserRaw ? JSON.parse(currentUserRaw)?.id : null;
-        const verified = users.filter((u: any) => {
-          // Keep current logged-in user regardless
-          if (u.id === currentUserId) return true;
-          // Keep demo users
-          if (u.id === 'demo-student' || u.id === 'demo-instructor') return true;
-          // Keep only real Supabase UUID accounts
-          return uuidPattern.test(u.id || '');
-        });
-        localStorage.setItem('registeredUsers', JSON.stringify(verified));
-      }
-    } catch {}
+        const currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
+
+        // Reset registeredUsers to only the logged-in user
+        if (currentUser) {
+          localStorage.setItem('registeredUsers', JSON.stringify([currentUser]));
+        } else {
+          localStorage.setItem('registeredUsers', JSON.stringify([]));
+        }
+
+        // Remove stale userCreds_ entries
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i) || '';
+          if (key.startsWith('userCreds_') && currentUser && key !== `userCreds_${currentUser.email}`) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+
+        localStorage.setItem('v3_local_users_wiped', '1');
+      } catch {}
+    }
 
     // One-time fix: remove falsely pre-completed lesson1-1 and lesson1-2
     // that were seeded by hardcoded `completed: true` in lessonsData.ts (now fixed).
