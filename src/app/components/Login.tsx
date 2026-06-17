@@ -109,82 +109,110 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
         return;
       }
 
-      // Try to sign in using backend API for real accounts
-      const result = await backendApi.signIn(email, password);
+      // --- Check local accounts first (works even without backend) ---
+      let localUsers: any[] = [];
+      try {
+        const raw = localStorage.getItem('registeredUsers');
+        localUsers = raw ? JSON.parse(raw) : [];
+      } catch (_e: unknown) { localUsers = []; }
 
-      if (result.success) {
-        const userData = result.data;
-        
-        // Check if role matches
-        if (userData.profile?.role !== role) {
-          toast.error('Login failed', {
-            description: `This account is registered as a ${userData.profile?.role}. Please select the correct role.`,
-          });
+      const localMatch = localUsers.find((u: any) => u.email === email && u.role === role);
+      if (localMatch) {
+        // Verify password against stored credentials
+        let credsOk = false;
+        try {
+          const credsRaw = localStorage.getItem(`userCreds_${email}`);
+          if (credsRaw) {
+            const creds = JSON.parse(credsRaw);
+            credsOk = creds.password === password;
+          }
+        } catch (_e: unknown) {}
+
+        if (credsOk) {
+          const user: User = {
+            id: localMatch.id,
+            name: localMatch.name,
+            email: localMatch.email,
+            role: localMatch.role,
+            enrolledCourses: localMatch.enrolledCourses || ['CCS108'],
+          };
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          localStorage.setItem('accessToken', `local-token-${user.id}`);
+          if (rememberMe) {
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('rememberedEmail', email);
+          }
+          localStorage.setItem('lastLoginTime', new Date().toISOString());
+          toast.success('Login successful!', { description: `Welcome back, ${user.name}!` });
+          setIsLoading(false);
+          onLogin(user);
+          return;
+        } else {
+          toast.error('Incorrect password', { description: 'Please check your password and try again.' });
+          setErrors({ password: 'Incorrect password.' });
           setIsLoading(false);
           return;
         }
+      }
 
-        // Create user object
-        const user: User = {
-          id: userData.userId,
-          name: userData.profile?.name || 'User',
-          email: userData.email,
-          role: userData.profile?.role || 'student',
-          enrolledCourses: ['CCS108']
-        };
+      // --- Fall back to Supabase backend for accounts registered on other devices ---
+      try {
+        const result = await backendApi.signIn(email, password);
 
-        // Store login session
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        localStorage.setItem('accessToken', userData.accessToken);
-        
-        if (rememberMe) {
-          localStorage.setItem('rememberMe', 'true');
-          localStorage.setItem('rememberedEmail', email);
-        } else {
-          localStorage.removeItem('rememberMe');
-          localStorage.removeItem('rememberedEmail');
+        if (result.success) {
+          const userData = result.data;
+
+          if (userData.profile?.role && userData.profile.role !== role) {
+            toast.error('Login failed', {
+              description: `This account is registered as a ${userData.profile?.role}. Please select the correct role.`,
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          const user: User = {
+            id: userData.userId,
+            name: userData.profile?.name || 'User',
+            email: userData.email,
+            role: userData.profile?.role || role,
+            enrolledCourses: ['CCS108'],
+          };
+
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          localStorage.setItem('accessToken', userData.accessToken);
+          localStorage.setItem(`userCreds_${email}`, JSON.stringify({ password, id: user.id }));
+
+          // Save to local registeredUsers so instructor views work
+          if (!localUsers.some((u: any) => u.id === user.id)) {
+            localUsers.push({ ...user, registeredAt: new Date().toISOString() });
+            localStorage.setItem('registeredUsers', JSON.stringify(localUsers));
+          }
+
+          if (rememberMe) {
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('rememberedEmail', email);
+          } else {
+            localStorage.removeItem('rememberMe');
+            localStorage.removeItem('rememberedEmail');
+          }
+          localStorage.setItem('lastLoginTime', new Date().toISOString());
+          toast.success('Login successful!', { description: `Welcome back, ${user.name}!` });
+          setIsLoading(false);
+          onLogin(user);
         }
-
-        // Store login timestamp
-        localStorage.setItem('lastLoginTime', new Date().toISOString());
-
-        toast.success('Login successful!', {
-          description: `Welcome back, ${user.name}!`,
-        });
-
+      } catch (_backendErr: unknown) {
+        // Backend unreachable and no local account found
         setIsLoading(false);
-        onLogin(user);
-      } else {
-        // Backend returned error
-        setIsLoading(false);
-        toast.error('Login failed', {
-          description: result.error || 'Invalid email or password. Please try again.',
+        toast.error('Account not found', {
+          description: 'No account found with this email and role. Please register first.',
+          duration: 5000,
         });
-        setErrors({ 
-          password: 'Invalid credentials. Please check your email and password.' 
-        });
+        setErrors({ email: 'No account found. Please register first.' });
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (outerErr: unknown) {
+      console.error('Login error:', outerErr);
       setIsLoading(false);
-
-      // Check if it's a network error (backend not deployed)
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        toast.error('Backend server unavailable', {
-          description: 'Please use demo accounts: student@demo.com or instructor@demo.com (password: demo123)',
-          duration: 6000,
-        });
-        setErrors({
-          email: 'Backend not deployed. Use demo accounts or deploy the Supabase function.'
-        });
-      } else {
-        toast.error('Login failed', {
-          description: 'An error occurred. Please try again.',
-        });
-        setErrors({
-          password: 'An error occurred during login. Please try again.'
-        });
-      }
+      toast.error('Login failed', { description: 'An unexpected error occurred. Please try again.' });
     }
   };
 

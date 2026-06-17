@@ -138,81 +138,89 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
 
     setIsLoading(true);
 
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    // --- Step 1: Create user locally right away ---
+    const localId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const newUser = {
+      id: localId,
+      name: trimmedName,
+      email: trimmedEmail,
+      role,
+      studentId: role === 'student' ? studentId : undefined,
+      department: role === 'instructor' ? department : undefined,
+      enrolledCourses: role === 'student' ? ['CCS108'] : [],
+      registeredAt: new Date().toISOString(),
+      pendingSync: true, // flag: not yet saved to Supabase
+    };
+
+    // Check for duplicate email in localStorage
+    let existingUsers: any[] = [];
     try {
-      // Register using backend API
-      const result = await backendApi.signUp({
-        email: email.trim(),
-        password: password,
-        name: name.trim(),
-        role: role,
-        studentId: role === 'student' ? studentId : undefined,
-        section: role === 'student' ? department : undefined,
-        yearLevel: role === 'student' ? '1st Year' : undefined,
-      });
+      const raw = localStorage.getItem('registeredUsers');
+      existingUsers = raw ? JSON.parse(raw) : [];
+    } catch (_e: unknown) { existingUsers = []; }
 
-      if (result.success) {
-        // Save to localStorage so instructor dashboard can see this user immediately
-        const newUser = {
-          id: result.data.userId,
-          name: name.trim(),
-          email: email.trim(),
-          role: role,
-          studentId: role === 'student' ? studentId : undefined,
-          department: role === 'instructor' ? department : undefined,
-          enrolledCourses: role === 'student' ? ['CCS108'] : [],
-          registeredAt: new Date().toISOString(),
-        };
-
-        let registeredUsers: any[] = [];
-        try {
-          const usersData = localStorage.getItem('registeredUsers');
-          registeredUsers = usersData ? JSON.parse(usersData) : [];
-        } catch (_e: unknown) { registeredUsers = []; }
-        // Avoid duplicate entries
-        if (!registeredUsers.some((u: any) => u.id === newUser.id)) {
-          registeredUsers.push(newUser);
-          localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-        }
-
-        // Create user object for app state
-        const user: User = {
-          id: result.data.userId,
-          name: result.data.name,
-          email: result.data.email,
-          role: result.data.role,
-          enrolledCourses: role === 'student' ? ['CCS108'] : []
-        };
-
-        toast.success('Registration successful!', {
-          description: `Welcome to CodeLearn AI, ${name}!`,
-        });
-
-        setIsLoading(false);
-        onRegister(user);
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
+    if (existingUsers.some((u: any) => u.email === trimmedEmail)) {
+      setErrors({ email: 'This email is already registered' });
+      toast.error('Email already registered', { description: 'Please log in instead.' });
       setIsLoading(false);
-
-      const errMsg = String(error);
-      if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exists') || errMsg.toLowerCase().includes('duplicate') || errMsg.toLowerCase().includes('user already')) {
-        toast.error('Email already registered', {
-          description: 'This email is already in use. Please log in or use a different email.',
-          duration: 5000,
-        });
-        setErrors({ email: 'This email is already registered' });
-      } else if (errMsg.includes('unreachable') || errMsg.includes('edge function') || (error instanceof TypeError && error.message.includes('fetch'))) {
-        toast.error('Cannot connect to server', {
-          description: 'The backend is not reachable. Please deploy the Supabase edge function from Make settings, then try again.',
-          duration: 7000,
-        });
-      } else {
-        toast.error('Registration failed', {
-          description: errMsg || 'Please try again.',
-          duration: 5000,
-        });
-      }
+      return;
     }
+
+    // Save to localStorage immediately
+    existingUsers.push(newUser);
+    localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+    // Save credentials for login (hashed would be better in production)
+    localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: localId }));
+
+    // Log in the user right away
+    const appUser: User = {
+      id: localId,
+      name: trimmedName,
+      email: trimmedEmail,
+      role,
+      enrolledCourses: role === 'student' ? ['CCS108'] : [],
+    };
+
+    toast.success('Registration successful!', {
+      description: `Welcome to CodeLearn AI, ${trimmedName}!`,
+    });
+    setIsLoading(false);
+    onRegister(appUser);
+
+    // --- Step 2: Try to sync to Supabase backend in the background ---
+    backendApi.signUp({
+      email: trimmedEmail,
+      password,
+      name: trimmedName,
+      role,
+      studentId: role === 'student' ? studentId : undefined,
+      section: role === 'student' ? department : undefined,
+      yearLevel: role === 'student' ? '1st Year' : undefined,
+    }).then((result) => {
+      if (result?.data?.userId) {
+        // Update the local record with the real Supabase userId
+        try {
+          const raw = localStorage.getItem('registeredUsers');
+          const users: any[] = raw ? JSON.parse(raw) : [];
+          const idx = users.findIndex((u: any) => u.id === localId);
+          if (idx !== -1) {
+            users[idx].id = result.data.userId;
+            users[idx].pendingSync = false;
+            localStorage.setItem('registeredUsers', JSON.stringify(users));
+            // Update credentials key too
+            localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: result.data.userId }));
+          }
+        } catch (_e: unknown) {}
+        console.log('✅ User synced to Supabase:', result.data.userId);
+      }
+    }).catch((syncErr: unknown) => {
+      // Non-blocking — user is already logged in, just note the sync failed
+      console.warn('⚠️ Background Supabase sync failed (user is still registered locally):', syncErr);
+    });
+
   };
 
   const getPasswordStrength = (password: string): { strength: string; color: string; width: string } => {
