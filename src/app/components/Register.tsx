@@ -203,11 +203,18 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
 
     supabaseRegister.then(({ userId, error }) => {
       if (error) {
-        console.warn('⚠️ Supabase Auth signup failed:', error);
+        console.warn('⚠️ Supabase sync failed:', error);
+        toast.warning('Saved locally only', {
+          description: `Supabase sync failed: ${error}. Account works but won't appear in Supabase dashboard.`,
+          duration: 6000,
+        });
         return;
       }
-      console.log(`✅ ${role} registered in Supabase Auth — userId: ${userId}`);
-      // Update localStorage record with the real Supabase Auth userId
+      toast.info('Synced to Supabase ✓', {
+        description: `${role === 'student' ? 'Student' : 'Instructor'} account saved to Supabase Auth.`,
+        duration: 4000,
+      });
+      // Update localStorage with the real Supabase user ID
       if (userId) {
         try {
           const raw = localStorage.getItem('registeredUsers');

@@ -1,15 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+
+// User's actual linked Supabase project (from /supabase/.temp/linked-project.json)
+const LINKED_PROJECT_ID = 'hoofdryqutuucipuqxca';
+const LINKED_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
 
 export const supabase = createClient(
-  `https://${projectId}.supabase.co`,
-  publicAnonKey as string
+  `https://${LINKED_PROJECT_ID}.supabase.co`,
+  LINKED_ANON_KEY
 );
 
 /**
- * Register a student directly in Supabase Auth.
- * The user will appear in Authentication → Users in the Supabase dashboard.
- * Role and profile info are stored in user_metadata.
+ * Register a student in the user's Supabase Auth.
+ * Appears under Authentication → Users in supabase.com/dashboard/project/hoofdryqutuucipuqxca
  */
 export async function registerStudentInSupabase(data: {
   email: string;
@@ -20,6 +22,7 @@ export async function registerStudentInSupabase(data: {
   yearLevel?: string;
 }): Promise<{ userId: string | null; error: string | null }> {
   try {
+    console.log('🔄 Registering student in Supabase Auth...', data.email);
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -36,15 +39,21 @@ export async function registerStudentInSupabase(data: {
       },
     });
 
-    if (error) return { userId: null, error: error.message };
+    if (error) {
+      console.error('❌ Supabase student signup error:', error.message);
+      return { userId: null, error: error.message };
+    }
+
+    console.log('✅ Student registered in Supabase Auth:', authData.user?.id);
     return { userId: authData.user?.id || null, error: null };
   } catch (err: unknown) {
+    console.error('❌ Supabase student signup exception:', err);
     return { userId: null, error: String(err) };
   }
 }
 
 /**
- * Register an instructor directly in Supabase Auth.
+ * Register an instructor in the user's Supabase Auth.
  */
 export async function registerInstructorInSupabase(data: {
   email: string;
@@ -53,6 +62,7 @@ export async function registerInstructorInSupabase(data: {
   department?: string;
 }): Promise<{ userId: string | null; error: string | null }> {
   try {
+    console.log('🔄 Registering instructor in Supabase Auth...', data.email);
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -66,15 +76,21 @@ export async function registerInstructorInSupabase(data: {
       },
     });
 
-    if (error) return { userId: null, error: error.message };
+    if (error) {
+      console.error('❌ Supabase instructor signup error:', error.message);
+      return { userId: null, error: error.message };
+    }
+
+    console.log('✅ Instructor registered in Supabase Auth:', authData.user?.id);
     return { userId: authData.user?.id || null, error: null };
   } catch (err: unknown) {
+    console.error('❌ Supabase instructor signup exception:', err);
     return { userId: null, error: String(err) };
   }
 }
 
 /**
- * Sign in via Supabase Auth (for accounts registered on other devices).
+ * Sign in via Supabase Auth.
  */
 export async function signInWithSupabase(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -82,8 +98,7 @@ export async function signInWithSupabase(email: string, password: string) {
   return data;
 }
 
-// Legacy KV helpers — kept for backward compatibility but may not work without service key
-export async function saveStudentToSupabase(_data: any) { /* noop — use registerStudentInSupabase */ }
-export async function saveInstructorToSupabase(_data: any) { /* noop — use registerInstructorInSupabase */ }
+export async function saveStudentToSupabase(_data: any) {}
+export async function saveInstructorToSupabase(_data: any) {}
 export async function fetchStudentsFromSupabase() { return []; }
 export async function fetchInstructorsFromSupabase() { return []; }
