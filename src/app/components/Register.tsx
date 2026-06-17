@@ -8,7 +8,7 @@ import { Checkbox } from './ui/checkbox';
 import { Brain, Mail, Lock, UserCircle as UserIcon, GraduationCap, Shield, FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import * as backendApi from '../services/backendApi';
-import { saveStudentToSupabase, saveInstructorToSupabase } from '../utils/supabaseClient';
+import { registerStudentInSupabase, registerInstructorInSupabase } from '../utils/supabaseClient';
 
 interface RegisterProps {
   onRegister: (user: User) => void;
@@ -191,46 +191,37 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     setIsLoading(false);
     onRegister(appUser);
 
-    // --- Step 2: Save directly to Supabase KV store (no edge function needed) ---
-    const registeredAt = new Date().toISOString();
-    const saveToSupabase = role === 'student'
-      ? saveStudentToSupabase({
-          userId: localId,
-          name: trimmedName,
-          email: trimmedEmail,
-          studentId,
-          section: department,
-          yearLevel: '1st Year',
-          registeredAt,
+    // --- Step 2: Save to Supabase Auth directly (appears in Authentication → Users) ---
+    const supabaseRegister = role === 'student'
+      ? registerStudentInSupabase({
+          email: trimmedEmail, password, name: trimmedName,
+          studentId, section: department, yearLevel: '1st Year',
         })
-      : saveInstructorToSupabase({
-          userId: localId,
-          name: trimmedName,
-          email: trimmedEmail,
-          department,
-          registeredAt,
+      : registerInstructorInSupabase({
+          email: trimmedEmail, password, name: trimmedName, department,
         });
 
-    saveToSupabase
-      .then(() => {
-        console.log(`✅ ${role} saved to Supabase (key: ${role}_${localId})`);
-        // Mark as synced in localStorage
+    supabaseRegister.then(({ userId, error }) => {
+      if (error) {
+        console.warn('⚠️ Supabase Auth signup failed:', error);
+        return;
+      }
+      console.log(`✅ ${role} registered in Supabase Auth — userId: ${userId}`);
+      // Update localStorage record with the real Supabase Auth userId
+      if (userId) {
         try {
           const raw = localStorage.getItem('registeredUsers');
           const users: any[] = raw ? JSON.parse(raw) : [];
           const idx = users.findIndex((u: any) => u.id === localId);
-          if (idx !== -1) { users[idx].pendingSync = false; localStorage.setItem('registeredUsers', JSON.stringify(users)); }
+          if (idx !== -1) {
+            users[idx].id = userId;
+            users[idx].pendingSync = false;
+            localStorage.setItem('registeredUsers', JSON.stringify(users));
+            localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: userId }));
+          }
         } catch (_e: unknown) {}
-      })
-      .catch((err: unknown) => {
-        console.warn('⚠️ Supabase direct save failed:', err);
-        // Fall back to edge function as secondary attempt
-        backendApi.signUp({ email: trimmedEmail, password, name: trimmedName, role,
-          studentId: role === 'student' ? studentId : undefined,
-          section: role === 'student' ? department : undefined,
-          yearLevel: role === 'student' ? '1st Year' : undefined,
-        }).catch(() => {});
-      });
+      }
+    });
 
   };
 

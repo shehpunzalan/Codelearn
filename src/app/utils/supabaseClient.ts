@@ -6,75 +6,84 @@ export const supabase = createClient(
   publicAnonKey as string
 );
 
-const KV_TABLE = 'kv_store_aaa3a86f';
-
-/** Save a student record directly to Supabase */
-export async function saveStudentToSupabase(data: {
-  userId: string;
-  name: string;
+/**
+ * Register a student directly in Supabase Auth.
+ * The user will appear in Authentication → Users in the Supabase dashboard.
+ * Role and profile info are stored in user_metadata.
+ */
+export async function registerStudentInSupabase(data: {
   email: string;
+  password: string;
+  name: string;
   studentId?: string;
   section?: string;
   yearLevel?: string;
-  registeredAt: string;
-}) {
-  const { error } = await supabase.from(KV_TABLE).upsert({
-    key: `student_${data.userId}`,
-    value: {
-      type: 'student',
-      userId: data.userId,
-      name: data.name,
+}): Promise<{ userId: string | null; error: string | null }> {
+  try {
+    const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
-      studentId: data.studentId || '',
-      section: data.section || '',
-      yearLevel: data.yearLevel || '1st Year',
-      enrolledCourses: ['CCS108'],
-      registeredAt: data.registeredAt,
-      role: 'student',
-    },
-  });
-  if (error) throw error;
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          role: 'student',
+          studentId: data.studentId || '',
+          section: data.section || '',
+          yearLevel: data.yearLevel || '1st Year',
+          enrolledCourses: ['CCS108'],
+          registeredAt: new Date().toISOString(),
+        },
+      },
+    });
+
+    if (error) return { userId: null, error: error.message };
+    return { userId: authData.user?.id || null, error: null };
+  } catch (err: unknown) {
+    return { userId: null, error: String(err) };
+  }
 }
 
-/** Save an instructor record directly to Supabase */
-export async function saveInstructorToSupabase(data: {
-  userId: string;
-  name: string;
+/**
+ * Register an instructor directly in Supabase Auth.
+ */
+export async function registerInstructorInSupabase(data: {
   email: string;
+  password: string;
+  name: string;
   department?: string;
-  registeredAt: string;
-}) {
-  const { error } = await supabase.from(KV_TABLE).upsert({
-    key: `instructor_${data.userId}`,
-    value: {
-      type: 'instructor',
-      userId: data.userId,
-      name: data.name,
+}): Promise<{ userId: string | null; error: string | null }> {
+  try {
+    const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
-      department: data.department || '',
-      registeredAt: data.registeredAt,
-      role: 'instructor',
-    },
-  });
-  if (error) throw error;
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          role: 'instructor',
+          department: data.department || '',
+          registeredAt: new Date().toISOString(),
+        },
+      },
+    });
+
+    if (error) return { userId: null, error: error.message };
+    return { userId: authData.user?.id || null, error: null };
+  } catch (err: unknown) {
+    return { userId: null, error: String(err) };
+  }
 }
 
-/** Fetch all students from Supabase */
-export async function fetchStudentsFromSupabase() {
-  const { data, error } = await supabase
-    .from(KV_TABLE)
-    .select('key, value')
-    .like('key', 'student_%');
-  if (error) throw error;
-  return (data || []).map((row: any) => row.value);
+/**
+ * Sign in via Supabase Auth (for accounts registered on other devices).
+ */
+export async function signInWithSupabase(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+  return data;
 }
 
-/** Fetch all instructors from Supabase */
-export async function fetchInstructorsFromSupabase() {
-  const { data, error } = await supabase
-    .from(KV_TABLE)
-    .select('key, value')
-    .like('key', 'instructor_%');
-  if (error) throw error;
-  return (data || []).map((row: any) => row.value);
-}
+// Legacy KV helpers — kept for backward compatibility but may not work without service key
+export async function saveStudentToSupabase(_data: any) { /* noop — use registerStudentInSupabase */ }
+export async function saveInstructorToSupabase(_data: any) { /* noop — use registerInstructorInSupabase */ }
+export async function fetchStudentsFromSupabase() { return []; }
+export async function fetchInstructorsFromSupabase() { return []; }

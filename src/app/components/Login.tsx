@@ -155,7 +155,43 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
         }
       }
 
-      // --- Fall back to Supabase backend for accounts registered on other devices ---
+      // --- Fall back to Supabase Auth for accounts registered on other devices ---
+      try {
+        const { signInWithSupabase } = await import('../utils/supabaseClient');
+        const authData = await signInWithSupabase(email, password);
+        if (authData?.user) {
+          const meta = authData.user.user_metadata || {};
+          const userRole = meta.role || role;
+          if (userRole !== role) {
+            toast.error('Wrong role selected', {
+              description: `This account is registered as a ${userRole}. Please select the correct role.`,
+            });
+            setIsLoading(false);
+            return;
+          }
+          const user: User = {
+            id: authData.user.id,
+            name: meta.name || authData.user.email || 'User',
+            email: authData.user.email || email,
+            role: userRole,
+            enrolledCourses: meta.enrolledCourses || ['CCS108'],
+          };
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          localStorage.setItem('accessToken', authData.session?.access_token || `supabase-${user.id}`);
+          localStorage.setItem(`userCreds_${email}`, JSON.stringify({ password, id: user.id }));
+          if (!localUsers.some((u: any) => u.id === user.id)) {
+            localUsers.push({ ...user, registeredAt: new Date().toISOString() });
+            localStorage.setItem('registeredUsers', JSON.stringify(localUsers));
+          }
+          if (rememberMe) { localStorage.setItem('rememberMe', 'true'); localStorage.setItem('rememberedEmail', email); }
+          localStorage.setItem('lastLoginTime', new Date().toISOString());
+          toast.success('Login successful!', { description: `Welcome back, ${user.name}!` });
+          setIsLoading(false);
+          onLogin(user);
+          return;
+        }
+      } catch (_supabaseErr: unknown) { /* fall through to backend */ }
+
       try {
         const result = await backendApi.signIn(email, password);
 
