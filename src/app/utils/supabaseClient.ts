@@ -1,13 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-// User's actual linked Supabase project (from /supabase/.temp/linked-project.json)
-const LINKED_PROJECT_ID = 'hoofdryqutuucipuqxca';
-const LINKED_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
+// CodeLearn AI — real Supabase project
+const PROJECT_URL = 'https://hoofdryqutuucipuqxca.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
 
-export const supabase = createClient(
-  `https://${LINKED_PROJECT_ID}.supabase.co`,
-  LINKED_ANON_KEY
-);
+export const supabase = createClient(PROJECT_URL, ANON_KEY);
 
 /**
  * Register a student in the user's Supabase Auth.
