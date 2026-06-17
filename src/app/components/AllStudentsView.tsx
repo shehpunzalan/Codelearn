@@ -17,8 +17,6 @@ interface AllStudentsViewProps {
   onViewStudent?: (userId: string, userName: string) => void;
 }
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 interface StudentData {
   id: string;
   name: string;
@@ -26,7 +24,6 @@ interface StudentData {
   studentId?: string;
   registeredAt: string;
   enrolledCourses: string[];
-  isVerified: boolean; // true = Supabase UUID, false = local only
   completionRate: number;
   averageScore: number;
   totalSubmissions: number;
@@ -122,7 +119,6 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
           studentId: student.studentId,
           registeredAt: student.registeredAt,
           enrolledCourses: student.enrolledCourses || ['CCS108'],
-          isVerified: UUID_PATTERN.test(student.id || ''),
           completionRate,
           averageScore,
           totalSubmissions: allSubmissions.length,
@@ -409,27 +405,6 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
         </Card>
       ) : (
         <>
-        {/* Banner: show if any local-only students exist */}
-        {students.some(s => !s.isVerified) && (
-          <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 'var(--radius-md, 8px)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-            <div>
-              <p style={{ fontWeight: 600, color: '#c2410c', margin: 0, fontSize: '0.875rem' }}>
-                ⚠ {students.filter(s => !s.isVerified).length} local-only student{students.filter(s => !s.isVerified).length !== 1 ? 's' : ''} detected
-              </p>
-              <p style={{ color: '#9a3412', margin: '2px 0 0', fontSize: '0.8rem' }}>
-                These accounts exist only in this browser and are not saved in Supabase. Ask them to re-register, or remove them below.
-              </p>
-            </div>
-            <Button
-              size="sm"
-              onClick={removeAllLocalStudents}
-              style={{ background: '#c2410c', color: '#fff', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              Remove All Local
-            </Button>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 gap-4">
           {filteredStudents.map((student, index) => (
             <Card 
@@ -451,10 +426,6 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                         <h3 className="font-semibold" style={{ color: 'var(--foreground)' }}>{student.name}</h3>
                         {index < 3 && <Award className="w-4 h-4 text-yellow-500" />}
                         {getPerformanceBadge(student.averageScore)}
-                        {student.isVerified
-                          ? <Badge className="bg-green-100 text-green-700 border-green-300 text-xs px-2">✓ In Supabase</Badge>
-                          : <Badge className="bg-orange-100 text-orange-700 border-orange-300 text-xs px-2">⚠ Local only</Badge>
-                        }
                       </div>
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
@@ -504,7 +475,7 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                         <Eye className="w-4 h-4 mr-1" />
                         View Details
                       </Button>
-                      {student.averageScore < 70 && student.isVerified && (
+                      {student.averageScore < 70 && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -513,16 +484,6 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                         >
                           <AlertCircle className="w-4 h-4 mr-1" />
                           Intervene
-                        </Button>
-                      )}
-                      {!student.isVerified && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          style={{ borderColor: 'var(--destructive)', color: 'var(--destructive)' }}
-                          onClick={() => removeLocalStudent(student.id, student.name)}
-                        >
-                          Remove
                         </Button>
                       )}
                     </div>
