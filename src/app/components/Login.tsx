@@ -159,8 +159,10 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
       try {
         const { signInWithSupabase } = await import('../utils/supabaseClient');
         const authData = await signInWithSupabase(email, password);
-        if (authData?.user) {
-          const meta = authData.user.user_metadata || {};
+        // Direct REST API returns: { access_token, user: { id, email, user_metadata } }
+        const authUser = authData?.user || authData;
+        if (authUser?.id) {
+          const meta = authUser.user_metadata || authUser.raw_user_meta_data || {};
           const userRole = meta.role || role;
           if (userRole !== role) {
             toast.error('Wrong role selected', {
@@ -170,14 +172,14 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
             return;
           }
           const user: User = {
-            id: authData.user.id,
-            name: meta.name || authData.user.email || 'User',
-            email: authData.user.email || email,
+            id: authUser.id,
+            name: meta.name || authUser.email || 'User',
+            email: authUser.email || email,
             role: userRole,
             enrolledCourses: meta.enrolledCourses || ['CCS108'],
           };
           localStorage.setItem('currentUser', JSON.stringify(user));
-          localStorage.setItem('accessToken', authData.session?.access_token || `supabase-${user.id}`);
+          localStorage.setItem('accessToken', authData?.access_token || `supabase-${user.id}`);
           localStorage.setItem(`userCreds_${email}`, JSON.stringify({ password, id: user.id }));
           if (!localUsers.some((u: any) => u.id === user.id)) {
             localUsers.push({ ...user, registeredAt: new Date().toISOString() });
