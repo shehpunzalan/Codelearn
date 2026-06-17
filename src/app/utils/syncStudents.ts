@@ -1,19 +1,18 @@
-import { fetchStudentsFromSupabase, fetchInstructorsFromSupabase } from './supabaseClient';
+import * as backendApi from '../services/backendApi';
 
 /**
- * Fetches all registered users directly from the Supabase KV store
- * (student_ and instructor_ prefixed records) and merges them into
- * localStorage 'registeredUsers' so all instructor views stay current.
+ * Fetches all registered user profiles from the backend KV store
+ * and merges them into localStorage so the instructor dashboard
+ * shows students/instructors registered on ANY device.
  */
 export async function syncBackendStudentsToLocalStorage(): Promise<void> {
   try {
-    const [students, instructors] = await Promise.all([
-      fetchStudentsFromSupabase(),
-      fetchInstructorsFromSupabase(),
-    ]);
+    // Backend stores all profiles with prefix "profile_<userId>"
+    // The /analytics/students endpoint returns all of them
+    const result = await backendApi.getAllStudentsAnalytics();
+    const backendProfiles: any[] = result?.data || [];
 
-    const backendUsers = [...students, ...instructors];
-    if (backendUsers.length === 0) return;
+    if (!Array.isArray(backendProfiles) || backendProfiles.length === 0) return;
 
     let local: any[] = [];
     try {
@@ -21,36 +20,47 @@ export async function syncBackendStudentsToLocalStorage(): Promise<void> {
     } catch (_e: unknown) { local = []; }
 
     const localById = new Map(local.map((u: any) => [u.id, u]));
+    let changed = false;
 
-    for (const bu of backendUsers) {
-      const uid = bu.userId || bu.id;
+    for (const profile of backendProfiles) {
+      const uid = profile.userId || profile.id;
       if (!uid) continue;
+
       if (!localById.has(uid)) {
+        // New user from another device — add them
         localById.set(uid, {
           id: uid,
-          name: bu.name || '',
-          email: bu.email || '',
-          role: bu.role || 'student',
-          studentId: bu.studentId || '',
-          department: bu.department || '',
-          enrolledCourses: bu.enrolledCourses || (bu.role === 'student' ? ['CCS108'] : []),
-          registeredAt: bu.registeredAt || new Date().toISOString(),
+          name: profile.name || '',
+          email: profile.email || '',
+          role: profile.role || 'student',
+          studentId: profile.studentId || '',
+          department: profile.department || '',
+          enrolledCourses: profile.role === 'student' ? ['CCS108'] : [],
+          registeredAt: profile.createdAt || new Date().toISOString(),
           pendingSync: false,
         });
-      } else {
-        const existing = localById.get(uid)!;
-        localById.set(uid, {
-          ...existing,
-          name: bu.name || existing.name,
-          email: bu.email || existing.email,
-          role: bu.role || existing.role,
-          pendingSync: false,
-        });
+        changed = true;
       }
     }
 
-    localStorage.setItem('registeredUsers', JSON.stringify(Array.from(localById.values())));
+    if (changed) {
+      localStorage.setItem('registeredUsers', JSON.stringify(Array.from(localById.values())));
+      // Notify instructor dashboards that new users arrived
+      window.dispatchEvent(new CustomEvent('codelearn:userRegistered', { detail: null }));
+    }
   } catch (_e: unknown) {
-    // Silently ignore — Supabase may not be accessible
+    // Backend unreachable — silently ignore
   }
+}
+
+/** Start polling the backend every 30 seconds for new registrations */
+export function startRegistrationPolling(): () => void {
+  // Run immediately on start
+  syncBackendStudentsToLocalStorage().catch(() => {});
+
+  const intervalId = setInterval(() => {
+    syncBackendStudentsToLocalStorage().catch(() => {});
+  }, 30_000);
+
+  return () => clearInterval(intervalId);
 }

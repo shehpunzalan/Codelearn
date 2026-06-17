@@ -198,6 +198,9 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
     localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: userId }));
 
+    // Notify instructor dashboards on any open tabs to refresh student list
+    window.dispatchEvent(new CustomEvent('codelearn:userRegistered', { detail: newUser }));
+
     const appUser: User = {
       id: userId,
       name: trimmedName,

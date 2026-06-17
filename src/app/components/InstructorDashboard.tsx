@@ -13,7 +13,7 @@ import {
 import { toast } from 'sonner';
 import { createModuleNotification, createActivityNotification, createAnnouncementNotification } from '../utils/notifications';
 import { getAllProgress, getAllSubmissions, getUserStats } from '../utils/storage';
-import { syncBackendStudentsToLocalStorage } from '../utils/syncStudents';
+import { syncBackendStudentsToLocalStorage, startRegistrationPolling } from '../utils/syncStudents';
 import { AllStudentsView } from './AllStudentsView';
 import { StudentDetailView } from './StudentDetailView';
 
@@ -47,17 +47,31 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
   const [avgCompletion, setAvgCompletion] = useState(0);
   const [topStudents, setTopStudents] = useState<StudentSummary[]>([]);
   const [needsAttention, setNeedsAttention] = useState<StudentSummary[]>([]);
+  const [refreshTick, setRefreshTick] = useState(0);
 
   const totalLessons = modules.reduce((sum, m) => sum + m.totalLessons, 0);
 
-  // Fetch students from Supabase backend and merge into localStorage
+  // Poll backend every 30 seconds to sync students registered on other devices
   useEffect(() => {
-    syncBackendStudentsToLocalStorage().catch(() => {});
+    const stopPolling = startRegistrationPolling();
+    return stopPolling; // cleanup on unmount
+  }, []);
+
+  // Re-load student list whenever a new user registers (same or other tab/device)
+  useEffect(() => {
+    const handleNewUser = () => setRefreshTick(t => t + 1);
+    window.addEventListener('codelearn:userRegistered', handleNewUser);
+    window.addEventListener('storage', handleNewUser);
+    return () => {
+      window.removeEventListener('codelearn:userRegistered', handleNewUser);
+      window.removeEventListener('storage', handleNewUser);
+    };
   }, []);
 
   useEffect(() => {
     try {
       const usersData = localStorage.getItem('registeredUsers');
+      // refreshTick dependency ensures this re-runs when new users arrive
       const registeredUsers: any[] = usersData ? JSON.parse(usersData) : [];
       const students = registeredUsers.filter((u: any) => u.role === 'student');
 
@@ -118,7 +132,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
     } catch (err) {
       console.error('InstructorDashboard load error:', err);
     }
-  }, [modules, totalLessons]);
+  }, [modules, totalLessons, refreshTick]);
 
   const filteredTopStudents = topStudents.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const filteredNeedsAttention = needsAttention.filter(s =>

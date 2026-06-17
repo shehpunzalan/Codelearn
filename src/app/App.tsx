@@ -165,7 +165,34 @@ function AppContent() {
     checkSession();
   }, []);
 
+  /** Clear all module/quiz/progress data that is NOT scoped to a specific user ID.
+   *  Called when a different user logs in so they start with a clean slate. */
+  const clearProgressDataForNewUser = (newUserId: string) => {
+    const lastUserId = localStorage.getItem('lastLoggedInUserId');
+    if (lastUserId === newUserId) return; // same user — keep their progress
+
+    const progressPrefixes = [
+      'moduleProgress_', 'completedLessons_', 'quiz_',
+      'progress_', 'stats_', 'submissions_', 'userPosition_',
+    ];
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i) || '';
+      // Remove keys that match progress prefixes but don't contain the new user's id
+      // (These are either from a previous user or are unscoped shared keys)
+      if (progressPrefixes.some(p => key.startsWith(p)) && !key.includes(newUserId)) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('lastLoggedInUserId', newUserId);
+
+    // Reset module state in React so UI shows 0% for all modules
+    setModules(mockModules.map(m => ({ ...m, progress: 0, completedLessons: 0 })));
+  };
+
   const handleLogin = async (loggedInUser: User) => {
+    clearProgressDataForNewUser(loggedInUser.id);
     setUser(loggedInUser);
     setCurrentView('dashboard');
     setShowLogin(false);
@@ -187,6 +214,7 @@ function AppContent() {
   };
 
   const handleRegister = (newUser: User) => {
+    clearProgressDataForNewUser(newUser.id);
     setUser(newUser);
     setCurrentView('dashboard');
     setShowLogin(false);
@@ -210,6 +238,7 @@ function AppContent() {
       localStorage.removeItem('currentUser');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('lastLoginTime');
+      localStorage.removeItem('lastLoggedInUserId');
       toast.success('Logged out successfully');
     }
   };

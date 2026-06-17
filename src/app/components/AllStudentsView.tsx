@@ -3,14 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { 
-  ArrowLeft, Search, User, Mail, Calendar, 
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import {
+  ArrowLeft, Search, User, Mail, Calendar,
   Award, TrendingUp, AlertCircle, Eye, Filter,
   Users, CheckCircle, BookOpen, GraduationCap,
-  TrendingDown, Minus, BarChart3
+  TrendingDown, Minus, BarChart3, Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getUserStats, getAllProgress, getAllSubmissions } from '../utils/storage';
+import * as backendApi from '../services/backendApi';
 
 interface AllStudentsViewProps {
   onBack: () => void;
@@ -38,10 +40,84 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
   const [filterSection, setFilterSection] = useState<'all' | 'excellent' | 'good' | 'needs-attention'>('all');
   const [sortBy, setSortBy] = useState<'name' | 'score' | 'progress'>('name');
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<StudentData | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadStudents();
+    // Refresh when a new user registers in any tab
+    const handleNewUser = () => loadStudents();
+    window.addEventListener('codelearn:userRegistered', handleNewUser);
+    window.addEventListener('storage', handleNewUser);
+    return () => {
+      window.removeEventListener('codelearn:userRegistered', handleNewUser);
+      window.removeEventListener('storage', handleNewUser);
+    };
   }, []);
+
+  const confirmDeleteStudent = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+
+    const { id, name, email } = deleteTarget;
+
+    try {
+      // 1. Remove from localStorage registeredUsers
+      const raw = localStorage.getItem('registeredUsers');
+      const users: any[] = raw ? JSON.parse(raw) : [];
+      localStorage.setItem('registeredUsers', JSON.stringify(users.filter((u: any) => u.id !== id)));
+
+      // 2. Remove stored credentials
+      localStorage.removeItem(`userCreds_${email}`);
+      localStorage.removeItem(`userPosition_${id}`);
+
+      // 3. Remove all student activity data from localStorage
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i) || '';
+        if (
+          key.includes(`_${id}_`) || key.includes(`_${id}`) ||
+          key.startsWith(`quiz_result_${id}`) ||
+          key.startsWith(`moduleProgress_${id}`) ||
+          key.startsWith(`completedLessons_${id}`) ||
+          key.startsWith(`stats_${id}`) ||
+          key.startsWith(`progress_${id}`) ||
+          key.startsWith(`submissions_${id}`) ||
+          key === `currentUser` && (() => { try { return JSON.parse(localStorage.getItem('currentUser') || '{}').id === id; } catch { return false; } })()
+        ) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+
+      // 4. Delete from backend KV store (profile + any quiz/progress records)
+      try {
+        await backendApi.getProfile(id); // check it exists first
+        // Delete the profile record from KV store via backend
+        await fetch(`https://ebheipblvbpjvoqhshah.supabase.co/functions/v1/make-server-c61d3fdc/profile/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
+            'Content-Type': 'application/json',
+          },
+        }).catch(() => {}); // silently fail if not deployed
+      } catch (_e: unknown) { /* backend unavailable */ }
+
+      // 5. Update UI
+      setStudents(prev => prev.filter(s => s.id !== id));
+      toast.success(`Student "${name}" deleted`, {
+        description: 'Account and all associated data have been removed.',
+      });
+
+      // Notify other components
+      window.dispatchEvent(new CustomEvent('codelearn:userRegistered', { detail: null }));
+    } catch (err: unknown) {
+      toast.error('Delete failed', { description: String(err) });
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
 
   const removeLocalStudent = (studentId: string, studentName: string) => {
     try {
@@ -486,6 +562,15 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                           Intervene
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeleteTarget(student)}
+                        style={{ borderColor: 'var(--destructive)', color: 'var(--destructive)' }}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -497,9 +582,68 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
       )}
 
       {/* Results Summary */}
-      <div className="text-center text-sm text-gray-600">
+      <div className="text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>
         Showing {filteredStudents.length} of {students.length} students
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <DialogHeader>
+            <DialogTitle style={{ color: 'var(--foreground)' }} className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5" style={{ color: 'var(--destructive)' }} />
+              Delete Student Account
+            </DialogTitle>
+            <DialogDescription style={{ color: 'var(--muted-foreground)' }}>
+              This will permanently delete <strong style={{ color: 'var(--foreground)' }}>{deleteTarget?.name}</strong>'s account and all their data including quiz results, progress, and submissions. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {deleteTarget && (
+            <div className="p-4 rounded-lg" style={{ background: 'var(--accent)', border: '1px solid var(--border)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <User className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <p className="font-semibold" style={{ color: 'var(--foreground)' }}>{deleteTarget.name}</p>
+                  <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem' }}>{deleteTarget.email}</p>
+                  {deleteTarget.studentId && (
+                    <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem' }}>ID: {deleteTarget.studentId}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDeleteStudent}
+              disabled={isDeleting}
+              style={{ background: 'var(--destructive)', color: '#fff' }}
+            >
+              {isDeleting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Permanently
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
