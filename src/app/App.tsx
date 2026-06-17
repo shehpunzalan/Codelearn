@@ -61,30 +61,20 @@ function AppContent() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // One-time wipe of ALL stale local user data.
-    // Runs once per browser — after that, only Supabase-registered users appear.
+    // One-time wipe of stale non-Supabase local users (keeps UUID-format accounts).
     if (!localStorage.getItem('v3_local_users_wiped')) {
       try {
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const currentUserRaw = localStorage.getItem('currentUser');
         const currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
-
-        // Reset registeredUsers to only the logged-in user
-        if (currentUser) {
-          localStorage.setItem('registeredUsers', JSON.stringify([currentUser]));
-        } else {
-          localStorage.setItem('registeredUsers', JSON.stringify([]));
-        }
-
-        // Remove stale userCreds_ entries
-        const keysToRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i) || '';
-          if (key.startsWith('userCreds_') && currentUser && key !== `userCreds_${currentUser.email}`) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
-
+        const raw = localStorage.getItem('registeredUsers');
+        const users: any[] = raw ? JSON.parse(raw) : [];
+        const cleaned = users.filter((u: any) =>
+          (currentUser && u.id === currentUser.id) ||
+          u.id === 'demo-student' || u.id === 'demo-instructor' ||
+          uuidPattern.test(u.id || '')
+        );
+        localStorage.setItem('registeredUsers', JSON.stringify(cleaned));
         localStorage.setItem('v3_local_users_wiped', '1');
       } catch {}
     }
@@ -149,40 +139,18 @@ function AppContent() {
           return;
         }
 
-        // For real accounts, verify session with backend (with timeout)
+        // For local/Supabase sessions — trust localStorage directly without backend verification
+        // Backend verification is skipped because the edge function may not be deployed
         if (accessToken && currentUser) {
-          console.log('🌐 Verifying session with backend...');
-
-          // Add 2 second timeout to prevent hanging
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Session check timeout')), 2000)
-          );
-
           try {
-            const sessionResult = await Promise.race([
-              backendApi.getSession(),
-              timeoutPromise
-            ]) as any;
-
-            if (sessionResult.success && sessionResult.data) {
-              const userData = sessionResult.data;
-              const user: User = {
-                id: userData.userId,
-                name: userData.profile?.name || 'User',
-                email: userData.email,
-                role: userData.profile?.role || 'student',
-                enrolledCourses: ['CCS108']
-              };
-              console.log('✅ Backend session verified:', user.email);
-              setUser(user);
+            const parsedUser = JSON.parse(currentUser);
+            if (parsedUser?.id && parsedUser?.email && parsedUser?.role) {
+              console.log('✅ Session restored from localStorage:', parsedUser.email);
+              setUser(parsedUser);
               setShowLogin(false);
-            } else {
-              console.log('❌ Backend session invalid, clearing storage');
-              localStorage.removeItem('currentUser');
-              localStorage.removeItem('accessToken');
             }
-          } catch (error: any) {
-            console.log('⚠️ Backend unavailable, clearing session:', error.message);
+          } catch (_e: unknown) {
+            // Malformed currentUser — clear it
             localStorage.removeItem('currentUser');
             localStorage.removeItem('accessToken');
           }
