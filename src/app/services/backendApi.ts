@@ -1,6 +1,10 @@
 import { projectId, publicAnonKey } from '/utils/supabase/info';
 
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c61d3fdc`;
+// Primary: Make platform's backend (always reachable from browser, proxies to hoofdryqutuucipuqxca)
+const MAKE_API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c61d3fdc`;
+// Secondary: User's own deployed function on hoofdryqutuucipuqxca (after GitHub Action deploys it)
+const USER_API_URL = `https://hoofdryqutuucipuqxca.supabase.co/functions/v1/server`;
+const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
 
 // Helper to get auth token
 function getAuthToken(): string {
@@ -16,45 +20,38 @@ function safeParseJSON(text: string): any {
   }
 }
 
-// Helper function to make API requests
-async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${getAuthToken()}`,
-  };
-
-  let response: Response;
-  let text: string;
-
-  try {
-    response = await fetch(url, {
-      ...options,
-      headers: { ...defaultHeaders, ...options.headers },
-    });
-    text = await response.text();
-  } catch (networkErr: unknown) {
-    const msg = 'Cannot reach the server. Please check your connection.';
-    console.error(`API Network Error (${endpoint}):`, networkErr);
-    throw new Error(msg);
-  }
-
+async function fetchFromUrl(url: string, endpoint: string, options: RequestInit, authKey: string): Promise<any> {
+  const fullUrl = `${url}${endpoint}`;
+  const response = await fetch(fullUrl, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authKey}`,
+      ...(options.headers || {}),
+    },
+  });
+  const text = await response.text();
   const data = safeParseJSON(text);
-
-  if (data === null) {
-    // Server returned non-JSON (HTML error page, empty body, etc.)
-    console.error(`API Error (${endpoint}): non-JSON response [HTTP ${response!.status}]:`, text.slice(0, 300));
-    throw new Error(`Server returned an unexpected response (HTTP ${response!.status}). Please redeploy the Supabase edge function.`);
-  }
-
-  if (!response!.ok || data.success === false) {
-    const msg = (data && data.error) ? String(data.error) : `Request failed (HTTP ${response!.status})`;
-    console.error(`API Error (${endpoint}):`, msg);
-    throw new Error(msg);
-  }
-
+  if (data === null || (!response.ok && !data)) throw new Error(`HTTP ${response.status}`);
+  if (data?.success === false) throw new Error(data.error || `HTTP ${response.status}`);
   return data;
+}
+
+// Helper function to make API requests — tries Make platform first, then user's own function
+async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
+  // Try Make platform backend (primary — browser CSP allows this)
+  try {
+    return await fetchFromUrl(MAKE_API_URL, endpoint, options, getAuthToken());
+  } catch (makeErr: unknown) {
+    console.warn(`Make backend failed for ${endpoint}:`, makeErr);
+  }
+  // Try user's own Supabase function (secondary — works after GitHub Action deploys it)
+  try {
+    return await fetchFromUrl(USER_API_URL, endpoint, options, USER_ANON_KEY);
+  } catch (userErr: unknown) {
+    console.error(`Both backends failed for ${endpoint}:`, userErr);
+    throw new Error('Cannot reach the server. Please ensure the Supabase edge function is deployed.');
+  }
 }
 
 // ============================================

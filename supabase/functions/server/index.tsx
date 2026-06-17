@@ -19,27 +19,35 @@ app.use("/*", cors({
 
 app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
 
-// AUTH
+// AUTH — proxy to user's real Supabase project (server-side avoids browser CSP)
+const USER_PROJECT_URL = 'https://hoofdryqutuucipuqxca.supabase.co';
+const USER_SERVICE_KEY = Deno.env.get('USER_SERVICE_ROLE_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTg2MjYxMiwiZXhwIjoyMDk1NDM4NjEyfQ.uOlSQmQ7UmDjRfWBW6PxglT1QaOT_XBi4lPd1sJO3a0';
+const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
+
 app.post("/auth/signup", async (c) => {
   try {
     const body = await c.req.json();
     const { email, password, name, role, studentId, section, yearLevel } = body;
 
-    // Save to the user's real Supabase project (server-side, no CSP restriction)
-    const USER_PROJECT_URL = 'https://hoofdryqutuucipuqxca.supabase.co';
-    const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
-
-    const signupRes = await fetch(`${USER_PROJECT_URL}/auth/v1/signup`, {
+    // Use admin API with service role key so email is auto-confirmed
+    const signupRes = await fetch(`${USER_PROJECT_URL}/auth/v1/admin/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': USER_ANON_KEY,
-        'Authorization': `Bearer ${USER_ANON_KEY}`,
+        'apikey': USER_SERVICE_KEY,
+        'Authorization': `Bearer ${USER_SERVICE_KEY}`,
       },
       body: JSON.stringify({
         email,
         password,
-        data: { name, role: role || 'student', studentId: studentId || '', section: section || '', yearLevel: yearLevel || '1st Year', registeredAt: new Date().toISOString() }
+        email_confirm: true,
+        user_metadata: {
+          name, role: role || 'student',
+          studentId: studentId || '',
+          section: section || '',
+          yearLevel: yearLevel || '1st Year',
+          registeredAt: new Date().toISOString(),
+        },
       }),
     });
 
@@ -48,13 +56,25 @@ app.post("/auth/signup", async (c) => {
     try { signupData = JSON.parse(signupText); } catch { /* non-JSON */ }
 
     if (!signupRes.ok) {
-      const errMsg = signupData?.msg || signupData?.message || signupData?.error_description || signupData?.error || `HTTP ${signupRes.status}`;
-      return c.json({ success: false, error: errMsg }, 400);
+      // Fall back to anon signup if admin API fails
+      const anonRes = await fetch(`${USER_PROJECT_URL}/auth/v1/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': USER_ANON_KEY, 'Authorization': `Bearer ${USER_ANON_KEY}` },
+        body: JSON.stringify({ email, password, data: { name, role: role || 'student', studentId: studentId || '', section: section || '', yearLevel: yearLevel || '1st Year', registeredAt: new Date().toISOString() } }),
+      });
+      const anonText = await anonRes.text();
+      let anonData: any = null;
+      try { anonData = JSON.parse(anonText); } catch {}
+      if (!anonRes.ok) {
+        const errMsg = anonData?.msg || anonData?.error_description || anonData?.error || `HTTP ${anonRes.status}`;
+        return c.json({ success: false, error: errMsg }, 400);
+      }
+      signupData = anonData;
     }
 
     const userId = signupData?.id || signupData?.user?.id;
 
-    // Also save profile to KV store for quick lookup
+    // Save profile to KV store
     if (userId) {
       await kv.set(`profile_${userId}`, {
         userId, name, email, role: role || 'student',
