@@ -1,0 +1,783 @@
+import React, { useState, useEffect } from 'react';
+import { User, Module } from './types';
+import { mockModules } from './data/mockData';
+import { Login } from './components/Login';
+import { Register } from './components/Register';
+import { Header } from './components/Header';
+import { StudentDashboard } from './components/StudentDashboard';
+import { InstructorDashboard } from './components/InstructorDashboard';
+import { ModulesPage } from './components/ModulesPage';
+import { CourseManagement } from './components/CourseManagement';
+import { LessonViewer } from './components/LessonViewerSimple';
+import { CodeEditorPage } from './components/CodeEditorPage';
+import { FeedbackPage } from './components/FeedbackPage';
+import { ProgressView } from './components/ProgressView';
+import { SettingsPage } from './components/SettingsPage';
+import { AnalyticsView } from './components/AnalyticsView';
+import { MonitoringView } from './components/MonitoringView';
+import { ReferencesView } from './components/ReferencesView';
+import { VideoTutorialPage } from './components/VideoTutorialPage';
+import { ReadingContentPage } from './components/ReadingContentPage';
+import { AudioLecturePage } from './components/AudioLecturePage';
+import { InteractiveGamePage } from './components/InteractiveGamePage';
+import { LearningPathReadingPage } from './components/LearningPathReadingPage';
+import { DataViewer } from './components/DataViewer';
+import { ConnectionTest } from './components/ConnectionTest';
+import { DatabaseTest } from './components/DatabaseTest';
+import { toast, Toaster } from 'sonner';
+import * as backendApi from './services/backendApi';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { getUserStats } from './utils/storage';
+
+// CodeLearn AI - Neural Network Pattern Recognition System for Java OOP
+function AppContent() {
+  console.log('🚀 AppContent rendering - timestamp:', new Date().toISOString());
+  console.log('📦 React version:', React.version);
+  console.log('🌐 Window location:', window.location.href);
+
+  const [user, setUser] = useState<User | null>(null);
+  const [showLogin, setShowLogin] = useState(true);
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [resumePrompt, setResumePrompt] = useState<{ moduleId: string; lessonId: string; moduleTitle: string; lessonTitle: string } | null>(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [selectedLessonTitle, setSelectedLessonTitle] = useState<string>('');
+  const [selectedLessonContent, setSelectedLessonContent] = useState<any>(null);
+  const [modules, setModules] = useState<Module[]>(() => {
+    // Restore persisted progress on top of mock data so progress survives page reloads
+    return mockModules.map(m => {
+      try {
+        const saved = localStorage.getItem(`moduleProgress_${m.id}`);
+        if (saved) {
+          const { progress, completedLessons } = JSON.parse(saved);
+          return { ...m, progress, completedLessons };
+        }
+      } catch {}
+      return m;
+    });
+  });
+  const [editorRefreshKey, setEditorRefreshKey] = useState(0); // Force refresh of code editor
+  const [isCheckingSession, setIsCheckingSession] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    // One-time wipe of stale non-Supabase local users (keeps UUID-format accounts).
+    if (!localStorage.getItem('v3_local_users_wiped')) {
+      try {
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const currentUserRaw = localStorage.getItem('currentUser');
+        const currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
+        const raw = localStorage.getItem('registeredUsers');
+        const users: any[] = raw ? JSON.parse(raw) : [];
+        const cleaned = users.filter((u: any) =>
+          (currentUser && u.id === currentUser.id) ||
+          u.id === 'demo-student' || u.id === 'demo-instructor' ||
+          uuidPattern.test(u.id || '')
+        );
+        localStorage.setItem('registeredUsers', JSON.stringify(cleaned));
+        localStorage.setItem('v3_local_users_wiped', '1');
+      } catch {}
+    }
+
+    // One-time fix: remove falsely pre-completed lesson1-1 and lesson1-2
+    // that were seeded by hardcoded `completed: true` in lessonsData.ts (now fixed).
+    const fixKey = 'v2_lesson_defaults_fixed';
+    if (!localStorage.getItem(fixKey)) {
+      // Clear completedLessons entries that contain lesson1-1 or lesson1-2 if they
+      // were never earned via a real quiz (no matching quiz_ entry exists).
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('completedLessons_mod1')) {
+          try {
+            const arr: string[] = JSON.parse(localStorage.getItem(key)!);
+            const hasRealQuiz1 = !!localStorage.getItem('quiz_mod1_lesson1-1');
+            const hasRealQuiz2 = !!localStorage.getItem('quiz_mod1_lesson1-2');
+            const cleaned = arr.filter(id =>
+              (id !== 'lesson1-1' || hasRealQuiz1) &&
+              (id !== 'lesson1-2' || hasRealQuiz2)
+            );
+            if (cleaned.length !== arr.length) {
+              localStorage.setItem(key, JSON.stringify(cleaned));
+              // Recalculate moduleProgress for mod1
+              const mod = mockModules.find(m => m.id === 'mod1');
+              if (mod) {
+                const pct = Math.round((cleaned.length / mod.totalLessons) * 100);
+                localStorage.setItem('moduleProgress_mod1', JSON.stringify({ progress: pct, completedLessons: cleaned.length }));
+              }
+            }
+          } catch {}
+        }
+      }
+      localStorage.setItem(fixKey, '1');
+    }
+
+    setIsInitialized(true);
+  }, []);
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      console.log('🔍 Checking session...');
+
+      try {
+        const currentUser = localStorage.getItem('currentUser');
+        const accessToken = localStorage.getItem('accessToken');
+
+        console.log('📦 Found in localStorage:', {
+          hasUser: !!currentUser,
+          tokenType: accessToken?.substring(0, 10)
+        });
+
+        // If we have demo tokens, use them directly without backend verification
+        if (accessToken === 'demo-token-student' || accessToken === 'demo-token-instructor') {
+          if (currentUser) {
+            const parsedUser = JSON.parse(currentUser);
+            console.log('✅ Demo user loaded:', parsedUser.email);
+            setUser(parsedUser);
+            setShowLogin(false);
+          }
+          return;
+        }
+
+        // For local/Supabase sessions — trust localStorage directly without backend verification
+        // Backend verification is skipped because the edge function may not be deployed
+        if (accessToken && currentUser) {
+          try {
+            const parsedUser = JSON.parse(currentUser);
+            if (parsedUser?.id && parsedUser?.email && parsedUser?.role) {
+              console.log('✅ Session restored from localStorage:', parsedUser.email);
+              setUser(parsedUser);
+              setShowLogin(false);
+            }
+          } catch (_e: unknown) {
+            // Malformed currentUser — clear it
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('accessToken');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Session check error:', error);
+      } finally {
+        console.log('✅ Session check complete');
+      }
+    };
+
+    checkSession();
+  }, []);
+
+  /** Clear all module/quiz/progress data that is NOT scoped to a specific user ID.
+   *  Called when a different user logs in so they start with a clean slate. */
+  const clearProgressDataForNewUser = (newUserId: string) => {
+    const lastUserId = localStorage.getItem('lastLoggedInUserId');
+    if (lastUserId === newUserId) return; // same user — keep their progress
+
+    const progressPrefixes = [
+      'moduleProgress_', 'completedLessons_', 'quiz_',
+      'progress_', 'stats_', 'submissions_', 'userPosition_',
+    ];
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i) || '';
+      // Remove keys that match progress prefixes but don't contain the new user's id
+      // (These are either from a previous user or are unscoped shared keys)
+      if (progressPrefixes.some(p => key.startsWith(p)) && !key.includes(newUserId)) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('lastLoggedInUserId', newUserId);
+
+    // Reset module state in React so UI shows 0% for all modules
+    setModules(mockModules.map(m => ({ ...m, progress: 0, completedLessons: 0 })));
+  };
+
+  const handleLogin = async (loggedInUser: User) => {
+    clearProgressDataForNewUser(loggedInUser.id);
+    setUser(loggedInUser);
+    setCurrentView('dashboard');
+    setShowLogin(false);
+    // Fetch last saved position and prompt to resume (skip for demo accounts)
+    const token = localStorage.getItem('accessToken');
+    if (token && token !== 'demo-token-student' && token !== 'demo-token-instructor') {
+      try {
+        const res = await backendApi.getUserPosition(loggedInUser.id);
+        if (res?.data?.moduleId && res?.data?.lessonId) {
+          setResumePrompt({
+            moduleId: res.data.moduleId,
+            lessonId: res.data.lessonId,
+            moduleTitle: res.data.moduleTitle || 'Module',
+            lessonTitle: res.data.lessonTitle || 'Lesson',
+          });
+        }
+      } catch (_) { /* silently ignore – backend may not have a saved position */ }
+    }
+  };
+
+  const handleRegister = (newUser: User) => {
+    clearProgressDataForNewUser(newUser.id);
+    setUser(newUser);
+    setCurrentView('dashboard');
+    setShowLogin(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Call backend signout (skip for demo accounts)
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken && accessToken !== 'demo-token-student' && accessToken !== 'demo-token-instructor') {
+        await backendApi.signOut();
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear local state regardless of backend result
+      setUser(null);
+      setShowLogin(true);
+      setCurrentView('dashboard');
+      setSelectedModuleId(null);
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('lastLoginTime');
+      localStorage.removeItem('lastLoggedInUserId');
+      toast.success('Logged out successfully');
+    }
+  };
+
+  const handleNavigate = (view: string) => {
+    setCurrentView(view);
+    if (view !== 'module' && view !== 'code-editor') {
+      setSelectedModuleId(null);
+      setSelectedLessonId(null);
+    }
+  };
+
+  const handleSelectModule = (moduleId: string) => {
+    setSelectedModuleId(moduleId);
+    setCurrentView('module');
+  };
+
+  /** Persist the user's current lesson position to the backend so they can resume later. */
+  const savePosition = (moduleId: string, lessonId: string) => {
+    if (!user) return;
+    const mod = modules.find(m => m.id === moduleId);
+    const lesson = mod?.lessons.find(l => l.id === lessonId);
+    backendApi.saveUserPosition({
+      userId: user.id,
+      moduleId,
+      lessonId,
+      moduleTitle: mod?.title,
+      lessonTitle: lesson?.title,
+    });
+  };
+
+  const handleLessonComplete = (moduleId: string, completedCount: number, total: number) => {
+    const progress = Math.round((completedCount / total) * 100);
+    // Persist so progress survives navigation / reload
+    localStorage.setItem(`moduleProgress_${moduleId}`, JSON.stringify({ progress, completedLessons: completedCount }));
+    setModules(prev => prev.map(m =>
+      m.id === moduleId ? { ...m, progress, completedLessons: completedCount } : m
+    ));
+    // Keep UserStats in sync so the dashboard counter is accurate
+    if (user) syncUserStats(user.id);
+  };
+
+  const handleModuleComplete = (moduleId: string) => {
+    setModules(prev => {
+      const updated = prev.map(m => {
+        if (m.id === moduleId) {
+          localStorage.setItem(`moduleProgress_${moduleId}`, JSON.stringify({ progress: 100, completedLessons: m.totalLessons }));
+          return { ...m, progress: 100, completedLessons: m.totalLessons };
+        }
+        return m;
+      });
+      // Sync stats after state is committed
+      if (user) setTimeout(() => syncUserStats(user.id), 0);
+      return updated;
+    });
+  };
+
+  /** Write a current snapshot of module progress into UserStats localStorage so the dashboard reads it. */
+  const syncUserStats = (userId: string) => {
+    const allModuleProgress = mockModules.map(m => {
+      try {
+        const saved = localStorage.getItem(`moduleProgress_${m.id}`);
+        return saved ? { ...m, ...JSON.parse(saved) } : m;
+      } catch { return m; }
+    });
+    const completedModules = allModuleProgress.filter(m => m.progress === 100).map(m => m.id);
+    const totalLessonsCompleted = allModuleProgress.reduce((s, m) => s + (m.completedLessons || 0), 0);
+
+    const existing = getUserStats(userId);
+    const updated = {
+      ...(existing ?? {}),
+      userId,
+      totalLessonsCompleted,
+      totalModulesCompleted: completedModules.length,
+      completedModules,
+      lastActiveDate: new Date().toISOString(),
+    };
+    localStorage.setItem(`stats_${userId}`, JSON.stringify(updated));
+  };
+
+  const handleNextModule = () => {
+    if (!selectedModuleId) return;
+    const currentIndex = modules.findIndex(m => m.id === selectedModuleId);
+    const next = modules[currentIndex + 1];
+    if (next) {
+      setSelectedModuleId(next.id);
+    } else {
+      setCurrentView('modules');
+      setSelectedModuleId(null);
+    }
+  };
+
+  const handleStartCoding = (moduleId: string, lessonId: string) => {
+    setSelectedModuleId(moduleId);
+    setSelectedLessonId(lessonId);
+    setCurrentView('code-editor');
+    setEditorRefreshKey(prevKey => prevKey + 1);
+    savePosition(moduleId, lessonId);
+  };
+
+  const handleOpenVideoTutorial = (moduleId: string, lessonId: string, lessonTitle: string) => {
+    setSelectedModuleId(moduleId);
+    setSelectedLessonId(lessonId);
+    setSelectedLessonTitle(lessonTitle);
+    setCurrentView('video-tutorial');
+    savePosition(moduleId, lessonId);
+  };
+
+  const handleOpenReadingContent = (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => {
+    setSelectedModuleId(moduleId);
+    setSelectedLessonId(lessonId);
+    setSelectedLessonTitle(lessonTitle);
+    setSelectedLessonContent(lessonContent);
+    setCurrentView('learning-path-reading');
+    savePosition(moduleId, lessonId);
+  };
+
+  const handleOpenAudioLecture = (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => {
+    setSelectedModuleId(moduleId);
+    setSelectedLessonId(lessonId);
+    setSelectedLessonTitle(lessonTitle);
+    setSelectedLessonContent(lessonContent);
+    setCurrentView('audio-lecture');
+    savePosition(moduleId, lessonId);
+  };
+
+  const handleOpenInteractiveGame = (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => {
+    setSelectedModuleId(moduleId);
+    setSelectedLessonId(lessonId);
+    setSelectedLessonTitle(lessonTitle);
+    setSelectedLessonContent(lessonContent);
+    setCurrentView('interactive-game');
+    savePosition(moduleId, lessonId);
+  };
+
+  const handleUpdateProfile = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    
+    // Also update in registeredUsers
+    const usersData = localStorage.getItem('registeredUsers');
+    if (usersData) {
+      const registeredUsers = JSON.parse(usersData);
+      const userIndex = registeredUsers.findIndex((u: any) => u.id === updatedUser.id);
+      if (userIndex !== -1) {
+        registeredUsers[userIndex] = {
+          ...registeredUsers[userIndex],
+          name: updatedUser.name,
+          email: updatedUser.email,
+        };
+        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+      }
+    }
+    
+    setCurrentView('dashboard');
+  };
+
+  // Show loading while initializing
+  if (!isInitialized) {
+    console.log('⏳ App initializing...');
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading CodeLearn AI...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Authentication screens - simplified logic
+  if (!user) {
+    console.log(showLogin ? '🔐 Rendering login screen' : '📝 Rendering register screen');
+
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        {showLogin ? (
+          <Login
+            onLogin={handleLogin}
+            onShowRegister={() => setShowLogin(false)}
+          />
+        ) : (
+          <Register
+            onRegister={handleRegister}
+            onShowLogin={() => setShowLogin(true)}
+          />
+        )}
+        <Toaster position="top-right" richColors closeButton />
+      </div>
+    );
+  }
+
+  // Find the currently selected module based on selectedModuleId
+  const selectedModule = selectedModuleId ? modules.find(module => module.id === selectedModuleId) : null;
+
+  // Find the currently selected lesson within the selected module
+  const selectedLesson = selectedModule && selectedLessonId
+    ? selectedModule.lessons.find(lesson => lesson.id === selectedLessonId)
+    : null;
+
+  console.log('🎨 Rendering main app - User:', user?.name, 'View:', currentView);
+
+  return (
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50">
+      {resumePrompt && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '1.5rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg, 12px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            padding: '1rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            maxWidth: '480px',
+            width: 'calc(100vw - 2rem)',
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontWeight: 600, color: 'var(--foreground)', fontSize: '0.95rem' }}>
+              Resume where you left off?
+            </p>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted-foreground)', fontSize: '0.82rem' }}>
+              {resumePrompt.moduleTitle} &rsaquo; {resumePrompt.lessonTitle}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const mod = modules.find(m => m.id === resumePrompt.moduleId);
+              if (mod) {
+                setSelectedModuleId(resumePrompt.moduleId);
+                setCurrentView('module');
+              }
+              setResumePrompt(null);
+            }}
+            style={{
+              background: 'var(--primary)',
+              color: 'var(--primary-foreground)',
+              border: 'none',
+              borderRadius: 'var(--radius-md, 8px)',
+              padding: '0.45rem 1rem',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Resume
+          </button>
+          <button
+            onClick={() => setResumePrompt(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--muted-foreground)',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              lineHeight: 1,
+              padding: '0 0.25rem',
+            }}
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+      <Header
+        user={user} 
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
+        onSettings={() => setCurrentView('settings')}
+      />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {currentView === 'dashboard' && user.role === 'student' && (
+          <StudentDashboard
+            user={user}
+            modules={modules}
+            onSelectModule={handleSelectModule}
+            onViewProgress={() => setCurrentView('progress')}
+            onViewFeedback={() => setCurrentView('feedback')}
+            onNavigate={handleNavigate}
+          />
+        )}
+
+        {currentView === 'dashboard' && user.role === 'instructor' && (
+          <InstructorDashboard
+            user={user}
+            modules={modules}
+            onSelectModule={handleSelectModule}
+            onNavigate={handleNavigate}
+          />
+        )}
+
+        {currentView === 'modules' && (
+          <ModulesPage
+            modules={modules}
+            onSelectModule={handleSelectModule}
+          />
+        )}
+
+        {currentView === 'module' && selectedModule && (
+          <LessonViewer
+            key={selectedModule.id}
+            module={selectedModule}
+            onBack={() => setCurrentView('modules')}
+            onViewFeedback={() => setCurrentView('feedback')}
+            onStartCoding={handleStartCoding}
+            onOpenVideoTutorial={handleOpenVideoTutorial}
+            onOpenReadingContent={handleOpenReadingContent}
+            onOpenAudioLecture={handleOpenAudioLecture}
+            onOpenInteractiveGame={handleOpenInteractiveGame}
+            onLessonComplete={handleLessonComplete}
+            onModuleComplete={handleModuleComplete}
+            onNextModule={modules.findIndex(m => m.id === selectedModuleId) < modules.length - 1 ? handleNextModule : undefined}
+            onLessonOpen={savePosition}
+          />
+        )}
+
+        {currentView === 'code-editor' && selectedModule && selectedLesson && (
+          <CodeEditorPage
+            key={`${selectedModule.id}-${selectedLesson.id}-${editorRefreshKey}`} // Force remount on navigation
+            module={selectedModule}
+            lesson={selectedLesson}
+            onBack={() => {
+              setCurrentView('module');
+              setSelectedLessonId(null);
+              setEditorRefreshKey(prevKey => prevKey + 1); // Increment for next visit
+            }}
+            onViewFeedback={() => setCurrentView('feedback')}
+          />
+        )}
+
+        {currentView === 'feedback' && (
+          <FeedbackPage onBack={() => setCurrentView('code-editor')} />
+        )}
+
+        {currentView === 'progress' && (
+          <ProgressView onBack={() => setCurrentView('dashboard')} />
+        )}
+
+        {currentView === 'settings' && (
+          <SettingsPage
+            user={user}
+            onSave={handleUpdateProfile}
+            onNavigate={setCurrentView}
+          />
+        )}
+
+        {currentView === 'course-management' && user.role === 'instructor' && (
+          <CourseManagement 
+            user={user}
+            modules={modules}
+            onBack={() => setCurrentView('dashboard')} 
+          />
+        )}
+
+        {currentView === 'monitoring' && user.role === 'instructor' && (
+          <MonitoringView onBack={() => setCurrentView('dashboard')} />
+        )}
+
+        {currentView === 'references' && (
+          <ReferencesView 
+            modules={mockModules}
+            onBack={() => setCurrentView('dashboard')} 
+          />
+        )}
+
+        {currentView === 'video-tutorial' && selectedModuleId && selectedLessonId && (
+          <VideoTutorialPage 
+            moduleId={selectedModuleId}
+            lessonId={selectedLessonId}
+            lessonTitle={selectedLessonTitle}
+            onBack={() => setCurrentView('module')} 
+          />
+        )}
+
+        {currentView === 'learning-path-reading' && selectedModuleId && selectedLessonId && (
+          <LearningPathReadingPage 
+            moduleId={selectedModuleId}
+            lessonId={selectedLessonId}
+            lessonTitle={selectedLessonTitle}
+            lessonContent={selectedLessonContent || {}}
+            onBack={() => setCurrentView('module')} 
+          />
+        )}
+
+        {currentView === 'audio-lecture' && selectedModuleId && selectedLessonId && (
+          <AudioLecturePage 
+            moduleId={selectedModuleId}
+            lessonId={selectedLessonId}
+            lessonTitle={selectedLessonTitle}
+            lessonContent={selectedLessonContent || {}}
+            onBack={() => setCurrentView('module')} 
+          />
+        )}
+
+        {currentView === 'interactive-game' && selectedModuleId && selectedLessonId && (
+          <InteractiveGamePage
+            moduleId={selectedModuleId}
+            lessonId={selectedLessonId}
+            lessonTitle={selectedLessonTitle}
+            lessonContent={selectedLessonContent || {}}
+            onBack={() => setCurrentView('module')}
+          />
+        )}
+
+        {currentView === 'analytics' && user.role === 'instructor' && (
+          <AnalyticsView user={user} onBack={() => setCurrentView('dashboard')} />
+        )}
+
+        {currentView === 'data-viewer' && (
+          <DataViewer onBack={() => setCurrentView('dashboard')} />
+        )}
+
+        {currentView === 'connection-test' && (
+          <ConnectionTest onBack={() => setCurrentView('settings')} />
+        )}
+
+        {currentView === 'database-test' && (
+          <DatabaseTest onBack={() => setCurrentView('settings')} />
+        )}
+
+        {/* Fallback in case no view matches */}
+        {!['dashboard', 'modules', 'module', 'code-editor', 'feedback', 'progress', 'settings', 'course-management', 'monitoring', 'references', 'video-tutorial', 'learning-path-reading', 'audio-lecture', 'interactive-game', 'analytics', 'data-viewer', 'connection-test', 'database-test'].includes(currentView) && (
+          <div className="text-center py-20">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
+            <p className="text-gray-600 mb-6">The view "{currentView}" doesn't exist.</p>
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Return to Dashboard
+            </button>
+          </div>
+        )}
+      </main>
+
+      {/* Toast Notifications */}
+      <Toaster position="top-right" richColors closeButton />
+    </div>
+  );
+}
+
+// Wrap with error boundary
+function App() {
+  console.log('🎯 App function called - CodeLearn AI starting');
+  console.log('📦 React:', React.version);
+
+  // Safety check - ensure we always return valid JSX
+  if (!React || typeof React.createElement !== 'function') {
+    console.error('❌ React not loaded properly');
+    return null;
+  }
+
+  try {
+    console.log('✅ Rendering ErrorBoundary and AppContent');
+    return (
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('🔴 App render error:', error);
+    // Fallback error UI
+    return (
+      <div style={{
+        minHeight: '100vh',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fee2e2',
+        padding: '2rem',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        <div style={{
+          maxWidth: '600px',
+          backgroundColor: 'white',
+          padding: '2rem',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        }}>
+          <h1 style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            ⚠️ Application Error
+          </h1>
+          <p style={{ color: '#4b5563', marginBottom: '1rem' }}>
+            {error instanceof Error ? error.message : 'An unknown error occurred while loading CodeLearn AI'}
+          </p>
+          {error instanceof Error && error.stack && (
+            <details style={{ marginBottom: '1rem' }}>
+              <summary style={{ cursor: 'pointer', color: '#6b7280', fontSize: '0.875rem' }}>
+                Show error details
+              </summary>
+              <pre style={{
+                marginTop: '0.5rem',
+                padding: '0.75rem',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+                overflow: 'auto',
+                maxHeight: '200px'
+              }}>
+                {error.stack}
+              </pre>
+            </details>
+          )}
+          <button
+            onClick={() => {
+              console.log('🔄 Reloading page...');
+              window.location.reload();
+            }}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              width: '100%'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+          >
+            Reload Application
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default App;
