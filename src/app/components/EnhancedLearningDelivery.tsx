@@ -1006,67 +1006,24 @@ export function EnhancedLearningDelivery({
               {/* Section 4: Hands-On Practice */}
               {learningSections[currentSection].type === 'practice' && (
                 <div className="space-y-4">
-                  <div className="bg-white rounded-lg border-2 border-gray-200 p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <Code className="w-6 h-6 text-pink-600" />
-                      Hands-On Practice Exercises
-                    </h3>
-                    
-                    {(comprehensiveLessonsContent[comprehensiveLessonKey]?.practiceExercises || [
-                      {
-                        question: 'Write a Java program that demonstrates the concepts learned in this lesson.',
-                        hints: ['Start with a class declaration', 'Add a main method', 'Implement the core concepts'],
-                        difficulty: 'Intermediate'
-                      }
-                    ]).map((exercise: any, idx: number) => (
-                      <div key={idx} className="mb-6 border-2 border-pink-200 rounded-lg p-5 bg-pink-50">
-                        <div className="flex items-start justify-between mb-3">
-                          <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                            <Target className="w-5 h-5 text-pink-600" />
-                            Exercise {idx + 1}
-                          </h4>
-                          <Badge className={
-                            exercise.difficulty === 'Beginner' ? 'bg-green-500' :
-                            exercise.difficulty === 'Intermediate' ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }>
-                            {exercise.difficulty}
-                          </Badge>
-                        </div>
-                        
-                        <p className="text-gray-700 mb-4">{exercise.question}</p>
-                        
-                        {exercise.hints && exercise.hints.length > 0 && (
-                          <div className="bg-white p-4 rounded-lg border-2 border-pink-300">
-                            <h5 className="font-semibold text-gray-900 mb-2 text-sm flex items-center gap-2">
-                              <Lightbulb className="w-4 h-4 text-yellow-600" />
-                              Hints
-                            </h5>
-                            <ul className="space-y-1">
-                              {exercise.hints.map((hint: string, hintIdx: number) => (
-                                <li key={hintIdx} className="text-sm text-gray-600">
-                                  {hintIdx + 1}. {hint}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                  <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-lg, 12px)', border: '2px solid var(--border)', padding: '2rem', fontFamily: 'var(--font-sans)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div style={{ width: 44, height: 44, background: 'linear-gradient(135deg, var(--primary), var(--secondary, #8b5cf6))', borderRadius: 'var(--radius-md, 8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Code style={{ width: 22, height: 22, color: 'white' }} />
                       </div>
-                    ))}
-
-                    <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg p-6 mt-6">
-                      <h4 className="font-semibold text-gray-900 mb-3">Ready to Code?</h4>
-                      <p className="text-gray-700 mb-4 text-sm">
-                        Open the code editor to practice these exercises with AI-powered feedback
-                      </p>
-                      <Button
-                        className="bg-pink-600 hover:bg-pink-700"
-                        onClick={() => onStartCoding && onStartCoding(moduleId, lessonId)}
-                      >
-                        <Play className="w-4 h-4 mr-2" />
-                        Open Code Editor
-                      </Button>
+                      <div>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--foreground)', margin: 0, fontFamily: 'var(--font-sans)' }}>Hands-On Practice</h3>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--muted-foreground)', margin: 0, fontFamily: 'var(--font-sans)' }}>Apply what you learned by writing real Java code</p>
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => onStartCoding && onStartCoding(moduleId, lessonId)}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.75rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary, #8b5cf6))', color: 'white', border: 'none', borderRadius: 'var(--radius-md, 8px)', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+                    >
+                      <Play style={{ width: 18, height: 18 }} />
+                      Open Code Editor
+                    </button>
                   </div>
                 </div>
               )}
