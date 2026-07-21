@@ -1,7 +1,9 @@
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+import { publicAnonKey } from '/utils/supabase/info';
 
-// Primary: Make platform's backend (always reachable from browser, proxies to hoofdryqutuucipuqxca)
-const MAKE_API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c61d3fdc`;
+// Make platform's own project ID — hardcoded because it never changes regardless of which
+// Supabase project the user links. The make-server-c61d3fdc function lives here.
+const MAKE_PROJECT_ID = 'hnlhcbzpeijdzueipejx';
+const MAKE_API_URL = `https://${MAKE_PROJECT_ID}.supabase.co/functions/v1/make-server-c61d3fdc`;
 // Secondary: User's own deployed function on hoofdryqutuucipuqxca (after GitHub Action deploys it)
 const USER_API_URL = `https://hoofdryqutuucipuqxca.supabase.co/functions/v1/server`;
 const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
