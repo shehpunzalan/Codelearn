@@ -356,43 +356,43 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
 
         {/* Leaderboard */}
         <div>
-          <Card className="border-0 shadow-md" style={{ background: 'linear-gradient(160deg, var(--card) 60%, rgba(251,191,36,0.08) 100%)' }}>
+          <Card className="border-0 shadow-md" style={{ background: 'var(--card)', fontFamily: 'var(--font-sans)' }}>
             <CardContent className="p-6">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-                <Trophy style={{ width: 22, height: 22, color: '#ca8a04' }} />
-                <h2 style={{ color: 'var(--foreground)', margin: 0 }} className="text-xl font-bold">Top 10 Leaderboard</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1.1rem' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Trophy style={{ width: 18, height: 18, color: 'white' }} />
+                </div>
+                <h2 style={{ color: 'var(--foreground)', margin: 0, fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-sans)' }}>Top 10 Leaderboard</h2>
               </div>
               {leaderboard.length === 0 ? (
-                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem' }}>Complete lessons to appear on the leaderboard!</p>
+                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', fontFamily: 'var(--font-sans)' }}>Complete lessons to appear on the leaderboard!</p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   {leaderboard.map((entry) => {
                     const rankIcon = entry.rank === 1
-                      ? <Crown style={{ width: 16, height: 16, color: '#f59e0b' }} />
+                      ? <Crown style={{ width: 15, height: 15, color: 'var(--warning, #ca8a04)' }} />
                       : entry.rank === 2
-                      ? <Medal style={{ width: 16, height: 16, color: '#94a3b8' }} />
+                      ? <Medal style={{ width: 15, height: 15, color: 'var(--muted-foreground)' }} />
                       : entry.rank === 3
-                      ? <Medal style={{ width: 16, height: 16, color: '#b45309' }} />
+                      ? <Medal style={{ width: 15, height: 15, color: 'var(--secondary)' }} />
                       : null;
-                    const rowBg = entry.isCurrentUser
-                      ? 'rgba(99,102,241,0.08)'
-                      : entry.rank <= 3 ? 'rgba(251,191,36,0.06)' : 'transparent';
-                    const rowBorder = entry.isCurrentUser ? '1.5px solid var(--primary, #6366f1)' : entry.rank <= 3 ? '1.5px solid rgba(251,191,36,0.3)' : '1px solid var(--border)';
+                    const rowBg = entry.isCurrentUser ? 'var(--accent)' : 'transparent';
+                    const rowBorder = entry.isCurrentUser ? '1.5px solid var(--primary)' : '1px solid var(--border)';
                     return (
                       <div
                         key={entry.email}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-sm, 6px)', background: rowBg, border: rowBorder }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', background: rowBg, border: rowBorder, fontFamily: 'var(--font-sans)' }}
                       >
-                        <span style={{ width: 24, textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', color: entry.rank <= 3 ? '#ca8a04' : 'var(--muted-foreground)' }}>
+                        <span style={{ width: 22, textAlign: 'center', fontWeight: 700, fontSize: '0.82rem', color: entry.rank <= 3 ? 'var(--warning, #ca8a04)' : 'var(--muted-foreground)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {rankIcon || `#${entry.rank}`}
                         </span>
-                        <span style={{ flex: 1, fontSize: '0.88rem', fontWeight: entry.isCurrentUser ? 700 : 500, color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ flex: 1, fontSize: '0.875rem', fontWeight: entry.isCurrentUser ? 700 : 500, color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {entry.name}{entry.isCurrentUser ? ' (You)' : ''}
                         </span>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', whiteSpace: 'nowrap' }}>
                           {entry.lessonsCompleted} lessons
                         </span>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary, #6366f1)', minWidth: 52, textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary)', minWidth: 48, textAlign: 'right' }}>
                           {entry.points} pts
                         </span>
                       </div>

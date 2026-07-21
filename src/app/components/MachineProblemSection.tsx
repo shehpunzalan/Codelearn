@@ -284,39 +284,41 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
     <div className="space-y-6">
       {/* Gamified Reward Overlay */}
       {showReward && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-lg, 16px)', padding: '2.5rem', maxWidth: 420, width: '90%', textAlign: 'center', boxShadow: '0 25px 60px rgba(0,0,0,0.35)', border: '3px solid rgba(251,191,36,0.5)', fontFamily: 'var(--font-sans)' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🏆</div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--foreground)', margin: '0 0 0.5rem' }}>All Objectives Met!</h2>
-            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.95rem', margin: '0 0 1.25rem' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}>
+          <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-xl)', padding: '2.5rem 2rem', maxWidth: 400, width: '90%', textAlign: 'center', boxShadow: 'var(--shadow-xl)', border: '2px solid var(--border)', fontFamily: 'var(--font-sans)' }}>
+            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 8px 24px rgba(37,99,235,0.3)' }}>
+              <span style={{ fontSize: '2rem', lineHeight: 1 }}>🏆</span>
+            </div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--foreground)', margin: '0 0 0.4rem' }}>All Objectives Met!</h2>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem', margin: '0 0 1.5rem', lineHeight: 1.5 }}>
               Your code satisfies every required objective. Submit it to earn your points!
             </p>
-            <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(251,191,36,0.1)', border: '1.5px solid rgba(251,191,36,0.4)', borderRadius: 'var(--radius-md, 8px)', padding: '0.75rem 1rem', marginBottom: '1.5rem', justifyContent: 'center', alignItems: 'center', gap: '1.5rem' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ca8a04' }}>{requirements.length}</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>Objectives</div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', background: 'var(--accent)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '0.9rem 1rem', marginBottom: '1.5rem' }}>
+              <div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>{requirements.length}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', marginTop: 2 }}>Objectives</div>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success, #16a34a)' }}>100%</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>Complete</div>
+              <div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--success)' }}>100%</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', marginTop: 2 }}>Complete</div>
               </div>
               {problem && (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary, #6366f1)' }}>{problem.points}</div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>Points</div>
+                <div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--secondary)' }}>{problem.points}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', marginTop: 2 }}>Points</div>
                 </div>
               )}
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <button
                 onClick={() => { setShowReward(false); setRewardDismissed(true); handleSubmit(); }}
-                style={{ padding: '0.75rem 1.5rem', background: 'linear-gradient(135deg, #ca8a04, var(--primary, #6366f1))', color: 'white', border: 'none', borderRadius: 'var(--radius-md, 8px)', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+                style={{ flex: 1, padding: '0.75rem 1rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 700, fontSize: '0.92rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
               >
                 Submit & Claim Points
               </button>
               <button
                 onClick={() => { setShowReward(false); setRewardDismissed(true); }}
-                style={{ padding: '0.75rem 1.25rem', background: 'transparent', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-md, 8px)', color: 'var(--foreground)', fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+                style={{ padding: '0.75rem 1.1rem', background: 'transparent', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--muted-foreground)', fontSize: '0.88rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
               >
                 Keep Editing
               </button>

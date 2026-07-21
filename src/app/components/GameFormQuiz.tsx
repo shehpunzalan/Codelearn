@@ -125,22 +125,25 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
 
   if (attemptsUsed >= MAX_ATTEMPTS) {
     return (
-      <div className="w-full max-w-4xl mx-auto">
-        <Card className="border-4 border-red-200 shadow-2xl" style={{ fontFamily: 'var(--font-sans)' }}>
-          <CardContent className="p-10 text-center">
-            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Quiz Locked</h2>
-            <p className="text-gray-600 mb-2">
-              You have used all <strong>{MAX_ATTEMPTS}</strong> attempts for this quiz.
-            </p>
-            <p className="text-gray-500 text-sm">Contact your instructor to reset your attempts.</p>
-            {onClose && (
-              <Button onClick={onClose} className="mt-6" variant="outline">
-                Go Back
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+      <div className="w-full max-w-4xl mx-auto" style={{ fontFamily: 'var(--font-sans)' }}>
+        <div style={{ background: 'var(--card)', border: '2px solid var(--destructive)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-xl)', padding: '3rem 2rem', textAlign: 'center' }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(220,38,38,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+            <AlertTriangle style={{ width: 36, height: 36, color: 'var(--destructive)' }} />
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--foreground)', margin: '0 0 0.5rem' }}>Quiz Locked</h2>
+          <p style={{ color: 'var(--muted-foreground)', margin: '0 0 0.35rem' }}>
+            You have used all <strong style={{ color: 'var(--foreground)' }}>{MAX_ATTEMPTS}</strong> attempts for this quiz.
+          </p>
+          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', margin: '0 0 1.75rem' }}>Contact your instructor to reset your attempts.</p>
+          {onClose && (
+            <button
+              onClick={onClose}
+              style={{ padding: '0.7rem 1.5rem', background: 'transparent', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--foreground)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+            >
+              Go Back
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -231,7 +234,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
   const getDifficultyBadge = () => {
     switch (difficulty) {
       case 'easy': return <Badge style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--success, #16a34a)', border: '1px solid rgba(34,197,94,0.4)' }}>EASY</Badge>;
-      case 'medium': return <Badge style={{ background: 'rgba(234,179,8,0.15)', color: '#854d0e', border: '1px solid rgba(234,179,8,0.4)' }}>MEDIUM</Badge>;
+      case 'medium': return <Badge style={{ background: 'rgba(234,179,8,0.15)', color: 'var(--warning, #92400e)', border: '1px solid rgba(234,179,8,0.4)' }}>MEDIUM</Badge>;
       case 'hard': return <Badge style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--destructive, #dc2626)', border: '1px solid rgba(239,68,68,0.4)' }}>HARD</Badge>;
     }
   };
@@ -301,7 +304,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
 
             {/* Streak Banner */}
             {currentStreak >= 3 && (
-              <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'linear-gradient(90deg, rgba(251,146,60,0.15), rgba(239,68,68,0.15))', border: '2px solid rgba(251,146,60,0.5)', borderRadius: 'var(--radius-md, 8px)', textAlign: 'center', fontWeight: 700, color: '#92400e', fontSize: '0.95rem' }}>
+              <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'linear-gradient(90deg, rgba(251,146,60,0.15), rgba(239,68,68,0.15))', border: '2px solid rgba(251,146,60,0.5)', borderRadius: 'var(--radius-md, 8px)', textAlign: 'center', fontWeight: 700, color: 'var(--warning, #ea580c)', fontSize: '0.95rem' }}>
                 <Flame className="w-4 h-4 inline mr-1 text-orange-500" />
                 {currentStreak >= 5 ? '🔥 ON FIRE!' : '⚡ STREAK ACTIVE!'} {currentStreak}x Combo
                 <Flame className="w-4 h-4 inline ml-1 text-orange-500" />
@@ -440,7 +443,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
                     <div style={{ padding: '0.75rem', background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.35)', borderRadius: 'var(--radius-md, 8px)', textAlign: 'center', fontWeight: 700, color: 'var(--success, #16a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                       <Award style={{ width: 20, height: 20 }} />
                       +{baseXP + (currentStreak >= 3 ? currentStreak * 10 : 0)} XP Earned!
-                      {currentStreak >= 3 && <Star style={{ width: 16, height: 16, color: '#ca8a04' }} />}
+                      {currentStreak >= 3 && <Star style={{ width: 16, height: 16, color: 'var(--warning, #ca8a04)' }} />}
                     </div>
                   );
                 })()}
@@ -454,7 +457,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
                 ) : (
                   <Button
                     onClick={finishQuiz}
-                    style={{ width: '100%', padding: '1rem', fontSize: '1rem', fontWeight: 700, background: 'linear-gradient(135deg, #ca8a04, var(--warning, #d97706))', color: 'white', border: 'none', borderRadius: 'var(--radius-md, 8px)' }}
+                    style={{ width: '100%', padding: '1rem', fontSize: '1rem', fontWeight: 700, background: 'linear-gradient(135deg, var(--warning, #ca8a04), var(--warning, #d97706))', color: 'white', border: 'none', borderRadius: 'var(--radius-md, 8px)' }}
                   >
                     <Trophy style={{ width: 18, height: 18, display: 'inline', marginRight: 6 }} />
                     Finish Quiz & See Results
