@@ -58,15 +58,18 @@ function AppContent() {
   const [selectedLessonContent, setSelectedLessonContent] =
     useState<any>(null);
   const [modules, setModules] = useState<Module[]>(() => {
-    // Restore persisted progress on top of mock data so progress survives page reloads
+    // Restore persisted progress on top of mock data so progress survives page reloads.
+    // Read user-scoped key first (survives clearProgressDataForNewUser) then fall back
+    // to unscoped key. Use lastLoggedInUserId since the user object isn't available yet.
+    const lastUserId = localStorage.getItem('lastLoggedInUserId');
     return mockModules.map((m) => {
       try {
-        const saved = localStorage.getItem(
-          `moduleProgress_${m.id}`,
-        );
-        if (saved) {
-          const { progress, completedLessons } =
-            JSON.parse(saved);
+        const userKey = lastUserId ? `moduleProgress_${lastUserId}_${m.id}` : null;
+        const raw =
+          (userKey && localStorage.getItem(userKey)) ||
+          localStorage.getItem(`moduleProgress_${m.id}`);
+        if (raw) {
+          const { progress, completedLessons } = JSON.parse(raw);
           return { ...m, progress, completedLessons };
         }
       } catch {}
@@ -267,17 +270,23 @@ function AppContent() {
     );
   };
 
-  // Re-hydrate module progress from localStorage whenever user changes.
-  // This is critical on page-refresh (session restored, clearProgressDataForNewUser
-  // was NOT called) so the modules state reflects what's actually in storage.
+  // Re-hydrate module progress from localStorage whenever user identity is known.
+  // Always try the user-scoped key first — it survives clearProgressDataForNewUser.
+  // The unscoped key is a secondary fallback for legacy data.
   useEffect(() => {
     if (!user) return;
     setModules(
       mockModules.map((m) => {
         try {
-          const saved = localStorage.getItem(`moduleProgress_${m.id}`);
-          if (saved) {
-            const { progress, completedLessons } = JSON.parse(saved);
+          const userKey = `moduleProgress_${user.id}_${m.id}`;
+          const unscopedKey = `moduleProgress_${m.id}`;
+          const raw =
+            localStorage.getItem(userKey) ||
+            localStorage.getItem(unscopedKey);
+          if (raw) {
+            const { progress, completedLessons } = JSON.parse(raw);
+            // Keep the unscoped key in sync so other reads stay consistent
+            localStorage.setItem(unscopedKey, raw);
             return { ...m, progress, completedLessons };
           }
         } catch {}
@@ -386,9 +395,13 @@ function AppContent() {
   ) => {
     const progress = Math.round((completedCount / total) * 100);
     const progressData = JSON.stringify({ progress, completedLessons: completedCount });
-    // Save with user-scoped key (survives clearProgressDataForNewUser) + legacy unscoped key
+    // Always write both keys. User-scoped key is the durable source of truth;
+    // unscoped key is a convenience copy for reads that don't have the user ID yet.
     localStorage.setItem(`moduleProgress_${moduleId}`, progressData);
-    if (user) localStorage.setItem(`moduleProgress_${user.id}_${moduleId}`, progressData);
+    if (user) {
+      localStorage.setItem(`moduleProgress_${user.id}_${moduleId}`, progressData);
+      localStorage.setItem('lastLoggedInUserId', user.id);
+    }
     setModules((prev) =>
       prev.map((m) =>
         m.id === moduleId
@@ -406,7 +419,10 @@ function AppContent() {
         if (m.id === moduleId) {
           const progressData = JSON.stringify({ progress: 100, completedLessons: m.totalLessons });
           localStorage.setItem(`moduleProgress_${moduleId}`, progressData);
-          if (user) localStorage.setItem(`moduleProgress_${user.id}_${moduleId}`, progressData);
+          if (user) {
+            localStorage.setItem(`moduleProgress_${user.id}_${moduleId}`, progressData);
+            localStorage.setItem('lastLoggedInUserId', user.id);
+          }
           return {
             ...m,
             progress: 100,
