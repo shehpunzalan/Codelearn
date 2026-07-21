@@ -113,6 +113,16 @@ function buildRequirements(instructions: string): CodeRequirement[] {
   return reqs;
 }
 
+/** Strip single-line comments that are just instructions (// ...) from starter code */
+function stripStarterComments(code: string): string {
+  return code
+    .split('\n')
+    .filter(line => !/^\s*\/\//.test(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export function MachineProblemSection({ moduleId, lessonId, userId }: MachineProblemProps) {
   const [problem, setProblem] = useState<MachineProblem | null>(null);
   const [code, setCode] = useState('');
@@ -125,6 +135,19 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
   const [attempts, setAttempts] = useState(0);
   const [showVideoTutorial, setShowVideoTutorial] = useState(true);
   const [requirements, setRequirements] = useState<CodeRequirement[]>([]);
+  const [showReward, setShowReward] = useState(false);
+  const [rewardDismissed, setRewardDismissed] = useState(false);
+
+  // Detect when all requirements become met and show reward
+  const allMet = requirements.length > 0 && requirements.every(r => r.check(code));
+  const prevAllMetRef = React.useRef(false);
+  React.useEffect(() => {
+    if (allMet && !prevAllMetRef.current && !rewardDismissed) {
+      setShowReward(true);
+      toast.success('🏆 All objectives completed!', { description: 'Great work — you met every requirement!', duration: 4000 });
+    }
+    prevAllMetRef.current = allMet;
+  }, [allMet, rewardDismissed]);
 
   useEffect(() => {
     loadMachineProblem();
@@ -145,7 +168,7 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
       const data = await response.json();
       if (data.success && data.data) {
         setProblem(data.data);
-        setCode(data.data.starterCode);
+        setCode(stripStarterComments(data.data.starterCode || ''));
         setRequirements(buildRequirements(data.data.instructions || ''));
       }
     } catch (error) {
@@ -259,6 +282,49 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
 
   return (
     <div className="space-y-6">
+      {/* Gamified Reward Overlay */}
+      {showReward && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-lg, 16px)', padding: '2.5rem', maxWidth: 420, width: '90%', textAlign: 'center', boxShadow: '0 25px 60px rgba(0,0,0,0.35)', border: '3px solid rgba(251,191,36,0.5)', fontFamily: 'var(--font-sans)' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '0.5rem' }}>🏆</div>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--foreground)', margin: '0 0 0.5rem' }}>All Objectives Met!</h2>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.95rem', margin: '0 0 1.25rem' }}>
+              Your code satisfies every required objective. Submit it to earn your points!
+            </p>
+            <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(251,191,36,0.1)', border: '1.5px solid rgba(251,191,36,0.4)', borderRadius: 'var(--radius-md, 8px)', padding: '0.75rem 1rem', marginBottom: '1.5rem', justifyContent: 'center', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ca8a04' }}>{requirements.length}</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>Objectives</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success, #16a34a)' }}>100%</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>Complete</div>
+              </div>
+              {problem && (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary, #6366f1)' }}>{problem.points}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>Points</div>
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              <button
+                onClick={() => { setShowReward(false); setRewardDismissed(true); handleSubmit(); }}
+                style={{ padding: '0.75rem 1.5rem', background: 'linear-gradient(135deg, #ca8a04, var(--primary, #6366f1))', color: 'white', border: 'none', borderRadius: 'var(--radius-md, 8px)', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+              >
+                Submit & Claim Points
+              </button>
+              <button
+                onClick={() => { setShowReward(false); setRewardDismissed(true); }}
+                style={{ padding: '0.75rem 1.25rem', background: 'transparent', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-md, 8px)', color: 'var(--foreground)', fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+              >
+                Keep Editing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tutorial Video Section */}
       {showVideoTutorial && problem.videoUrl && (
         <Card className="border-0 shadow-md bg-gradient-to-br from-purple-50 to-blue-50">
@@ -429,7 +495,7 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCode(problem.starterCode)}
+                onClick={() => setCode(stripStarterComments(problem.starterCode || ''))}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Reset Code

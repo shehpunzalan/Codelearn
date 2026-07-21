@@ -3,7 +3,7 @@ import { User, Module } from '../types';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { BookOpen, Target, TrendingUp, Clock, Brain, CheckCircle, Code, MessageSquare, Activity, Search } from 'lucide-react';
+import { BookOpen, Target, TrendingUp, Clock, Brain, CheckCircle, Code, MessageSquare, Activity, Search, Trophy, Medal, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { getUserStats, getAllProgress } from '../utils/storage';
 import { generateStudentInsights } from '../utils/aiFeedback';
@@ -26,11 +26,57 @@ interface RecentActivity {
   lastAccessed: string;
 }
 
+interface LeaderboardEntry {
+  name: string;
+  email: string;
+  points: number;
+  lessonsCompleted: number;
+  isCurrentUser: boolean;
+  rank: number;
+}
+
+function buildLeaderboard(currentUserId: string, modules: Module[]): LeaderboardEntry[] {
+  let users: any[] = [];
+  try { users = JSON.parse(localStorage.getItem('registeredUsers') || '[]'); } catch {}
+
+  const entries: LeaderboardEntry[] = users.map((u: any) => {
+    // Sum completed lessons across all modules using user-scoped keys
+    let lessons = 0;
+    let points = 0;
+    modules.forEach(m => {
+      try {
+        const raw = localStorage.getItem(`moduleProgress_${u.id}_${m.id}`) || localStorage.getItem(`moduleProgress_${m.id}`);
+        if (raw) {
+          const { completedLessons, progress } = JSON.parse(raw);
+          lessons += completedLessons || 0;
+          points += (completedLessons || 0) * 10 + (progress === 100 ? 50 : 0);
+        }
+      } catch {}
+    });
+    // Also count quiz XP from stats
+    try {
+      const statsRaw = localStorage.getItem(`stats_${u.id}`);
+      if (statsRaw) {
+        const s = JSON.parse(statsRaw);
+        points += (s.totalLessonsCompleted || 0) * 10;
+      }
+    } catch {}
+
+    return { name: u.name || u.email || 'Student', email: u.email || '', points, lessonsCompleted: lessons, isCurrentUser: u.id === currentUserId, rank: 0 };
+  });
+
+  // Sort by points desc, then lessons desc
+  entries.sort((a, b) => b.points - a.points || b.lessonsCompleted - a.lessonsCompleted);
+  entries.forEach((e, i) => { e.rank = i + 1; });
+  return entries.slice(0, 10);
+}
+
 export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback, onViewProgress, onNavigate }: StudentDashboardProps) {
   const [stats, setStats] = useState<any>(null);
   const [insights, setInsights] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
     const userStats = getUserStats(user.id);
@@ -94,6 +140,7 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
       .slice(0, 10);
 
     setRecentActivities(merged);
+    setLeaderboard(buildLeaderboard(user.id, modules));
   }, [user.id, modules]);
 
   const completedModules = modules.filter(m => m.progress === 100).length;
@@ -307,9 +354,57 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Leaderboard */}
         <div>
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-md" style={{ background: 'linear-gradient(160deg, var(--card) 60%, rgba(251,191,36,0.08) 100%)' }}>
+            <CardContent className="p-6">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+                <Trophy style={{ width: 22, height: 22, color: '#ca8a04' }} />
+                <h2 style={{ color: 'var(--foreground)', margin: 0 }} className="text-xl font-bold">Top 10 Leaderboard</h2>
+              </div>
+              {leaderboard.length === 0 ? (
+                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem' }}>Complete lessons to appear on the leaderboard!</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {leaderboard.map((entry) => {
+                    const rankIcon = entry.rank === 1
+                      ? <Crown style={{ width: 16, height: 16, color: '#f59e0b' }} />
+                      : entry.rank === 2
+                      ? <Medal style={{ width: 16, height: 16, color: '#94a3b8' }} />
+                      : entry.rank === 3
+                      ? <Medal style={{ width: 16, height: 16, color: '#b45309' }} />
+                      : null;
+                    const rowBg = entry.isCurrentUser
+                      ? 'rgba(99,102,241,0.08)'
+                      : entry.rank <= 3 ? 'rgba(251,191,36,0.06)' : 'transparent';
+                    const rowBorder = entry.isCurrentUser ? '1.5px solid var(--primary, #6366f1)' : entry.rank <= 3 ? '1.5px solid rgba(251,191,36,0.3)' : '1px solid var(--border)';
+                    return (
+                      <div
+                        key={entry.email}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-sm, 6px)', background: rowBg, border: rowBorder }}
+                      >
+                        <span style={{ width: 24, textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', color: entry.rank <= 3 ? '#ca8a04' : 'var(--muted-foreground)' }}>
+                          {rankIcon || `#${entry.rank}`}
+                        </span>
+                        <span style={{ flex: 1, fontSize: '0.88rem', fontWeight: entry.isCurrentUser ? 700 : 500, color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {entry.name}{entry.isCurrentUser ? ' (You)' : ''}
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)', whiteSpace: 'nowrap' }}>
+                          {entry.lessonsCompleted} lessons
+                        </span>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary, #6366f1)', minWidth: 52, textAlign: 'right' }}>
+                          {entry.points} pts
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-md" style={{ marginTop: '1rem' }}>
             <CardContent className="p-6">
               <h2 style={{ color: 'var(--foreground)', marginBottom: '1rem' }} className="text-xl font-bold">Student Actions</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

@@ -245,14 +245,16 @@ function AppContent() {
       "submissions_",
       "userPosition_",
     ];
+    // UUID pattern — any key segment that looks like a UUID belongs to a specific user
+    const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i) || "";
-      // Remove keys that match progress prefixes but don't contain the new user's id
-      // (These are either from a previous user or are unscoped shared keys)
+      // Only delete unscoped keys (no UUID in the key). User-scoped keys (any UUID)
+      // are preserved so every user's progress survives account switching.
       if (
         progressPrefixes.some((p) => key.startsWith(p)) &&
-        !key.includes(newUserId)
+        !uuidRe.test(key)
       ) {
         keysToRemove.push(key);
       }
