@@ -368,7 +368,7 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${
 
     const user = JSON.parse(currentUser);
     setIsSubmitting(true);
-    toast.info('🤖 AI is analyzing your code...');
+    toast.info('Checking your code...');
 
     // Update submit attempts
     const updatedMetrics = {
@@ -539,9 +539,9 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${
     setIsSubmitting(false);
 
     if (analysis.passed) {
-      toast.success(`🎉 Great work! Score: ${analysis.score}/100`);
+      toast.success(`Great job! Score: ${analysis.score}/100 — keep it up!`);
     } else {
-      toast.warning(`📝 Needs improvement. Score: ${analysis.score}/100`);
+      toast.warning(`Score: ${analysis.score}/100 — check the feedback below and try again.`);
     }
   };
 
@@ -704,9 +704,8 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${
                 <div className="flex items-center justify-center h-64 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200">
                   <div className="text-center p-4">
                     <Brain className="w-16 h-16 text-purple-400 mx-auto mb-3" />
-                    <p className="text-gray-600 text-sm">
-                      Submit your Java code to receive AI-powered feedback
-                    </p>
+                    <p className="text-gray-600 text-sm font-medium">Submit your code to get feedback</p>
+                    <p className="text-gray-500 text-xs mt-1">We will check your code and tell you what to fix.</p>
                   </div>
                 </div>
               ) : (
@@ -744,45 +743,48 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${
                     </ul>
                   </div>
 
-                  {/* Errors */}
-                  {(lastSubmission.feedback.errors.length > 0 || (lastSubmission.feedback.errorDetails && lastSubmission.feedback.errorDetails.length > 0)) && (
-                    <div className="bg-red-50 rounded-lg p-3 border border-red-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-semibold text-red-900 flex items-center gap-1">
-                          <XCircle className="w-4 h-4" />
-                          Issues Found
-                        </p>
-                        {lastSubmission.feedback.errorDetails && lastSubmission.feedback.errorDetails.length > 0 && (
-                          <Badge variant="destructive" className="h-5 text-xs">
-                            {lastSubmission.feedback.errorDetails.length}
-                          </Badge>
-                        )}
-                      </div>
-                      <ul className="text-xs text-red-700 space-y-1">
-                        {lastSubmission.feedback.errors.slice(0, 2).map((error, idx) => (
-                          <li key={idx}>{error}</li>
+                  {/* Errors — always visible if present */}
+                  {lastSubmission.feedback.errors.length > 0 ? (
+                    <div className="bg-red-50 rounded-lg p-3 border border-red-300">
+                      <p className="text-xs font-bold text-red-900 mb-2 flex items-center gap-1">
+                        <XCircle className="w-4 h-4" />
+                        Problems in Your Code ({lastSubmission.feedback.errors.length})
+                      </p>
+                      <ul className="text-xs text-red-800 space-y-1.5">
+                        {lastSubmission.feedback.errors.map((error, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-red-500 mt-0.5">•</span>
+                            <span>{error}</span>
+                          </li>
                         ))}
                       </ul>
-                      {lastSubmission.feedback.errorDetails && lastSubmission.feedback.errorDetails.length > 2 && (
-                        <p className="text-xs text-red-600 mt-2 font-medium">
-                          +{lastSubmission.feedback.errorDetails.length - 2} more issues
-                        </p>
-                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                      <p className="text-xs font-bold text-green-800 flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4" />
+                        No errors found — great!
+                      </p>
                     </div>
                   )}
 
-                  {/* Suggestions */}
-                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                    <p className="text-xs font-semibold text-blue-900 mb-2 flex items-center gap-1">
-                      <Sparkles className="w-4 h-4" />
-                      Suggestions
-                    </p>
-                    <ul className="text-xs text-blue-700 space-y-1">
-                      {lastSubmission.feedback.suggestions.slice(0, 2).map((suggestion, idx) => (
-                        <li key={idx}>{suggestion}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  {/* Suggestions — always visible */}
+                  {lastSubmission.feedback.suggestions.length > 0 && (
+                    <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                      <p className="text-xs font-bold text-blue-900 mb-2 flex items-center gap-1">
+                        <Sparkles className="w-4 h-4" />
+                        How to Improve Your Code
+                      </p>
+                      <ul className="text-xs text-blue-800 space-y-1.5">
+                        {lastSubmission.feedback.suggestions.map((suggestion, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-blue-400 mt-0.5">→</span>
+                            <span>{suggestion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   <Button
                     onClick={onViewFeedback}
@@ -795,30 +797,14 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${
                 </div>
               )}
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-6">
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <p className="text-sm font-semibold text-blue-900 mb-2">Neural Network Features:</p>
+                  <p className="text-sm font-semibold text-blue-900 mb-2">What the checker looks for:</p>
                   <ul className="text-xs text-blue-700 space-y-1.5">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span>OOP Principles Analysis</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span>Code Pattern Recognition</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span>Error Detection & Fixes</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span>Best Practice Suggestions</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span>Plagiarism Detection</span>
-                    </li>
+                    <li className="flex items-start gap-2"><CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /><span>Are you using classes, objects, and methods?</span></li>
+                    <li className="flex items-start gap-2"><CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /><span>Are there any syntax or logic errors?</span></li>
+                    <li className="flex items-start gap-2"><CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /><span>Are you following Java coding style?</span></li>
+                    <li className="flex items-start gap-2"><CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /><span>Can your code be improved or simplified?</span></li>
                   </ul>
                 </div>
               </div>

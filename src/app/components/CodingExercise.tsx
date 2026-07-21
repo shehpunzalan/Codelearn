@@ -137,18 +137,6 @@ export function CodingExercise({ activity, onBack }: CodingExerciseProps) {
               </div>
             )}
 
-            <div className="pt-4 border-t">
-              <h4 className="text-sm mb-2 flex items-center">
-                <Brain className="w-4 h-4 mr-2 text-purple-500" />
-                AI Tips
-              </h4>
-              <ul className="text-sm space-y-1 text-gray-600">
-                <li>• Write clear, readable code</li>
-                <li>• Test edge cases</li>
-                <li>• Add helpful comments</li>
-                <li>• Follow best practices</li>
-              </ul>
-            </div>
           </CardContent>
         </Card>
       </div>

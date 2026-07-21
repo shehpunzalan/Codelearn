@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, BookOpen, CheckCircle, ChevronRight, Play, Trophy, RotateCcw, ClipboardList } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle, ChevronRight, Play, Trophy, RotateCcw, ClipboardList, Video } from 'lucide-react';
 import { EnhancedLearningDelivery } from './EnhancedLearningDelivery';
 import { GameFormQuiz } from './GameFormQuiz';
 import { QuizResultsPage } from './QuizResultsPage';
@@ -462,51 +462,83 @@ export function LessonViewer({
           const isActive = activeLessonId === lesson.id;
 
           return (
-            <button
+            <div
               key={lesson.id}
-              onClick={() => !isLocked && openLesson(lesson.id)}
-              disabled={isLocked}
               style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '1rem 1.25rem',
                 borderRadius: 'var(--radius-lg)',
                 border: `2px solid ${isCompleted ? 'var(--color-success-400)' : isActive ? 'var(--color-primary-500)' : 'var(--color-neutral-200)'}`,
                 backgroundColor: isCompleted ? 'var(--color-success-50)' : isActive ? 'var(--color-primary-50)' : isLocked ? 'var(--color-neutral-50)' : 'var(--color-background-primary)',
-                cursor: isLocked ? 'not-allowed' : 'pointer',
                 opacity: isLocked ? 0.5 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                transition: 'border-color 0.15s, background-color 0.15s',
+                overflow: 'hidden',
                 fontFamily: 'var(--font-sans)',
               }}
             >
-              {/* Step indicator */}
-              <div style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-full)', backgroundColor: isCompleted ? 'var(--color-success-500)' : isActive ? 'var(--color-primary-600)' : 'var(--color-neutral-200)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {isCompleted
-                  ? <CheckCircle size={22} color="#fff" />
-                  : <span style={{ color: isActive ? '#fff' : 'var(--color-neutral-600)', fontWeight: 700, fontSize: '0.95rem', fontFamily: 'var(--font-sans)' }}>{index + 1}</span>}
-              </div>
+              {/* Main lesson row */}
+              <button
+                onClick={() => !isLocked && openLesson(lesson.id)}
+                disabled={isLocked}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '1rem 1.25rem',
+                  background: 'none',
+                  border: 'none',
+                  cursor: isLocked ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  transition: 'background-color 0.15s',
+                  fontFamily: 'var(--font-sans)',
+                }}
+              >
+                {/* Step indicator */}
+                <div style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-full)', backgroundColor: isCompleted ? 'var(--color-success-500)' : isActive ? 'var(--color-primary-600)' : 'var(--color-neutral-200)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {isCompleted
+                    ? <CheckCircle size={22} color="#fff" />
+                    : <span style={{ color: isActive ? '#fff' : 'var(--color-neutral-600)', fontWeight: 700, fontSize: '0.95rem', fontFamily: 'var(--font-sans)' }}>{index + 1}</span>}
+                </div>
 
-              {/* Info */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.75rem', margin: '0 0 0.2rem', fontFamily: 'var(--font-sans)' }}>Lesson {index + 1}</p>
-                <p style={{ color: 'var(--color-text-primary)', fontWeight: 600, fontSize: '0.95rem', margin: '0 0 0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-sans)' }}>
-                  {lesson.title}
-                </p>
-                <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.8rem', margin: 0, fontFamily: 'var(--font-sans)' }}>{lesson.duration}</p>
-              </div>
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.75rem', margin: '0 0 0.2rem', fontFamily: 'var(--font-sans)' }}>Lesson {index + 1}</p>
+                  <p style={{ color: 'var(--color-text-primary)', fontWeight: 600, fontSize: '0.95rem', margin: '0 0 0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-sans)' }}>
+                    {lesson.title}
+                  </p>
+                  <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.8rem', margin: 0, fontFamily: 'var(--font-sans)' }}>{lesson.duration}</p>
+                </div>
 
-              {/* Status badge */}
-              {isCompleted ? (
-                <span style={{ backgroundColor: 'var(--color-success-100)', color: 'var(--color-success-700)', fontFamily: 'var(--font-sans)', fontSize: '0.72rem', fontWeight: 700, padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-full)', flexShrink: 0 }}>
-                  ✓ Done
-                </span>
-              ) : !isLocked ? (
-                <ChevronRight size={18} style={{ color: 'var(--color-neutral-400)', flexShrink: 0 }} />
-              ) : null}
-            </button>
+                {/* Status badge */}
+                {isCompleted ? (
+                  <span style={{ backgroundColor: 'var(--color-success-100)', color: 'var(--color-success-700)', fontFamily: 'var(--font-sans)', fontSize: '0.72rem', fontWeight: 700, padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-full)', flexShrink: 0 }}>
+                    ✓ Done
+                  </span>
+                ) : !isLocked ? (
+                  <ChevronRight size={18} style={{ color: 'var(--color-neutral-400)', flexShrink: 0 }} />
+                ) : null}
+              </button>
+
+              {/* Video Tutorial button — available for every lesson */}
+              {!isLocked && onOpenVideoTutorial && (
+                <div style={{ padding: '0 1.25rem 0.75rem', display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onOpenVideoTutorial(module.id, lesson.id, lesson.title); }}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                      background: 'none', border: '1.5px solid var(--color-primary-300)',
+                      color: 'var(--color-primary-600)', borderRadius: 'var(--radius-full)',
+                      padding: '0.25rem 0.75rem', fontSize: '0.75rem', fontWeight: 600,
+                      cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-primary-50)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                  >
+                    <Video size={12} />
+                    Watch Video Tutorial
+                  </button>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>

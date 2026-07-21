@@ -53,6 +53,66 @@ interface VerificationResult {
   feedback: string;
 }
 
+interface CodeRequirement {
+  id: string;
+  label: string;
+  check: (code: string) => boolean;
+}
+
+// Build requirement checklist from problem instructions + general Java OOP expectations
+function buildRequirements(instructions: string): CodeRequirement[] {
+  const instr = instructions.toLowerCase();
+  const reqs: CodeRequirement[] = [];
+
+  reqs.push({ id: 'class', label: 'Define a class', check: c => /class\s+\w+/.test(c) });
+  reqs.push({ id: 'main', label: 'Has a main() method', check: c => c.includes('public static void main') });
+
+  if (instr.includes('constructor')) {
+    reqs.push({ id: 'constructor', label: 'Has a constructor', check: c => /\w+\s*\([^)]*\)\s*\{/.test(c) && !/static\s+void\s+main/.test(c.split('(')[0]) });
+  }
+  if (instr.includes('private') || instr.includes('encapsulat')) {
+    reqs.push({ id: 'private', label: 'Uses private fields (encapsulation)', check: c => /private\s+\w+/.test(c) });
+  }
+  if (instr.includes('getter') || instr.includes('get method') || instr.includes('getters')) {
+    reqs.push({ id: 'getter', label: 'Has getter methods', check: c => /public\s+\w+\s+get[A-Z]/.test(c) });
+  }
+  if (instr.includes('setter') || instr.includes('set method') || instr.includes('setters')) {
+    reqs.push({ id: 'setter', label: 'Has setter methods', check: c => /public\s+void\s+set[A-Z]/.test(c) });
+  }
+  if (instr.includes('extend') || instr.includes('inherit')) {
+    reqs.push({ id: 'extends', label: 'Uses inheritance (extends)', check: c => /extends\s+\w+/.test(c) });
+  }
+  if (instr.includes('interface') || instr.includes('implement')) {
+    reqs.push({ id: 'implements', label: 'Implements an interface', check: c => /implements\s+\w+/.test(c) });
+  }
+  if (instr.includes('override') || instr.includes('polymorphism')) {
+    reqs.push({ id: 'override', label: 'Overrides a method (@Override)', check: c => c.includes('@Override') });
+  }
+  if (instr.includes('abstract')) {
+    reqs.push({ id: 'abstract', label: 'Uses abstract class or method', check: c => /abstract\s+(class|\w+)/.test(c) });
+  }
+  if (instr.includes('print') || instr.includes('output') || instr.includes('display')) {
+    reqs.push({ id: 'print', label: 'Prints output (System.out.print)', check: c => c.includes('System.out.print') });
+  }
+  if (instr.includes('array') || instr.includes('list') || instr.includes('collection')) {
+    reqs.push({ id: 'array', label: 'Uses array or collection', check: c => /\[\]|ArrayList|List<|HashMap|Set</.test(c) });
+  }
+  if (instr.includes('loop') || instr.includes('for ') || instr.includes('while') || instr.includes('iterate')) {
+    reqs.push({ id: 'loop', label: 'Has a loop (for / while)', check: c => /\bfor\s*\(|\bwhile\s*\(/.test(c) });
+  }
+  if (instr.includes('comment') || instr.includes('document')) {
+    reqs.push({ id: 'comment', label: 'Has code comments', check: c => c.includes('//') || c.includes('/*') });
+  }
+  // Always require closing brace / valid structure
+  reqs.push({ id: 'braces', label: 'Has balanced braces { }', check: c => {
+    let depth = 0;
+    for (const ch of c) { if (ch === '{') depth++; else if (ch === '}') depth--; }
+    return depth === 0 && c.includes('{');
+  }});
+
+  return reqs;
+}
+
 export function MachineProblemSection({ moduleId, lessonId, userId }: MachineProblemProps) {
   const [problem, setProblem] = useState<MachineProblem | null>(null);
   const [code, setCode] = useState('');
@@ -64,6 +124,7 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
   const [showSolution, setShowSolution] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [showVideoTutorial, setShowVideoTutorial] = useState(true);
+  const [requirements, setRequirements] = useState<CodeRequirement[]>([]);
 
   useEffect(() => {
     loadMachineProblem();
@@ -85,6 +146,7 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
       if (data.success && data.data) {
         setProblem(data.data);
         setCode(data.data.starterCode);
+        setRequirements(buildRequirements(data.data.instructions || ''));
       }
     } catch (error) {
       console.error('Error loading machine problem:', error);
@@ -301,6 +363,49 @@ export function MachineProblemSection({ moduleId, lessonId, userId }: MachinePro
           </div>
         </CardContent>
       </Card>
+
+      {/* Real-time Requirements Checklist */}
+      {requirements.length > 0 && (
+        <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-50 to-purple-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Lightbulb className="w-5 h-5 text-indigo-600" />
+              Code Requirements — checked in real time as you type
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {requirements.map(req => {
+                const met = req.check(code);
+                return (
+                  <div
+                    key={req.id}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.6rem',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: 'var(--radius-md, 8px)',
+                      background: met ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.07)',
+                      border: `1.5px solid ${met ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.25)'}`,
+                      transition: 'all 0.2s',
+                      fontFamily: 'var(--font-sans)',
+                    }}
+                  >
+                    {met
+                      ? <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      : <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />}
+                    <span style={{ fontSize: '0.82rem', fontWeight: 500, color: met ? 'rgb(21,128,61)' : 'rgb(153,27,27)' }}>
+                      {req.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500 mt-3 italic">
+              ✅ = Your code meets this requirement &nbsp;|&nbsp; ❌ = Still missing — keep coding!
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Code Editor */}
       <Card className="border-0 shadow-md">

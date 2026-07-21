@@ -32,6 +32,8 @@ async function fetchFromUrl(url: string, endpoint: string, options: RequestInit,
   });
   const text = await response.text();
   const data = safeParseJSON(text);
+  // 404 from Make backend means the function hasn't been redeployed yet — let it fall through
+  if (response.status === 404) throw new Error(`HTTP 404 — route not deployed yet`);
   if (data === null || (!response.ok && !data)) throw new Error(`HTTP ${response.status}`);
   if (data?.success === false) throw new Error(data.error || `HTTP ${response.status}`);
   return data;
@@ -39,18 +41,28 @@ async function fetchFromUrl(url: string, endpoint: string, options: RequestInit,
 
 // Helper function to make API requests — tries Make platform first, then user's own function
 async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
-  // Try Make platform backend (primary — browser CSP allows this)
+  // Try Make platform backend (primary — browser CSP allows this, but may return 404
+  // if the edge function hasn't been redeployed with the latest routes yet)
   try {
     return await fetchFromUrl(MAKE_API_URL, endpoint, options, getAuthToken());
   } catch (makeErr: unknown) {
-    console.warn(`Make backend failed for ${endpoint}:`, makeErr);
+    const isNotDeployed = String(makeErr).includes('404');
+    if (isNotDeployed) {
+      console.warn(`Make backend: route ${endpoint} not yet deployed (404) — trying fallback`);
+    } else {
+      console.warn(`Make backend failed for ${endpoint}:`, makeErr);
+    }
   }
-  // Try user's own Supabase function (secondary — works after GitHub Action deploys it)
+  // Try user's own Supabase function (secondary — may fail due to browser CSP if direct call)
   try {
     return await fetchFromUrl(USER_API_URL, endpoint, options, USER_ANON_KEY);
   } catch (userErr: unknown) {
+    const isCsp = String(userErr).includes('Failed to fetch');
+    if (isCsp) {
+      throw new Error('backend-csp');
+    }
     console.error(`Both backends failed for ${endpoint}:`, userErr);
-    throw new Error('Cannot reach the server. Please ensure the Supabase edge function is deployed.');
+    throw new Error('Cannot reach the server. Please check your connection and try again.');
   }
 }
 

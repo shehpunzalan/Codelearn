@@ -272,9 +272,24 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
 
             {/* Question */}
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-gray-900 leading-relaxed mb-6">
+              <h3 className="text-xl font-semibold text-gray-900 leading-relaxed mb-4">
                 {currentQuestion.question}
               </h3>
+
+              {/* Code snippet — shown when the question includes sample code */}
+              {currentQuestion.code && (
+                <div className="mb-4 rounded-lg overflow-hidden border-2 border-orange-200">
+                  <div className="bg-gray-800 px-4 py-2 flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-400 inline-block" />
+                    <span className="w-3 h-3 rounded-full bg-yellow-400 inline-block" />
+                    <span className="w-3 h-3 rounded-full bg-green-400 inline-block" />
+                    <span className="text-gray-400 text-xs ml-2 font-mono">Java</span>
+                  </div>
+                  <pre className="bg-gray-900 text-green-300 p-4 text-sm font-mono overflow-x-auto leading-relaxed">
+                    {currentQuestion.code}
+                  </pre>
+                </div>
+              )}
 
               {/* Options */}
               <div className="space-y-3">
@@ -342,7 +357,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
                     <Lightbulb className={`w-5 h-5 mt-0.5 ${
                       isCorrect ? 'text-green-600' : 'text-blue-600'
                     }`} />
-                    <div>
+                    <div className="flex-1">
                       <p className={`font-semibold mb-1 ${
                         isCorrect ? 'text-green-900' : 'text-blue-900'
                       }`}>
@@ -357,6 +372,15 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle }: Ga
                         <p className="text-blue-700 text-sm mt-2">
                           <strong>Correct Answer:</strong> {correctOption.text}
                         </p>
+                      )}
+                      {/* Code example in explanation */}
+                      {currentQuestion.code && (
+                        <div className="mt-3 rounded overflow-hidden border border-gray-600">
+                          <div className="bg-gray-700 px-3 py-1 text-xs text-gray-300 font-mono">Code Example</div>
+                          <pre className="bg-gray-900 text-green-300 p-3 text-xs font-mono overflow-x-auto">
+                            {currentQuestion.code}
+                          </pre>
+                        </div>
                       )}
                     </div>
                   </div>

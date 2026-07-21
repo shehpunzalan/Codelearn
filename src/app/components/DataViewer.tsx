@@ -18,53 +18,82 @@ interface StorageItem {
   type: string;
 }
 
+// Keys that are system/internal and should never be shown to users
+const HIDDEN_KEYS = new Set(['rememberMe', 'rememberedEmail', 'v3_local_users_wiped', 'v2_lesson_defaults_fixed', 'lastLoggedInUserId', 'lastLoginTime']);
+
+// Mask sensitive fields in any object recursively
+function maskSensitiveFields(value: any): any {
+  if (typeof value !== 'object' || value === null) return value;
+  if (Array.isArray(value)) return value.map(maskSensitiveFields);
+  const masked: any = {};
+  for (const k of Object.keys(value)) {
+    const lk = k.toLowerCase();
+    if (lk === 'password' || lk === 'pwd' || lk === 'secret' || lk === 'token' || lk === 'accesstoken') {
+      masked[k] = '••••••••';
+    } else {
+      masked[k] = maskSensitiveFields(value[k]);
+    }
+  }
+  return masked;
+}
+
 export function DataViewer({ onBack }: DataViewerProps) {
   const [storageData, setStorageData] = useState<StorageItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<StorageItem | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [showRawJson, setShowRawJson] = useState<boolean>(false);
 
-  // Load all localStorage data
+  // Get current user ID for filtering
+  const getCurrentUserId = (): string | null => {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (raw) return JSON.parse(raw).id;
+    } catch {}
+    return null;
+  };
+
+  // Check if a key belongs to the current user
+  const isCurrentUserKey = (key: string, userId: string | null): boolean => {
+    if (!userId) return true; // no user logged in — show everything
+    if (key === 'currentUser') return true;
+    if (key.includes(userId)) return true;
+    // Unscoped progress/quiz keys (no user id in them) — show them too since they belong to this session
+    if (key.startsWith('moduleProgress_') || key.startsWith('completedLessons_') || key.startsWith('quiz_')) return true;
+    return false;
+  };
+
+  // Load only current user's localStorage data
   const loadStorageData = () => {
+    const userId = getCurrentUserId();
     const items: StorageItem[] = [];
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key) {
-        const rawValue = localStorage.getItem(key);
-        if (rawValue) {
-          try {
-            const parsedValue = JSON.parse(rawValue);
-            const sizeInBytes = new Blob([rawValue]).size;
-            const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+      if (!key) continue;
+      if (HIDDEN_KEYS.has(key)) continue;
+      if (!isCurrentUserKey(key, userId)) continue;
 
-            // Determine type based on key
-            let type = 'other';
-            if (key.startsWith('progress_')) type = 'progress';
-            else if (key.startsWith('submissions_')) type = 'submissions';
-            else if (key.startsWith('stats_')) type = 'stats';
-            else if (key.startsWith('quiz_')) type = 'quiz';
-            else if (key.startsWith('notifications_')) type = 'notifications';
-            else if (key === 'currentUser') type = 'auth';
-            else if (key === 'registeredUsers') type = 'users';
-            else if (key === 'allSubmissions') type = 'submissions';
+      const rawValue = localStorage.getItem(key);
+      if (!rawValue) continue;
 
-            items.push({
-              key,
-              value: parsedValue,
-              size: `${sizeInKB} KB`,
-              type
-            });
-          } catch (error) {
-            // If not JSON, store as string
-            items.push({
-              key,
-              value: rawValue,
-              size: `${(new Blob([rawValue]).size / 1024).toFixed(2)} KB`,
-              type: 'string'
-            });
-          }
-        }
+      try {
+        const parsedValue = JSON.parse(rawValue);
+        const sizeInKB = (new Blob([rawValue]).size / 1024).toFixed(2);
+
+        let type = 'other';
+        if (key.startsWith('progress_')) type = 'progress';
+        else if (key.startsWith('submissions_')) type = 'submissions';
+        else if (key.startsWith('stats_')) type = 'stats';
+        else if (key.startsWith('quiz_')) type = 'quiz';
+        else if (key.startsWith('moduleProgress_')) type = 'progress';
+        else if (key.startsWith('completedLessons_')) type = 'progress';
+        else if (key.startsWith('notifications_')) type = 'notifications';
+        else if (key === 'currentUser') type = 'auth';
+        else if (key === 'allSubmissions') type = 'submissions';
+
+        items.push({ key, value: maskSensitiveFields(parsedValue), size: `${sizeInKB} KB`, type });
+      } catch {
+        items.push({ key, value: rawValue, size: `${(new Blob([rawValue]).size / 1024).toFixed(2)} KB`, type: 'string' });
       }
     }
 

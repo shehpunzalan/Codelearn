@@ -1565,32 +1565,6 @@ export function EnhancedLearningDelivery({
         </CardContent>
       </Card>
 
-      {/* Collaborative Learning Features */}
-      <Card className="border-0 shadow-md bg-gradient-to-r from-cyan-50 to-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-cyan-600" />
-            Collaborative Learning
-          </CardTitle>
-          <CardDescription>
-            Learn together with your classmates
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Button variant="outline" className="w-full justify-start border-cyan-300 hover:bg-cyan-50">
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Discussion Forum - Ask Questions
-          </Button>
-          <Button variant="outline" className="w-full justify-start border-blue-300 hover:bg-blue-50">
-            <Users className="w-4 h-4 mr-2" />
-            Study Group - Join Session
-          </Button>
-          <Button variant="outline" className="w-full justify-start border-purple-300 hover:bg-purple-50">
-            <Brain className="w-4 h-4 mr-2" />
-            Peer Review - Share Code
-          </Button>
-        </CardContent>
-      </Card>
 
       {/* Personalized Feedback & Analytics */}
       <Card className="border-0 shadow-md">
