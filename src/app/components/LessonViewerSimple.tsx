@@ -9,6 +9,7 @@ import type { Module } from '../types';
 
 interface LessonViewerProps {
   module: Module;
+  userId?: string;
   onBack: () => void;
   onViewFeedback?: () => void;
   onStartCoding: (moduleId: string, lessonId: string) => void;
@@ -36,6 +37,7 @@ interface QuizStats {
 
 export function LessonViewer({
   module,
+  userId,
   onBack,
   onStartCoding,
   onOpenVideoTutorial,
@@ -51,22 +53,25 @@ export function LessonViewer({
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [quizStats, setQuizStats] = useState<QuizStats | null>(null);
 
+  // User-scoped key so different users don't share completed-lesson state.
+  // Falls back to legacy unscoped key for backward compat.
+  const completedKey = userId
+    ? `completedLessons_${userId}_${module.id}`
+    : `completedLessons_${module.id}`;
+
   // Load completed lessons from localStorage once on mount
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(() => {
-    const seeded = new Set<string>(module.lessons.filter(lesson => lesson.completed).map(lesson => lesson.id));
-
-    // Also hydrate from the parent module snapshot. This covers existing users
-    // who only have moduleProgress_* saved (completedLessons count) but do not
-    // yet have completedLessons_* lesson IDs saved.
-    const completedFromModule = module.progress >= 100 ? module.lessons.length : module.completedLessons;
-    module.lessons.slice(0, completedFromModule).forEach(lesson => seeded.add(lesson.id));
+    const seeded = new Set<string>();
     try {
-      const raw = localStorage.getItem(`completedLessons_${module.id}`);
+      // Try user-scoped key first, then fall back to legacy unscoped key
+      const userKey = userId ? `completedLessons_${userId}_${module.id}` : null;
+      const legacyKey = `completedLessons_${module.id}`;
+      const raw = (userKey && localStorage.getItem(userKey)) || localStorage.getItem(legacyKey);
       if (raw) {
         JSON.parse(raw).forEach((lessonId: string) => seeded.add(lessonId));
       }
     } catch {
-      // Ignore malformed local progress and fall back to module data.
+      // Ignore malformed data
     }
     return seeded;
   });
@@ -109,7 +114,7 @@ export function LessonViewer({
       const completedCount = Math.min(updated.size, module.lessons.length);
 
       setCompletedLessons(updated);
-      localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...updated]));
+      localStorage.setItem(completedKey, JSON.stringify([...updated]));
       onLessonComplete?.(module.id, completedCount, module.lessons.length);
 
       if (completedCount >= module.lessons.length) {

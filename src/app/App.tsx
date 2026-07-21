@@ -267,6 +267,25 @@ function AppContent() {
     );
   };
 
+  // Re-hydrate module progress from localStorage whenever user changes.
+  // This is critical on page-refresh (session restored, clearProgressDataForNewUser
+  // was NOT called) so the modules state reflects what's actually in storage.
+  useEffect(() => {
+    if (!user) return;
+    setModules(
+      mockModules.map((m) => {
+        try {
+          const saved = localStorage.getItem(`moduleProgress_${m.id}`);
+          if (saved) {
+            const { progress, completedLessons } = JSON.parse(saved);
+            return { ...m, progress, completedLessons };
+          }
+        } catch {}
+        return m;
+      }),
+    );
+  }, [user?.id]);
+
   const handleLogin = async (loggedInUser: User) => {
     clearProgressDataForNewUser(loggedInUser.id);
     setUser(loggedInUser);
@@ -326,7 +345,9 @@ function AppContent() {
       localStorage.removeItem("currentUser");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("lastLoginTime");
-      localStorage.removeItem("lastLoggedInUserId");
+      // Do NOT remove lastLoggedInUserId — we keep it so that when the same
+      // user logs back in, clearProgressDataForNewUser recognises them and
+      // skips the progress wipe.
       toast.success("Logged out successfully");
     }
   };
@@ -364,14 +385,10 @@ function AppContent() {
     total: number,
   ) => {
     const progress = Math.round((completedCount / total) * 100);
-    // Persist so progress survives navigation / reload
-    localStorage.setItem(
-      `moduleProgress_${moduleId}`,
-      JSON.stringify({
-        progress,
-        completedLessons: completedCount,
-      }),
-    );
+    const progressData = JSON.stringify({ progress, completedLessons: completedCount });
+    // Save with user-scoped key (survives clearProgressDataForNewUser) + legacy unscoped key
+    localStorage.setItem(`moduleProgress_${moduleId}`, progressData);
+    if (user) localStorage.setItem(`moduleProgress_${user.id}_${moduleId}`, progressData);
     setModules((prev) =>
       prev.map((m) =>
         m.id === moduleId
@@ -387,13 +404,9 @@ function AppContent() {
     setModules((prev) => {
       const updated = prev.map((m) => {
         if (m.id === moduleId) {
-          localStorage.setItem(
-            `moduleProgress_${moduleId}`,
-            JSON.stringify({
-              progress: 100,
-              completedLessons: m.totalLessons,
-            }),
-          );
+          const progressData = JSON.stringify({ progress: 100, completedLessons: m.totalLessons });
+          localStorage.setItem(`moduleProgress_${moduleId}`, progressData);
+          if (user) localStorage.setItem(`moduleProgress_${user.id}_${moduleId}`, progressData);
           return {
             ...m,
             progress: 100,
@@ -741,6 +754,7 @@ function AppContent() {
           <LessonViewer
             key={selectedModule.id}
             module={selectedModule}
+            userId={user?.id}
             onBack={() => setCurrentView("modules")}
             onViewFeedback={() => setCurrentView("feedback")}
             onStartCoding={handleStartCoding}
