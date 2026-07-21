@@ -24,77 +24,74 @@ export const analyzeJavaCode = (code: string, lessonTopic: string): CodeAnalysis
     feedback: ''
   };
 
-  // Basic code checks
   const hasClass = /class\s+\w+/.test(code);
-  const hasMain = /public\s+static\s+void\s+main/.test(code);
   const hasComments = /\/\/|\/\*/.test(code);
   const hasCamelCase = /[a-z]+[A-Z]/.test(code);
   const hasSemicolons = /;/.test(code);
   const hasProperBraces = code.split('{').length === code.split('}').length;
-  const hasPackage = /package\s+[\w.]+;/.test(code);
-  const hasImports = /import\s+[\w.]+;/.test(code);
+  const lineCount = code.split('\n').filter(l => l.trim()).length;
 
-  let score = 0;
+  // Generous base score — reward students just for writing code
+  let score = 68;
 
-  // Check for class definition
   if (hasClass) {
-    score += 15;
+    score += 8;
     analysis.strengths.push('✓ Class definition present');
   } else {
-    analysis.errors.push('✗ Missing class definition');
+    analysis.errors.push('✗ Add a class definition to your program');
   }
 
-  // Check for proper braces
   if (hasProperBraces) {
-    score += 10;
-    analysis.strengths.push('✓ Balanced braces');
-  } else {
-    analysis.errors.push('✗ Unbalanced braces - check your code structure');
-  }
-
-  // Check for semicolons
-  if (hasSemicolons) {
     score += 5;
+    analysis.strengths.push('✓ Balanced braces — good structure');
   } else {
-    analysis.warnings.push('⚠ Missing semicolons');
+    score -= 8;
+    analysis.errors.push('✗ Unbalanced braces — check your opening and closing { }');
   }
 
-  // Check naming conventions
+  if (hasSemicolons) {
+    score += 3;
+    analysis.strengths.push('✓ Statements properly terminated');
+  }
+
   if (hasCamelCase) {
-    score += 10;
-    analysis.strengths.push('✓ Following camelCase naming convention');
-  } else {
-    analysis.warnings.push('⚠ Consider using camelCase for variable names');
+    score += 4;
+    analysis.strengths.push('✓ Good naming style (camelCase)');
   }
 
-  // Check for comments
   if (hasComments) {
-    score += 10;
-    analysis.strengths.push('✓ Code documentation present');
+    score += 4;
+    analysis.strengths.push('✓ Code has helpful comments');
   } else {
-    analysis.suggestions.push('💡 Add comments to explain your code');
+    analysis.suggestions.push('💡 Try adding a comment or two to explain what your code does');
   }
 
-  // Topic-specific analysis
+  if (lineCount > 10) {
+    score += 3;
+    analysis.strengths.push('✓ Well-developed solution');
+  }
+
+  // Topic-specific bonuses (no penalties — only rewards for what is present)
   if (lessonTopic.toLowerCase().includes('encapsulation')) {
     const hasPrivate = /private\s+\w+/.test(code);
     const hasGetters = /get[A-Z]\w+\(/.test(code);
     const hasSetters = /set[A-Z]\w+\(/.test(code);
 
     if (hasPrivate) {
-      score += 15;
-      analysis.strengths.push('✓ Using private access modifiers');
+      score += 5;
+      analysis.strengths.push('✓ Private fields — great encapsulation!');
       analysis.detectedPatterns.push('Encapsulation: Private fields');
     } else {
-      analysis.errors.push('✗ Missing private access modifiers for encapsulation');
+      analysis.suggestions.push('💡 Try using private fields to protect your data');
     }
 
     if (hasGetters && hasSetters) {
-      score += 15;
-      analysis.strengths.push('✓ Getter and setter methods implemented');
+      score += 5;
+      analysis.strengths.push('✓ Getter and setter methods — well done!');
       analysis.detectedPatterns.push('Encapsulation: Accessor methods');
-    } else {
-      analysis.suggestions.push('💡 Implement getter and setter methods');
+    } else if (hasGetters || hasSetters) {
+      score += 3;
+      analysis.suggestions.push('💡 Add both getters and setters for full encapsulation');
     }
   }
 
@@ -104,21 +101,19 @@ export const analyzeJavaCode = (code: string, lessonTopic: string): CodeAnalysis
     const hasOverride = /@Override/.test(code);
 
     if (hasExtends) {
-      score += 20;
-      analysis.strengths.push('✓ Inheritance implemented with extends');
+      score += 6;
+      analysis.strengths.push('✓ Inheritance with extends — nice work!');
       analysis.detectedPatterns.push('Inheritance: Class extension');
     } else {
-      analysis.errors.push('✗ Missing extends keyword for inheritance');
+      analysis.suggestions.push('💡 Use extends to create a parent-child class relationship');
     }
-
     if (hasSuper) {
-      score += 10;
-      analysis.strengths.push('✓ Proper super() constructor call');
+      score += 3;
+      analysis.strengths.push('✓ super() call — proper constructor chaining');
     }
-
     if (hasOverride) {
-      score += 10;
-      analysis.strengths.push('✓ Using @Override annotation');
+      score += 3;
+      analysis.strengths.push('✓ @Override annotation — excellent!');
       analysis.detectedPatterns.push('Inheritance: Method overriding');
     }
   }
@@ -130,24 +125,21 @@ export const analyzeJavaCode = (code: string, lessonTopic: string): CodeAnalysis
     const hasOverride = /@Override/.test(code);
 
     if (hasInterface || hasImplements) {
-      score += 20;
-      analysis.strengths.push('✓ Interface-based polymorphism');
+      score += 6;
+      analysis.strengths.push('✓ Interface-based polymorphism — great!');
       analysis.detectedPatterns.push('Polymorphism: Interface implementation');
     }
-
     if (hasAbstract) {
-      score += 15;
-      analysis.strengths.push('✓ Abstract class/method usage');
+      score += 4;
+      analysis.strengths.push('✓ Abstract class used — well done!');
       analysis.detectedPatterns.push('Polymorphism: Abstraction');
     }
-
     if (hasOverride) {
-      score += 10;
+      score += 3;
       analysis.strengths.push('✓ Method overriding for polymorphism');
     }
-
-    if (!hasInterface && !hasImplements && !hasAbstract) {
-      analysis.errors.push('✗ Missing polymorphism implementation (interface/abstract)');
+    if (!hasInterface && !hasImplements && !hasAbstract && !hasOverride) {
+      analysis.suggestions.push('💡 Try using an interface or @Override to show polymorphism');
     }
   }
 
@@ -156,37 +148,28 @@ export const analyzeJavaCode = (code: string, lessonTopic: string): CodeAnalysis
     const hasInterface = /interface\s+\w+/.test(code);
 
     if (hasAbstract || hasInterface) {
-      score += 20;
-      analysis.strengths.push('✓ Abstraction properly implemented');
+      score += 7;
+      analysis.strengths.push('✓ Abstraction implemented — excellent!');
       analysis.detectedPatterns.push('Abstraction: Abstract class/interface');
     } else {
-      analysis.errors.push('✗ Missing abstract class or interface');
+      analysis.suggestions.push('💡 Add an abstract class or interface to show abstraction');
     }
   }
 
-  // Check for constructors
   const hasConstructor = new RegExp(`class\\s+(\\w+).*?\\1\\s*\\(`).test(code);
   if (hasConstructor) {
-    score += 10;
+    score += 3;
     analysis.strengths.push('✓ Constructor defined');
   }
 
-  // Check for exception handling
   const hasTryCatch = /try\s*\{/.test(code) && /catch\s*\(/.test(code);
   if (hasTryCatch) {
-    score += 10;
-    analysis.strengths.push('✓ Exception handling implemented');
-    analysis.detectedPatterns.push('Exception handling: try-catch blocks');
+    score += 3;
+    analysis.strengths.push('✓ Exception handling — very thorough!');
+    analysis.detectedPatterns.push('Exception handling: try-catch');
   }
 
-  // Code quality checks
-  const lineCount = code.split('\n').length;
-  if (lineCount > 5) {
-    score += 5;
-  }
-
-  // Ensure score is between 0 and 100
-  score = Math.min(100, Math.max(0, score));
+  score = Math.min(100, Math.max(0, Math.round(score)));
   analysis.score = score;
   analysis.passed = score >= 60;
 

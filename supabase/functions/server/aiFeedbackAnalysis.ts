@@ -226,89 +226,37 @@ function analyzeCodeQuality(code: string) {
 }
 
 /**
- * Detect common Java errors
+ * Detect common Java errors — only flags genuinely broken structure,
+ * not style issues that produce excessive false positives.
  */
 function detectCommonErrors(code: string) {
   const errors = [];
 
-  // Missing semicolons (basic check)
-  const lines = code.split('\n');
-  lines.forEach((line, idx) => {
-    const trimmed = line.trim();
-    if (trimmed && 
-        !trimmed.endsWith(';') && 
-        !trimmed.endsWith('{') && 
-        !trimmed.endsWith('}') &&
-        !trimmed.startsWith('//') &&
-        !trimmed.startsWith('/*') &&
-        !trimmed.startsWith('*') &&
-        !trimmed.includes('class ') &&
-        !trimmed.includes('interface ') &&
-        trimmed.length > 5) {
-      // Could be missing semicolon
-      errors.push({
-        type: 'syntax',
-        severity: 'high',
-        message: 'Possible missing semicolon',
-        line: idx + 1,
-        fix: 'Add semicolon at the end of the statement'
-      });
-    }
-  });
-
-  // Unmatched braces
+  // Only flag truly unmatched braces (real syntax break)
   const openBraces = (code.match(/\{/g) || []).length;
   const closeBraces = (code.match(/\}/g) || []).length;
-  
   if (openBraces !== closeBraces) {
     errors.push({
       type: 'syntax',
       severity: 'critical',
       message: `Unmatched braces: ${openBraces} opening, ${closeBraces} closing`,
       line: 0,
-      fix: 'Ensure every opening brace has a matching closing brace'
+      fix: 'Make sure every { has a matching }'
     });
   }
 
-  // Unmatched parentheses
+  // Only flag truly unmatched parentheses
   const openParens = (code.match(/\(/g) || []).length;
   const closeParens = (code.match(/\)/g) || []).length;
-  
   if (openParens !== closeParens) {
     errors.push({
       type: 'syntax',
       severity: 'critical',
       message: `Unmatched parentheses: ${openParens} opening, ${closeParens} closing`,
       line: 0,
-      fix: 'Ensure every opening parenthesis has a matching closing parenthesis'
+      fix: 'Make sure every ( has a matching )'
     });
   }
-
-  // Missing main method for standalone programs
-  if (!code.includes('main') && code.includes('class')) {
-    errors.push({
-      type: 'logic',
-      severity: 'medium',
-      message: 'No main method detected - program may not be executable',
-      line: 0,
-      fix: 'Add: public static void main(String[] args) { ... }'
-    });
-  }
-
-  // Variable naming issues
-  const varDeclarations = code.match(/\b(int|double|String|boolean|float|char)\s+([a-zA-Z_]\w*)/g) || [];
-  varDeclarations.forEach(decl => {
-    const varName = decl.split(/\s+/)[1];
-    if (varName && varName[0] === varName[0].toUpperCase()) {
-      errors.push({
-        type: 'convention',
-        severity: 'low',
-        message: `Variable '${varName}' should start with lowercase letter (camelCase)`,
-        line: 0,
-        fix: `Rename to '${varName[0].toLowerCase() + varName.slice(1)}'`
-      });
-    }
-  });
 
   return errors;
 }
@@ -375,32 +323,28 @@ function generateSuggestions(code: string, lessonId: string, oopPrinciples: any[
 }
 
 /**
- * Calculate overall score
+ * Calculate overall score — starts from a generous base so students
+ * are rewarded for effort, not punished for minor style issues.
  */
 function calculateScore(oopPrinciples: any[], qualityMetrics: any, errors: any[]) {
-  let score = 0;
+  // Base: 68 points just for submitting code
+  let score = 68;
 
-  // OOP principles score (max 100 points)
-  const oopScore = oopPrinciples.reduce((sum, p) => sum + (p.score || 0), 0);
-  score += oopScore;
+  // Each detected OOP principle adds up to 7 points (max +28 for all four)
+  const oopBonus = oopPrinciples
+    .filter(p => p.detected)
+    .reduce((sum, p) => sum + Math.min(7, Math.round((p.score || 0) * 0.28)), 0);
+  score += oopBonus;
 
-  // Quality bonus (max 20 points)
-  const qualityBonus = Math.max(0, 20 - (qualityMetrics.issues.length * 5));
-  score += qualityBonus;
+  // Strengths bonus (max +8)
+  score += Math.min(8, qualityMetrics.strengths.length * 2);
 
-  // Error penalties (deduct 10 points per critical error, 5 per high, 2 per medium)
+  // Only penalise genuinely broken structure (critical errors only)
   const errorPenalty = errors.reduce((sum: number, e: any) => {
-    if (e.severity === 'critical') return sum + 10;
-    if (e.severity === 'high') return sum + 5;
-    if (e.severity === 'medium') return sum + 2;
-    return sum + 1;
+    if (e.severity === 'critical') return sum + 8;
+    return sum;
   }, 0);
-  
   score = Math.max(0, score - errorPenalty);
-
-  // Strengths bonus (max 10 points)
-  const strengthBonus = Math.min(10, qualityMetrics.strengths.length * 2);
-  score += strengthBonus;
 
   return Math.min(100, Math.round(score));
 }
