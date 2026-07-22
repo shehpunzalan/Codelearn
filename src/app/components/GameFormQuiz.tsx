@@ -342,8 +342,9 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 {currentQuestion.options.map((option) => {
                   const isSelected = selectedOption === option.text;
-                  const showCorrect = isAnswered && option.isCorrect;
-                  const showIncorrect = isAnswered && isSelected && !option.isCorrect;
+                  // On timeout there is no selected answer — don't highlight correct either
+                  const showCorrect = isAnswered && !timedOut && option.isCorrect;
+                  const showIncorrect = isAnswered && !timedOut && isSelected && !option.isCorrect;
                   return (
                     <label
                       key={option.id}
@@ -383,6 +384,19 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
 
             {/* Answer Explanation */}
             {isAnswered && (() => {
+              if (timedOut) {
+                return (
+                  <div style={{ marginBottom: '1.25rem', padding: '1rem', borderRadius: 'var(--radius-md, 8px)', background: 'rgba(220,38,38,0.07)', border: '2px solid rgba(220,38,38,0.3)' }}>
+                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                      <Clock style={{ width: 18, height: 18, color: 'var(--destructive)', flexShrink: 0, marginTop: 2 }} />
+                      <div>
+                        <p style={{ fontWeight: 700, margin: '0 0 4px', color: 'var(--destructive)', fontSize: '0.9rem' }}>⏰ Time ran out!</p>
+                        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>No answer was selected — this question is marked incorrect. Try to answer faster next time!</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
               const selectedOptionObj = currentQuestion.options.find(opt => opt.text === selectedOption);
               const correctOption = currentQuestion.options.find(opt => opt.isCorrect);
               const isCorrect = selectedOptionObj?.isCorrect || false;
