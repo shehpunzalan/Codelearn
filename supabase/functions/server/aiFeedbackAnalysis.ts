@@ -226,37 +226,97 @@ function analyzeCodeQuality(code: string) {
 }
 
 /**
- * Detect common Java errors — only flags genuinely broken structure,
- * not style issues that produce excessive false positives.
+ * Detect missing semicolons line-by-line with conservative heuristics.
+ * Skips class/method declarations, control flow, annotations, and comments.
+ */
+function detectMissingSemicolons(code: string) {
+  const lines = code.split('\n');
+  const issues: Array<{ line: number; text: string }> = [];
+  let inBlockComment = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const trimmed = raw.trim();
+
+    if (!inBlockComment && (trimmed.startsWith('/*') || trimmed.startsWith('/**'))) inBlockComment = true;
+    if (inBlockComment) { if (trimmed.includes('*/')) inBlockComment = false; continue; }
+
+    if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('@')) continue;
+
+    const stripped = trimmed.replace(/\/\/.*$/, '').trim();
+    if (!stripped) continue;
+
+    const last = stripped[stripped.length - 1];
+    if (last === ';' || last === '{' || last === '}' || last === ',') continue;
+
+    // Skip class/interface/enum/record declarations
+    if (/^(public\s+|private\s+|protected\s+|abstract\s+|final\s+|static\s+)*(class|interface|enum|record)\s+/.test(stripped)) continue;
+
+    // Skip control flow
+    if (/^(if|else|for|while|do|switch|try|catch|finally)\b/.test(stripped)) continue;
+
+    // Skip method/constructor signatures
+    if (/^(public|private|protected|static|abstract|final|synchronized|native|default|\w+)\s+[\w<>\[\]]+\s+\w+\s*\(/.test(stripped) && !stripped.includes('=')) continue;
+
+    const isStatement =
+      /^(int|long|double|float|char|boolean|byte|short|String|var|Integer|Long|Double|Float|Boolean)\s+\w+/.test(stripped) ||
+      /^\w[\w<>\[\]]*\s+\w+\s*=/.test(stripped) ||
+      /^\w[\w.]*\s*[\+\-\*\/&|^]?=(?!=)/.test(stripped) ||
+      /^\w[\w.]*\s*\(/.test(stripped) ||
+      /^(return|throw|break|continue)\b/.test(stripped) ||
+      /^(import|package)\s+/.test(stripped);
+
+    if (isStatement) {
+      issues.push({ line: i + 1, text: stripped.length > 55 ? stripped.slice(0, 55) + '…' : stripped });
+    }
+  }
+
+  return issues;
+}
+
+/**
+ * Detect common Java errors — structural issues and missing semicolons.
  */
 function detectCommonErrors(code: string) {
   const errors = [];
 
-  // Only flag truly unmatched braces (real syntax break)
+  // Unmatched braces
   const openBraces = (code.match(/\{/g) || []).length;
   const closeBraces = (code.match(/\}/g) || []).length;
   if (openBraces !== closeBraces) {
     errors.push({
       type: 'syntax',
       severity: 'critical',
-      message: `Unmatched braces: ${openBraces} opening, ${closeBraces} closing`,
+      message: `Unmatched braces: ${openBraces} opening { but ${closeBraces} closing }`,
       line: 0,
       fix: 'Make sure every { has a matching }'
     });
   }
 
-  // Only flag truly unmatched parentheses
+  // Unmatched parentheses
   const openParens = (code.match(/\(/g) || []).length;
   const closeParens = (code.match(/\)/g) || []).length;
   if (openParens !== closeParens) {
     errors.push({
       type: 'syntax',
       severity: 'critical',
-      message: `Unmatched parentheses: ${openParens} opening, ${closeParens} closing`,
+      message: `Unmatched parentheses: ${openParens} opening ( but ${closeParens} closing )`,
       line: 0,
       fix: 'Make sure every ( has a matching )'
     });
   }
+
+  // Missing semicolons
+  const semiIssues = detectMissingSemicolons(code);
+  semiIssues.forEach(({ line, text }) => {
+    errors.push({
+      type: 'syntax',
+      severity: 'warning',
+      message: `Missing semicolon on line ${line}: "${text}"`,
+      line,
+      fix: 'Add a semicolon (;) at the end of this statement'
+    });
+  });
 
   return errors;
 }

@@ -11,6 +11,48 @@ export interface CodeAnalysis {
   feedback: string;
 }
 
+// Detect missing semicolons line-by-line with conservative heuristics.
+// Skips declarations, control flow, annotations, and comments.
+const detectMissingSemicolons = (code: string): string[] => {
+  const lines = code.split('\n');
+  const issues: string[] = [];
+  let inBlockComment = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const trimmed = raw.trim();
+
+    if (!inBlockComment && (trimmed.startsWith('/*') || trimmed.startsWith('/**'))) inBlockComment = true;
+    if (inBlockComment) { if (trimmed.includes('*/')) inBlockComment = false; continue; }
+
+    if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('@')) continue;
+
+    const stripped = trimmed.replace(/\/\/.*$/, '').trim();
+    if (!stripped) continue;
+
+    const last = stripped[stripped.length - 1];
+    if (last === ';' || last === '{' || last === '}' || last === ',') continue;
+
+    if (/^(public\s+|private\s+|protected\s+|abstract\s+|final\s+|static\s+)*(class|interface|enum|record)\s+/.test(stripped)) continue;
+    if (/^(if|else|for|while|do|switch|try|catch|finally)\b/.test(stripped)) continue;
+    if (/^(public|private|protected|static|abstract|final|synchronized|native|default|\w+)\s+[\w<>\[\]]+\s+\w+\s*\(/.test(stripped) && !stripped.includes('=')) continue;
+
+    const isStatement =
+      /^(int|long|double|float|char|boolean|byte|short|String|var|Integer|Long|Double|Float|Boolean)\s+\w+/.test(stripped) ||
+      /^\w[\w<>\[\]]*\s+\w+\s*=/.test(stripped) ||
+      /^\w[\w.]*\s*[\+\-\*\/&|^]?=(?!=)/.test(stripped) ||
+      /^\w[\w.]*\s*\(/.test(stripped) ||
+      /^(return|throw|break|continue)\b/.test(stripped) ||
+      /^(import|package)\s+/.test(stripped);
+
+    if (isStatement) {
+      issues.push(`Line ${i + 1}: Missing semicolon → "${stripped.length > 55 ? stripped.slice(0, 55) + '…' : stripped}"`);
+    }
+  }
+
+  return issues;
+};
+
 // Analyze Java code and generate feedback
 export const analyzeJavaCode = (code: string, lessonTopic: string): CodeAnalysis => {
   const analysis: CodeAnalysis = {
@@ -49,9 +91,24 @@ export const analyzeJavaCode = (code: string, lessonTopic: string): CodeAnalysis
     analysis.errors.push('✗ Unbalanced braces — check your opening and closing { }');
   }
 
+  // Parenthesis check
+  const openParens = (code.match(/\(/g) || []).length;
+  const closeParens = (code.match(/\)/g) || []).length;
+  if (openParens !== closeParens) {
+    score -= 6;
+    analysis.errors.push(`✗ Unmatched parentheses — ${openParens} opening ( but ${closeParens} closing )`);
+  }
+
   if (hasSemicolons) {
     score += 3;
     analysis.strengths.push('✓ Statements properly terminated');
+  }
+
+  // Missing semicolon check — flag each offending line
+  const semiErrors = detectMissingSemicolons(code);
+  if (semiErrors.length > 0) {
+    score -= Math.min(10, semiErrors.length * 3);
+    semiErrors.forEach(msg => analysis.errors.push(`✗ ${msg}`));
   }
 
   if (hasCamelCase) {
@@ -252,34 +309,34 @@ const generateFeedback = (analysis: CodeAnalysis, lessonTopic: string): string =
 export const compileJavaCode = (code: string): { success: boolean; output: string; errors: string[] } => {
   const errors: string[] = [];
 
-  // Check for common syntax errors
   if (!code.trim()) {
     errors.push('Error: Empty code submission');
+    return { success: false, output: 'Compilation failed. Please fix the errors and try again.', errors };
   }
 
+  // Structural checks
   const openBraces = (code.match(/{/g) || []).length;
   const closeBraces = (code.match(/}/g) || []).length;
   if (openBraces !== closeBraces) {
-    errors.push(`Syntax Error: Mismatched braces (${openBraces} opening, ${closeBraces} closing)`);
+    errors.push(`Syntax Error: Mismatched braces — ${openBraces} opening { but ${closeBraces} closing }`);
   }
 
   const openParens = (code.match(/\(/g) || []).length;
   const closeParens = (code.match(/\)/g) || []).length;
   if (openParens !== closeParens) {
-    errors.push(`Syntax Error: Mismatched parentheses (${openParens} opening, ${closeParens} closing)`);
+    errors.push(`Syntax Error: Mismatched parentheses — ${openParens} opening ( but ${closeParens} closing )`);
   }
 
-  // Check for class definition
-  if (!(/class\s+\w+/.test(code))) {
-    errors.push('Error: No class definition found');
+  if (!/class\s+\w+/.test(code)) {
+    errors.push('Error: No class definition found — every Java program needs at least one class');
   }
+
+  // Semicolon check
+  const semiIssues = detectMissingSemicolons(code);
+  semiIssues.forEach(msg => errors.push(`Syntax Error: ${msg}`));
 
   if (errors.length > 0) {
-    return {
-      success: false,
-      output: 'Compilation failed. Please fix the errors and try again.',
-      errors
-    };
+    return { success: false, output: 'Compilation failed. Please fix the errors and try again.', errors };
   }
 
   return {
