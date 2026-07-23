@@ -22,8 +22,6 @@ import { AudioLecturePage } from "./components/AudioLecturePage";
 import { InteractiveGamePage } from "./components/InteractiveGamePage";
 import { LearningPathReadingPage } from "./components/LearningPathReadingPage";
 import { DataViewer } from "./components/DataViewer";
-import { ConnectionTest } from "./components/ConnectionTest";
-import { DatabaseTest } from "./components/DatabaseTest";
 import { toast, Toaster } from "sonner";
 import * as backendApi from "./services/backendApi";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -914,17 +912,6 @@ function AppContent() {
           />
         )}
 
-        {currentView === "connection-test" && (
-          <ConnectionTest
-            onBack={() => setCurrentView("settings")}
-          />
-        )}
-
-        {currentView === "database-test" && (
-          <DatabaseTest
-            onBack={() => setCurrentView("settings")}
-          />
-        )}
 
         {/* Fallback in case no view matches */}
         {![
@@ -944,8 +931,6 @@ function AppContent() {
           "interactive-game",
           "analytics",
           "data-viewer",
-          "connection-test",
-          "database-test",
         ].includes(currentView) && (
           <div className="text-center py-20">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
