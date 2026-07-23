@@ -21,7 +21,6 @@ import { ReadingContentPage } from "./components/ReadingContentPage";
 import { AudioLecturePage } from "./components/AudioLecturePage";
 import { InteractiveGamePage } from "./components/InteractiveGamePage";
 import { LearningPathReadingPage } from "./components/LearningPathReadingPage";
-import { DataViewer } from "./components/DataViewer";
 import { toast, Toaster } from "sonner";
 import * as backendApi from "./services/backendApi";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -906,11 +905,6 @@ function AppContent() {
             />
           )}
 
-        {currentView === "data-viewer" && (
-          <DataViewer
-            onBack={() => setCurrentView("dashboard")}
-          />
-        )}
 
 
         {/* Fallback in case no view matches */}
@@ -930,7 +924,6 @@ function AppContent() {
           "audio-lecture",
           "interactive-game",
           "analytics",
-          "data-viewer",
         ].includes(currentView) && (
           <div className="text-center py-20">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">

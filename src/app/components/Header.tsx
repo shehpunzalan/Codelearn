@@ -3,7 +3,7 @@ import { User } from '../types';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Badge } from './ui/badge';
-import { Brain, Home, BookOpen, Code, MessageSquare, TrendingUp, LogOut, User as UserIcon, Settings, Bell, Database } from 'lucide-react';
+import { Brain, Home, BookOpen, Code, MessageSquare, TrendingUp, LogOut, User as UserIcon, Settings, Bell } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -324,10 +324,6 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
                 <DropdownMenuItem onClick={onSettings}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onNavigate('data-viewer')}>
-                  <Database className="mr-2 h-4 w-4" />
-                  <span>View Data</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onLogout} className="text-red-600">
