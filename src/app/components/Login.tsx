@@ -340,10 +340,6 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
           </CardContent>
         </Card>
 
-        {/* Demo hint */}
-        <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-sans)' }}>
-          Demo: <code>student@demo.com</code> / <code>instructor@demo.com</code> — password: <code>demo123</code>
-        </p>
       </div>
     </div>
   );

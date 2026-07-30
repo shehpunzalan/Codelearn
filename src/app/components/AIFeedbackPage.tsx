@@ -14,9 +14,10 @@ import { projectId, publicAnonKey } from '../../utils/supabase/info';
 interface AIFeedbackPageProps {
   userId: string;
   onBack: () => void;
+  onReturnToLesson?: () => void;
 }
 
-export function AIFeedbackPage({ userId, onBack }: AIFeedbackPageProps) {
+export function AIFeedbackPage({ userId, onBack, onReturnToLesson }: AIFeedbackPageProps) {
   const [feedbackList, setFeedbackList] = useState<any[]>([]);
   const [selectedFeedback, setSelectedFeedback] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -136,25 +137,39 @@ export function AIFeedbackPage({ userId, onBack }: AIFeedbackPageProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={onBack}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
+        <div className="mb-6" style={{ fontFamily: 'var(--font-sans)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onBack}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', background: 'transparent', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--muted-foreground)', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+              >
+                <ArrowLeft style={{ width: 16, height: 16 }} />
+                Dashboard
+              </button>
+              {onReturnToLesson && (
+                <button
+                  onClick={onReturnToLesson}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1.25rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', border: 'none', borderRadius: 'var(--radius-md)', color: 'white', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-sans)', boxShadow: 'var(--shadow-sm)' }}
+                >
+                  <BookOpen style={{ width: 16, height: 16 }} />
+                  Return to Lesson
+                </button>
+              )}
+            </div>
+            <span style={{ background: 'var(--primary)', color: 'white', borderRadius: 'var(--radius-full)', padding: '0.3rem 1rem', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'var(--font-sans)' }}>
+              CCS108
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Brain style={{ width: 24, height: 24, color: 'white' }} />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <Brain className="w-8 h-8 text-purple-600" />
-                AI-Generated Feedback
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Review neural network analysis of your Java OOP submissions
-              </p>
+              <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--foreground)', margin: 0, fontFamily: 'var(--font-sans)' }}>AI-Generated Feedback</h1>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', margin: 0, fontFamily: 'var(--font-sans)' }}>Review neural network analysis of your Java OOP submissions</p>
             </div>
           </div>
-          <Badge className="bg-purple-600 text-white px-4 py-2">
-            CCS108
-          </Badge>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -455,21 +470,28 @@ export function AIFeedbackPage({ userId, onBack }: AIFeedbackPageProps) {
 
               {/* Full Feedback Message */}
               {selectedFeedback.feedbackMessage && (
-                <Card className="border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-purple-600" />
-                      Detailed Feedback
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-sm max-w-none">
-                      <pre className="whitespace-pre-wrap text-gray-700 font-sans text-sm leading-relaxed">
-                        {selectedFeedback.feedbackMessage}
-                      </pre>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <FileText style={{ width: 18, height: 18, color: 'var(--secondary)' }} />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}>Detailed Feedback</h3>
+                  </div>
+                  <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.875rem', color: 'var(--foreground)', lineHeight: 1.7, fontFamily: 'var(--font-sans)', margin: 0 }}>
+                    {selectedFeedback.feedbackMessage}
+                  </pre>
+                </div>
+              )}
+
+              {/* Return to Lesson CTA at bottom */}
+              {onReturnToLesson && (
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '0.5rem', paddingBottom: '1rem' }}>
+                  <button
+                    onClick={onReturnToLesson}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 2rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', border: 'none', borderRadius: 'var(--radius-md)', color: 'white', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-sans)', boxShadow: 'var(--shadow-md)' }}
+                  >
+                    <BookOpen style={{ width: 18, height: 18 }} />
+                    Return to Lesson & Continue
+                  </button>
+                </div>
               )}
             </div>
           )}

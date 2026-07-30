@@ -39,7 +39,10 @@ function buildLeaderboard(currentUserId: string, modules: Module[]): Leaderboard
   let users: any[] = [];
   try { users = JSON.parse(localStorage.getItem('registeredUsers') || '[]'); } catch {}
 
-  const entries: LeaderboardEntry[] = users.map((u: any) => {
+  // Exclude instructors and demo accounts from the leaderboard
+  const students = users.filter((u: any) => u.role !== 'instructor' && u.id !== 'demo-instructor');
+
+  const entries: LeaderboardEntry[] = students.map((u: any) => {
     // Sum completed lessons across all modules using user-scoped keys
     let lessons = 0;
     let points = 0;

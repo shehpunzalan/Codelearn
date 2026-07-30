@@ -810,6 +810,7 @@ function AppContent() {
         {currentView === "feedback" && (
           <FeedbackPage
             onBack={() => setCurrentView("code-editor")}
+            onReturnToLesson={() => setCurrentView("module")}
           />
         )}
 

@@ -21,9 +21,10 @@ interface SubmissionData {
 
 interface FeedbackPageProps {
   onBack?: () => void;
+  onReturnToLesson?: () => void;
 }
 
-export function FeedbackPage({ onBack }: FeedbackPageProps) {
+export function FeedbackPage({ onBack, onReturnToLesson }: FeedbackPageProps) {
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionData | null>(null);
 
@@ -69,13 +70,26 @@ export function FeedbackPage({ onBack }: FeedbackPageProps) {
 
   if (submissions.length === 0) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Badge className="bg-blue-600 text-white px-3 py-1">CCS108</Badge>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">AI-Generated Feedback</h1>
-            <p className="text-gray-600">Review neural network analysis of your Java OOP submissions</p>
+      <div className="space-y-6" style={{ fontFamily: 'var(--font-sans)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Brain style={{ width: 22, height: 22, color: 'white' }} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--foreground)', margin: 0, fontFamily: 'var(--font-sans)' }}>AI-Generated Feedback</h1>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', margin: 0, fontFamily: 'var(--font-sans)' }}>Review neural network analysis of your Java OOP submissions</p>
+            </div>
           </div>
+          {onReturnToLesson && (
+            <button
+              onClick={onReturnToLesson}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', border: 'none', borderRadius: 'var(--radius-md)', color: 'white', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+            >
+              <ArrowLeft style={{ width: 15, height: 15 }} />
+              Return to Lesson
+            </button>
+          )}
         </div>
 
         <Card className="border-0 shadow-md">
@@ -113,13 +127,26 @@ export function FeedbackPage({ onBack }: FeedbackPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Badge className="bg-blue-600 text-white px-3 py-1">CCS108</Badge>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">AI-Generated Feedback</h1>
-          <p className="text-gray-600">Review neural network analysis of your Java OOP submissions</p>
+    <div className="space-y-6" style={{ fontFamily: 'var(--font-sans)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Brain style={{ width: 22, height: 22, color: 'white' }} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--foreground)', margin: 0, fontFamily: 'var(--font-sans)' }}>AI-Generated Feedback</h1>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', margin: 0, fontFamily: 'var(--font-sans)' }}>Review neural network analysis of your Java OOP submissions</p>
+          </div>
         </div>
+        {onReturnToLesson && (
+          <button
+            onClick={onReturnToLesson}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', border: 'none', borderRadius: 'var(--radius-md)', color: 'white', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
+          >
+            <ArrowLeft style={{ width: 15, height: 15 }} />
+            Return to Lesson
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
