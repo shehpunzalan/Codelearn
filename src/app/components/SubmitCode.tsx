@@ -12,7 +12,7 @@ interface SubmitCodeProps {
 
 export function SubmitCode({ onSubmitComplete }: SubmitCodeProps) {
   const [selectedModule, setSelectedModule] = useState('Module 2: Student Class Implementation');
-  const [code, setCode] = useState(`// Write your Java code here...\\npublic class Student {\\n    // Your implementation\\n}`);
+  const [code, setCode] = useState(`public class Student {\n\n    public static void main(String[] args) {\n        \n    }\n\n}`);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = () => {

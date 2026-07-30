@@ -403,7 +403,7 @@ app.get("/machine-problem/:moduleId/:lessonId", async (c) => {
         lessonId,
         title: "Java OOP Machine Problem",
         description: "Solve the programming task using Java OOP concepts from this lesson.",
-        starterCode: "public class Main {\\n    public static void main(String[] args) {\\n        // Write your solution here\\n    }\\n}",
+        starterCode: "public class Main {\n\n    public static void main(String[] args) {\n        \n    }\n\n}",
         testCases: []
       }
     });

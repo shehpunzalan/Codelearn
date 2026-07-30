@@ -141,7 +141,7 @@ export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, on
       if (savedCode) {
         setCode(savedCode);
       } else {
-        setCode(`// Write your Java code here...\n// Module: ${module.title}\n// Lesson: ${selectedLesson?.title}\n\npublic class Solution {\n    // Your implementation\n    \n}`);
+        setCode(`public class Solution {\n\n    public static void main(String[] args) {\n        \n    }\n\n}`);
       }
 
       if (savedSubmission) {
@@ -233,7 +233,7 @@ export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, on
 
   // Reset code to default
   const handleResetCode = () => {
-    const defaultCode = `// Write your Java code here...\n// Module: ${module.title}\n// Lesson: ${selectedLesson?.title}\n\npublic class Solution {\n    // Your implementation\n    \n}`;
+    const defaultCode = `public class Solution {\n\n    public static void main(String[] args) {\n        \n    }\n\n}`;
     setCode(defaultCode);
     toast.info('Code reset to default template');
   };
@@ -375,7 +375,7 @@ export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, on
       return;
     }
 
-    if (code === `// Write your Java code here...\n// Module: ${module.title}\n// Lesson: ${selectedLesson?.title}\n\npublic class Solution {\n    // Your implementation\n    \n}`) {
+    if (code === `public class Solution {\n\n    public static void main(String[] args) {\n        \n    }\n\n}`) {
       toast.error('Default template detected', {
         description: 'Please modify the code template before submitting.',
       });

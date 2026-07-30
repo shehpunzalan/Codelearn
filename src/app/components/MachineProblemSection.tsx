@@ -113,11 +113,11 @@ function buildRequirements(instructions: string): CodeRequirement[] {
   return reqs;
 }
 
-/** Strip single-line comments that are just instructions (// ...) from starter code */
+/** Strip instructional comment lines (// TODO:, // Write, // Add, etc.) from starter code. */
 function stripStarterComments(code: string): string {
   return code
     .split('\n')
-    .filter(line => !/^\s*\/\//.test(line))
+    .filter(line => !/^\s*\/\/\s*(TODO|FIXME|Write|Add|Your|Enter|Replace|Start|Begin|Use|Create|Declare|Implement|Override|Note:|Hint|e\.g\.)/.test(line))
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();

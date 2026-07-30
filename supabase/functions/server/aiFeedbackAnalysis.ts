@@ -225,6 +225,119 @@ function analyzeCodeQuality(code: string) {
   return { issues, strengths };
 }
 
+/** Detect semantic errors: = inside boolean condition, String == comparison, division by zero. */
+function detectSemanticErrors(code: string): Array<{ line: number; message: string; fix: string }> {
+  const lines = code.split('\n');
+  const issues: Array<{ line: number; message: string; fix: string }> = [];
+  let inBlockComment = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (!inBlockComment && (trimmed.startsWith('/*') || trimmed.startsWith('/**'))) inBlockComment = true;
+    if (inBlockComment) { if (trimmed.includes('*/')) inBlockComment = false; continue; }
+    if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('@')) continue;
+
+    const stripped = trimmed.replace(/\/\/.*$/, '').trim();
+    const ln = i + 1;
+    const prev = stripped.length > 65 ? stripped.slice(0, 65) + '…' : stripped;
+
+    const condMatch = stripped.match(/^(?:if|while)\s*\((.+)\)\s*(?:\{|$)/);
+    if (condMatch) {
+      const cond = condMatch[1];
+      if (/(?<![=!<>+\-*\/&|])=(?!=)/.test(cond)) {
+        issues.push({
+          line: ln,
+          message: `Semantic error on line ${ln}: assignment (=) used inside boolean condition — did you mean == ? → "${prev}"`,
+          fix: 'Replace = with == to perform equality comparison instead of assignment'
+        });
+      }
+      if (/(?:"[^"]*"\s*(?:==|!=)|(?:==|!=)\s*"[^"]*")/.test(cond)) {
+        issues.push({
+          line: ln,
+          message: `Semantic error on line ${ln}: String compared with == or != (compares object references, not values) → "${prev}"`,
+          fix: 'Use .equals() for String value comparison, e.g. str.equals("value")'
+        });
+      }
+    }
+
+    if (!condMatch && /(?:"[^"]*"\s*==|==\s*"[^"]*")/.test(stripped) && !/\.equals\(/.test(stripped)) {
+      issues.push({
+        line: ln,
+        message: `Semantic error on line ${ln}: String compared with == instead of .equals() → "${prev}"`,
+        fix: 'Replace == with .equals() for correct String value comparison'
+      });
+    }
+
+    if (/[^/]\/\s*0(?![.\dLlFf])/.test(stripped)) {
+      issues.push({
+        line: ln,
+        message: `Semantic error on line ${ln}: division by literal zero (/ 0) will throw ArithmeticException at runtime → "${prev}"`,
+        fix: 'Ensure the divisor cannot be zero before dividing'
+      });
+    }
+  }
+
+  return issues;
+}
+
+/** Detect logical errors: off-by-one in array loops, unreachable code after return/throw. */
+function detectLogicalErrors(code: string): Array<{ line: number; message: string; fix: string }> {
+  const lines = code.split('\n');
+  const issues: Array<{ line: number; message: string; fix: string }> = [];
+  let inBlockComment = false;
+  let braceDepth = 0;
+  let returnedOrThrown = false;
+  let returnedDepth = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (!inBlockComment && (trimmed.startsWith('/*') || trimmed.startsWith('/**'))) inBlockComment = true;
+    if (inBlockComment) { if (trimmed.includes('*/')) inBlockComment = false; continue; }
+    if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('@')) continue;
+
+    const stripped = trimmed.replace(/\/\/.*$/, '').trim();
+    const ln = i + 1;
+    const prev = stripped.length > 70 ? stripped.slice(0, 70) + '…' : stripped;
+
+    const opens = (stripped.match(/\{/g) || []).length;
+    const closes = (stripped.match(/\}/g) || []).length;
+
+    if (/\bfor\s*\(/.test(stripped)) {
+      const forMatch = stripped.match(/for\s*\([^;]*;([^;]+);/);
+      if (forMatch && /<=\s*[\w.[\]]+\.length\b(?!\s*-\s*1)/.test(forMatch[1])) {
+        issues.push({
+          line: ln,
+          message: `Logical error on line ${ln}: off-by-one — loop uses <= array.length but arrays are 0-indexed (last valid index = array.length - 1). This will throw ArrayIndexOutOfBoundsException → "${prev}"`,
+          fix: 'Change <= to < in the loop condition to stay within array bounds'
+        });
+      }
+    }
+
+    if (returnedOrThrown && braceDepth === returnedDepth &&
+        stripped !== '}' && !stripped.startsWith('}') &&
+        !/^(else|catch|finally)\b/.test(stripped)) {
+      issues.push({
+        line: ln,
+        message: `Logical error on line ${ln}: unreachable code — this statement comes after a return/throw and will never execute → "${prev}"`,
+        fix: 'Remove or move this statement to before the return/throw'
+      });
+      returnedOrThrown = false;
+    }
+
+    if (/^(return|throw)\b/.test(stripped)) {
+      returnedOrThrown = true;
+      returnedDepth = braceDepth;
+    } else if (opens > 0) {
+      returnedOrThrown = false;
+    }
+
+    braceDepth += opens - closes;
+    if (braceDepth < returnedDepth) { returnedOrThrown = false; returnedDepth = -1; }
+  }
+
+  return issues;
+}
+
 /**
  * Detect missing semicolons line-by-line with conservative heuristics.
  * Skips class/method declarations, control flow, annotations, and comments.
@@ -316,6 +429,18 @@ function detectCommonErrors(code: string) {
       line,
       fix: 'Add a semicolon (;) at the end of this statement'
     });
+  });
+
+  // Semantic errors
+  const semanticIssues = detectSemanticErrors(code);
+  semanticIssues.forEach(({ line, message, fix }) => {
+    errors.push({ type: 'semantic', severity: 'error', message, line, fix });
+  });
+
+  // Logical errors
+  const logicalIssues = detectLogicalErrors(code);
+  logicalIssues.forEach(({ line, message, fix }) => {
+    errors.push({ type: 'logical', severity: 'error', message, line, fix });
   });
 
   return errors;

@@ -788,6 +788,20 @@ public interface Drawable {
   },
 ];
 
+// Strip instructional // TODO / // Write / etc. comments from starter code so the editor
+// shows a clean blank template rather than directive comments.
+const _stripInstructional = (code: string) =>
+  code
+    .split('\n')
+    .filter(l => !/^\s*\/\/\s*(TODO|FIXME|Write|Add|Your|Enter|Replace|Start|Begin|Use|Create|Declare|Implement|Override|Note:|Hint|e\.g\.)/.test(l))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+sampleAssignments.forEach(a => {
+  if (a.starterCode) a.starterCode = _stripInstructional(a.starterCode);
+});
+
 // ============================================
 // ANALYTICS DATA
 // ============================================

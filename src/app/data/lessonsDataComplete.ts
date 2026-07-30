@@ -484,7 +484,7 @@ export const lessonEnhancements: Record<string, {
 // Helper function to merge enhancements with lesson data
 export function enhanceLesson(lesson: Lesson): Lesson {
   const enhancement = lessonEnhancements[lesson.id];
-  const starterCode = getStarterCodeForLesson(lesson.id, lesson.title);
+  const starterCode = stripInstructionalComments(getStarterCodeForLesson(lesson.id, lesson.title));
   
   if (enhancement) {
     return {
@@ -502,6 +502,17 @@ export function enhanceLesson(lesson: Lesson): Lesson {
     ...lesson,
     starterCode
   };
+}
+
+// Remove instructional comment lines (// TODO:, // Write, // Add, // Your, // Enter, etc.)
+// from Java starter code so students see a clean editor with no directive comments.
+function stripInstructionalComments(code: string): string {
+  return code
+    .split('\n')
+    .filter(line => !/^\s*\/\/\s*(TODO|FIXME|Write|Add|Your|Enter|Replace|Start|Begin|Use|Create|Declare|Implement|Override|Note:|Hint|e\.g\.)/.test(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 // Generate appropriate starter code based on lesson content

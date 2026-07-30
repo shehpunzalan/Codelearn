@@ -98,7 +98,7 @@ interface Submission {
  */
 export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeEditorPageProps) {
   // State management for code content and editor behavior
-  const [code, setCode] = useState<string>(lesson.starterCode || '// Write your Java code here...');
+  const [code, setCode] = useState<string>(lesson.starterCode || 'public class Solution {\n\n    public static void main(String[] args) {\n        \n    }\n\n}');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Submission | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -123,7 +123,7 @@ export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeE
     localStorage.removeItem(`performance_${module.id}_${lesson.id}`);
     
     // Reset to starter code provided by the lesson
-    setCode(lesson.starterCode || '// Write your Java code here...');
+    setCode(lesson.starterCode || 'public class Solution {\n\n    public static void main(String[] args) {\n        \n    }\n\n}');
     setLastSubmission(null);
     setHasSubmitted(false);
     
@@ -210,7 +210,7 @@ export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeE
     // Confirm with user before resetting (destructive action)
     if (confirm('Are you sure you want to reset your code? This will restore the starter code and cannot be undone.')) {
       // Restore starter code from lesson
-      setCode(lesson.starterCode || '// Write your Java code here...');
+      setCode(lesson.starterCode || 'public class Solution {\n\n    public static void main(String[] args) {\n        \n    }\n\n}');
       
       // Remove saved code from local storage
       localStorage.removeItem(`code_${module.id}_${lesson.id}`);
