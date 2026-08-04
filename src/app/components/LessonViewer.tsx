@@ -22,8 +22,9 @@ import type { Module } from '../types';
 interface LessonViewerProps {
   module: Module;
   onBack: () => void;
-  onViewFeedback?: () => void;
+  onViewFeedback?: (lessonId?: string) => void;
   onStartCoding: (moduleId: string, lessonId: string) => void;
+  initialLessonId?: string;
   onOpenVideoTutorial?: (moduleId: string, lessonId: string, lessonTitle: string) => void;
   onOpenReadingContent?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
   onOpenAudioLecture?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
@@ -75,9 +76,9 @@ interface LessonPerformance {
   completedAt?: string;
 }
 
-export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, onOpenVideoTutorial, onOpenReadingContent, onOpenAudioLecture, onOpenInteractiveGame }: LessonViewerProps) {
+export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, onOpenVideoTutorial, onOpenReadingContent, onOpenAudioLecture, onOpenInteractiveGame, initialLessonId }: LessonViewerProps) {
   const [viewMode, setViewMode] = useState<'lessons' | 'feedback'>('lessons');
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(initialLessonId ?? null);
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSubmitSection, setShowSubmitSection] = useState(false);
@@ -457,7 +458,7 @@ export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, on
 
   const handleViewFullFeedback = () => {
     if (onViewFeedback) {
-      onViewFeedback();
+      onViewFeedback(selectedLessonId ?? undefined);
     }
   };
 

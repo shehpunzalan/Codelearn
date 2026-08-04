@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { User, Module } from "./types";
 import { mockModules } from "./data/mockData";
 import { Login } from "./components/Login";
@@ -73,7 +73,11 @@ function AppContent() {
       return m;
     });
   });
-  const [editorRefreshKey, setEditorRefreshKey] = useState(0); // Force refresh of code editor
+  const [editorRefreshKey, setEditorRefreshKey] = useState(0);
+  // Track where the user was before navigating to feedback, so "Return to Lesson" restores
+  // the exact view (module lesson panel or code editor) with the correct lesson selected.
+  const previewFeedbackView = useRef<string>("module");
+  const previewFeedbackLessonId = useRef<string | null>(null);
   const [isCheckingSession, setIsCheckingSession] =
     useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -370,6 +374,7 @@ function AppContent() {
 
   const handleSelectModule = (moduleId: string) => {
     setSelectedModuleId(moduleId);
+    previewFeedbackLessonId.current = null; // fresh entry — no lesson pre-selected
     setCurrentView("module");
   };
 
@@ -770,8 +775,16 @@ function AppContent() {
             key={selectedModule.id}
             module={selectedModule}
             userId={user?.id}
-            onBack={() => setCurrentView("modules")}
-            onViewFeedback={() => setCurrentView("feedback")}
+            initialLessonId={previewFeedbackLessonId.current ?? undefined}
+            onBack={() => {
+              previewFeedbackLessonId.current = null;
+              setCurrentView("modules");
+            }}
+            onViewFeedback={(lessonId) => {
+              previewFeedbackView.current = "module";
+              previewFeedbackLessonId.current = lessonId ?? null;
+              setCurrentView("feedback");
+            }}
             onStartCoding={handleStartCoding}
             onOpenVideoTutorial={handleOpenVideoTutorial}
             onOpenReadingContent={handleOpenReadingContent}
@@ -795,22 +808,30 @@ function AppContent() {
           selectedModule &&
           selectedLesson && (
             <CodeEditorPage
-              key={`${selectedModule.id}-${selectedLesson.id}-${editorRefreshKey}`} // Force remount on navigation
+              key={`${selectedModule.id}-${selectedLesson.id}-${editorRefreshKey}`}
               module={selectedModule}
               lesson={selectedLesson}
               onBack={() => {
+                previewFeedbackLessonId.current = null;
                 setCurrentView("module");
                 setSelectedLessonId(null);
-                setEditorRefreshKey((prevKey) => prevKey + 1); // Increment for next visit
+                setEditorRefreshKey((prevKey) => prevKey + 1);
               }}
-              onViewFeedback={() => setCurrentView("feedback")}
+              onViewFeedback={() => {
+                previewFeedbackView.current = "code-editor";
+                previewFeedbackLessonId.current = selectedLesson.id;
+                setCurrentView("feedback");
+              }}
             />
           )}
 
         {currentView === "feedback" && (
           <FeedbackPage
-            onBack={() => setCurrentView("code-editor")}
-            onReturnToLesson={() => setCurrentView("module")}
+            onBack={() => setCurrentView(previewFeedbackView.current)}
+            onReturnToLesson={() => {
+              // Navigate back to the exact view + lesson the user came from
+              setCurrentView(previewFeedbackView.current);
+            }}
           />
         )}
 

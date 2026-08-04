@@ -243,7 +243,7 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
           <CardHeader style={{ paddingBottom: '0.75rem' }}>
             <CardTitle style={{ fontSize: '1.375rem', fontWeight: 700, fontFamily: 'var(--font-sans)', color: 'var(--color-text-primary)' }}>Log In</CardTitle>
             <CardDescription style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-text-secondary)' }}>
-              Enter your email and password — your role is detected automatically.
+              Welcome back. Please sign in to continue.
             </CardDescription>
           </CardHeader>
           <CardContent>
