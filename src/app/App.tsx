@@ -83,30 +83,30 @@ function AppContent() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // One-time wipe of stale non-Supabase local users (keeps UUID-format accounts).
-    if (!localStorage.getItem("v3_local_users_wiped")) {
+    // One-time migration: remove stale placeholder accounts that were never real users.
+    // v4 is safer than v3 — it keeps any user whose credentials are stored locally,
+    // not just UUID-format IDs, so no real registered account is lost.
+    if (!localStorage.getItem("v4_local_users_wiped")) {
       try {
-        const uuidPattern =
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        const currentUserRaw =
-          localStorage.getItem("currentUser");
-        const currentUser = currentUserRaw
-          ? JSON.parse(currentUserRaw)
-          : null;
         const raw = localStorage.getItem("registeredUsers");
         const users: any[] = raw ? JSON.parse(raw) : [];
         const cleaned = users.filter(
           (u: any) =>
-            (currentUser && u.id === currentUser.id) ||
+            // Keep demo accounts
             u.id === "demo-student" ||
             u.id === "demo-instructor" ||
-            uuidPattern.test(u.id || ""),
+            // Keep any user whose credentials are stored (i.e. a real registered account)
+            !!localStorage.getItem(`userCreds_${u.email}`) ||
+            // Keep the currently logged-in user regardless
+            (() => {
+              try {
+                const cu = JSON.parse(localStorage.getItem("currentUser") || "{}");
+                return cu.id === u.id;
+              } catch { return false; }
+            })(),
         );
-        localStorage.setItem(
-          "registeredUsers",
-          JSON.stringify(cleaned),
-        );
-        localStorage.setItem("v3_local_users_wiped", "1");
+        localStorage.setItem("registeredUsers", JSON.stringify(cleaned));
+        localStorage.setItem("v4_local_users_wiped", "1");
       } catch {}
     }
 

@@ -93,41 +93,70 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
         localUsers = raw ? JSON.parse(raw) : [];
       } catch (_e: unknown) { localUsers = []; }
 
-      // Find user by email only — role is auto-detected from their registration
-      const localMatch = localUsers.find((u: any) => u.email === email);
-      if (localMatch) {
-        const credsRaw = localStorage.getItem(`userCreds_${email}`);
-        if (credsRaw) {
-          // Credentials exist locally — verify the password right here
-          let credsOk = false;
-          try { const creds = JSON.parse(credsRaw); credsOk = creds.password === password; } catch {}
+      // Check credentials key first — this survives even if registeredUsers was corrupted/wiped.
+      const credsRaw = localStorage.getItem(`userCreds_${email}`);
+      if (credsRaw) {
+        let creds: { password: string; id: string } | null = null;
+        try { creds = JSON.parse(credsRaw); } catch {}
 
-          if (credsOk) {
-            const user: User = {
-              id: localMatch.id,
-              name: localMatch.name,
-              email: localMatch.email,
-              role: localMatch.role,
-              enrolledCourses: localMatch.enrolledCourses || ['CCS108'],
-            };
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            localStorage.setItem('accessToken', `local-token-${user.id}`);
-            if (rememberMe) { localStorage.setItem('rememberMe', 'true'); localStorage.setItem('rememberedEmail', email); }
-            localStorage.setItem('lastLoginTime', new Date().toISOString());
-            toast.success('Login successful!', { description: `Welcome back, ${user.name}! (${user.role})` });
-            setIsLoading(false);
-            onLogin(user);
-            return;
-          } else {
-            // Credentials stored but password wrong — definitive failure
+        if (creds) {
+          if (creds.password !== password) {
+            // Credentials exist but password is wrong — definitive failure, no backend fallthrough.
             toast.error('Incorrect password', { description: 'Please check your password and try again.' });
             setErrors({ password: 'Incorrect password.' });
             setIsLoading(false);
             return;
           }
+
+          // Password matches — find or reconstruct the user profile.
+          const localMatch = localUsers.find((u: any) => u.email === email);
+          const userId = creds.id;
+
+          // If the entry was wiped from registeredUsers, restore it from the credentials key.
+          if (!localMatch) {
+            const restoredUser = {
+              id: userId,
+              name: email.split('@')[0], // best-effort name recovery
+              email,
+              role: 'student' as const,
+              enrolledCourses: ['CCS108'],
+              registeredAt: new Date().toISOString(),
+              pendingSync: true,
+            };
+            const usersToSave = [...localUsers, restoredUser];
+            localStorage.setItem('registeredUsers', JSON.stringify(usersToSave));
+            const user: User = { id: userId, name: restoredUser.name, email, role: 'student', enrolledCourses: ['CCS108'] };
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.setItem('accessToken', `local-token-${userId}`);
+            if (rememberMe) { localStorage.setItem('rememberMe', 'true'); localStorage.setItem('rememberedEmail', email); }
+            localStorage.setItem('lastLoginTime', new Date().toISOString());
+            toast.success('Login successful!', { description: `Welcome back! Your account has been restored.` });
+            setIsLoading(false);
+            onLogin(user);
+            return;
+          }
+
+          // Normal path — profile exists and password matched.
+          const user: User = {
+            id: localMatch.id,
+            name: localMatch.name,
+            email: localMatch.email,
+            role: localMatch.role,
+            enrolledCourses: localMatch.enrolledCourses || ['CCS108'],
+          };
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          localStorage.setItem('accessToken', `local-token-${user.id}`);
+          if (rememberMe) { localStorage.setItem('rememberMe', 'true'); localStorage.setItem('rememberedEmail', email); }
+          localStorage.setItem('lastLoginTime', new Date().toISOString());
+          toast.success('Login successful!', { description: `Welcome back, ${user.name}! (${user.role})` });
+          setIsLoading(false);
+          onLogin(user);
+          return;
         }
-        // No stored credentials (user registered on another device) — fall through to backend auth
       }
+
+      // No local credentials found — fall through to backend auth (handles accounts
+      // registered on a different device or directly via Supabase).
 
       // Try Supabase Auth — role will be read from user_metadata
       try {

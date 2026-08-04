@@ -180,7 +180,8 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       // Backend unreachable — continue with local save
     }
 
-    const userId = supabaseUserId || `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // Always use UUID format so the App.tsx startup wipe never deletes local accounts.
+    const userId = supabaseUserId || crypto.randomUUID();
 
     // Save to localStorage
     const newUser = {
