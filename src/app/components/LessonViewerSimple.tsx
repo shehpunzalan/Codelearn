@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, BookOpen, CheckCircle, ChevronRight, Play, Trophy, RotateCcw, ClipboardList, Video } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle, ChevronRight, Trophy, ClipboardList, Video } from 'lucide-react';
 import { EnhancedLearningDelivery } from './EnhancedLearningDelivery';
 import { GameFormQuiz } from './GameFormQuiz';
 import { QuizResultsPage } from './QuizResultsPage';
@@ -257,13 +257,6 @@ export function LessonViewer({
             <ChevronRight size={12} />
             <span style={{ color: 'var(--foreground)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeLesson.title}</span>
           </div>
-          {/* Quick quiz shortcut */}
-          <button
-            onClick={startQuiz}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--primary)', color: 'var(--primary-foreground)', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontWeight: 600, padding: '0.35rem 0.85rem', fontSize: '0.78rem', borderRadius: 'var(--radius-md, 8px)', whiteSpace: 'nowrap' }}
-          >
-            <Play size={13} /> Take Quiz
-          </button>
         </div>
 
         {/* Lesson header */}
@@ -283,58 +276,6 @@ export function LessonViewer({
           )}
         </div>
 
-        {/* Quiz CTA banner — always visible */}
-        <div
-          style={{
-            backgroundColor: isCompleted ? 'var(--color-success-50)' : 'var(--color-primary-50)',
-            border: `2px solid ${isCompleted ? 'var(--color-success-500)' : 'var(--color-primary-300)'}`,
-            borderRadius: 'var(--radius-lg)',
-            padding: '1rem 1.25rem',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '1rem',
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-full)', backgroundColor: isCompleted ? 'var(--color-success-500)' : 'var(--color-primary-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {isCompleted ? <CheckCircle size={20} color="#fff" /> : <ClipboardList size={20} color="#fff" />}
-            </div>
-            <div>
-              <p style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-sans)', fontWeight: 600, margin: '0 0 0.1rem', fontSize: '0.95rem' }}>
-                {isCompleted ? 'Lesson Completed!' : 'Ready to complete this lesson?'}
-              </p>
-              <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-sans)', fontSize: '0.8rem', margin: 0 }}>
-                {isCompleted
-                  ? 'You passed the Knowledge Check. Retake anytime.'
-                  : `Take the Knowledge Check quiz (${quizQuestions.length} questions) — score 70% or higher to complete.`}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={startQuiz}
-            style={{
-              backgroundColor: isCompleted ? 'var(--color-success-600)' : 'var(--color-primary-600)',
-              color: '#fff',
-              fontFamily: 'var(--font-sans)',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              padding: '0.6rem 1.25rem',
-              borderRadius: 'var(--radius-lg)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              flexShrink: 0,
-            }}
-          >
-            {isCompleted ? <RotateCcw size={15} /> : <Play size={15} />}
-            {isCompleted ? 'Retake Quiz' : 'Take Quiz'}
-          </button>
-        </div>
 
         {/* Lesson content */}
         <EnhancedLearningDelivery
@@ -435,13 +376,6 @@ export function LessonViewer({
         </p>
       </div>
 
-      {/* How to complete info box */}
-      <div style={{ backgroundColor: 'var(--color-primary-50)', border: '1.5px solid var(--color-primary-200)', borderRadius: 'var(--radius-lg)', padding: '0.9rem 1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-        <BookOpen size={18} style={{ color: 'var(--color-primary-600)', flexShrink: 0, marginTop: '0.1rem' }} />
-        <p style={{ color: 'var(--color-primary-700)', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
-          <strong>How to complete a lesson:</strong> Open a lesson → study the content → click <strong>"Take Quiz"</strong> → score 70%+ to mark it complete and unlock the next module.
-        </p>
-      </div>
 
       {/* Lessons list — scrollable so the page doesn't grow endlessly */}
       <div

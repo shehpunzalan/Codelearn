@@ -247,7 +247,25 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="module-duration">Estimated Duration *</Label>
-                    <Input id="module-duration" placeholder="e.g., 4 hours" />
+                    <Select>
+                      <SelectTrigger id="module-duration">
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30min">30 minutes</SelectItem>
+                        <SelectItem value="1hr">1 hour</SelectItem>
+                        <SelectItem value="1.5hr">1.5 hours</SelectItem>
+                        <SelectItem value="2hr">2 hours</SelectItem>
+                        <SelectItem value="2.5hr">2.5 hours</SelectItem>
+                        <SelectItem value="3hr">3 hours</SelectItem>
+                        <SelectItem value="4hr">4 hours</SelectItem>
+                        <SelectItem value="5hr">5 hours</SelectItem>
+                        <SelectItem value="6hr">6 hours</SelectItem>
+                        <SelectItem value="8hr">8 hours</SelectItem>
+                        <SelectItem value="10hr">10 hours</SelectItem>
+                        <SelectItem value="12hr">12+ hours</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -403,8 +421,26 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="module-duration">Estimated Duration *</Label>
-                          <Input id="module-duration" placeholder="e.g., 4 hours" />
+                          <Label htmlFor="module-duration-2">Estimated Duration *</Label>
+                          <Select>
+                            <SelectTrigger id="module-duration-2">
+                              <SelectValue placeholder="Select duration" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30min">30 minutes</SelectItem>
+                              <SelectItem value="1hr">1 hour</SelectItem>
+                              <SelectItem value="1.5hr">1.5 hours</SelectItem>
+                              <SelectItem value="2hr">2 hours</SelectItem>
+                              <SelectItem value="2.5hr">2.5 hours</SelectItem>
+                              <SelectItem value="3hr">3 hours</SelectItem>
+                              <SelectItem value="4hr">4 hours</SelectItem>
+                              <SelectItem value="5hr">5 hours</SelectItem>
+                              <SelectItem value="6hr">6 hours</SelectItem>
+                              <SelectItem value="8hr">8 hours</SelectItem>
+                              <SelectItem value="10hr">10 hours</SelectItem>
+                              <SelectItem value="12hr">12+ hours</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                       <div className="space-y-2">
