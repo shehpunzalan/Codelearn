@@ -245,6 +245,9 @@ function AppContent() {
       "stats_",
       "submissions_",
       "userPosition_",
+      "lessonPerformance_",
+      "submission_",
+      "code_",
     ];
     // UUID pattern — any key segment that looks like a UUID belongs to a specific user
     const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;

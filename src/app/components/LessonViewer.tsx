@@ -143,13 +143,29 @@ export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCo
     };
   }, [performanceMetrics.sessionStartTime]);
 
-  // Load saved code and completion status from localStorage
+  // Load completed lessons list on module mount so sidebar checkmarks show immediately.
+  useEffect(() => {
+    const u = userId || '';
+    const getLS = (base: string) =>
+      (u ? localStorage.getItem(`${base}_${u}`) : null) ?? localStorage.getItem(base);
+    const saved = getLS(`completedLessons_${module.id}`);
+    if (saved) {
+      try { setCompletedLessons(new Set(JSON.parse(saved))); } catch {}
+    }
+  }, [module.id, userId]);
+
+  // Load saved code and completion status from localStorage.
+  // Always try the user-scoped key first — it survives clearProgressDataForNewUser.
   useEffect(() => {
     if (selectedLessonId) {
-      const savedCode = localStorage.getItem(`code_${module.id}_${selectedLessonId}`);
-      const savedSubmission = localStorage.getItem(`submission_${module.id}_${selectedLessonId}`);
-      const savedCompletions = localStorage.getItem(`completedLessons_${module.id}`);
-      const savedPerformance = localStorage.getItem(`lessonPerformance_${module.id}`);
+      const u = userId || '';
+      const getLS = (base: string) =>
+        (u ? localStorage.getItem(`${base}_${u}`) : null) ?? localStorage.getItem(base);
+
+      const savedCode = getLS(`code_${module.id}_${selectedLessonId}`);
+      const savedSubmission = getLS(`submission_${module.id}_${selectedLessonId}`);
+      const savedCompletions = getLS(`completedLessons_${module.id}`);
+      const savedPerformance = getLS(`lessonPerformance_${module.id}`);
       
       if (savedCode) {
         setCode(savedCode);
@@ -234,10 +250,15 @@ export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCo
     }));
   };
 
-  // Save code to localStorage
+  // Save code to localStorage (user-scoped key + unscoped fallback copy)
+  const setLS = (base: string, value: string) => {
+    localStorage.setItem(base, value);
+    if (userId) localStorage.setItem(`${base}_${userId}`, value);
+  };
+
   const handleSaveCode = () => {
     if (selectedLessonId) {
-      localStorage.setItem(`code_${module.id}_${selectedLessonId}`, code);
+      setLS(`code_${module.id}_${selectedLessonId}`, code);
       toast.success('Code saved successfully!', {
         description: 'Your progress has been saved.',
       });
@@ -423,7 +444,7 @@ export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCo
       };
 
       // Save submission snapshot (per-lesson key used by student's own views)
-      localStorage.setItem(`submission_${module.id}_${selectedLessonId}`, JSON.stringify(submission));
+      setLS(`submission_${module.id}_${selectedLessonId}`, JSON.stringify(submission));
 
       // Save to instructor-facing store so submissions appear in the instructor dashboard
       if (userId) {
@@ -474,14 +495,14 @@ export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCo
         newPerformance
       ];
       setLessonPerformance(updatedLessonPerformance);
-      localStorage.setItem(`lessonPerformance_${module.id}`, JSON.stringify(updatedLessonPerformance));
+      setLS(`lessonPerformance_${module.id}`, JSON.stringify(updatedLessonPerformance));
 
       // Mark lesson as completed if score is good
       if (feedback.codeQuality >= 70) {
         const newCompletedLessons = new Set(completedLessons);
         newCompletedLessons.add(selectedLessonId!);
         setCompletedLessons(newCompletedLessons);
-        localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...newCompletedLessons]));
+        setLS(`completedLessons_${module.id}`, JSON.stringify([...newCompletedLessons]));
         
         toast.success('🎉 Lesson Completed!', {
           description: `Excellent work! Score: ${feedback.codeQuality}/100`,
@@ -594,7 +615,7 @@ export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCo
       stats,
       timestamp: new Date().toISOString()
     };
-    localStorage.setItem(`quiz_${module.id}_${selectedLessonId}`, JSON.stringify(quizData));
+    setLS(`quiz_${module.id}_${selectedLessonId}`, JSON.stringify(quizData));
 
     // Save per-user quiz result so instructor StudentDetailView Quizzes tab can read it
     if (userId) {
@@ -610,13 +631,13 @@ export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCo
         })
       );
     }
-    
+
     // Mark lesson as completed if passed
     if (stats.accuracy >= 70) {
       const newCompleted = new Set(completedLessons);
       newCompleted.add(selectedLessonId!);
       setCompletedLessons(newCompleted);
-      localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...newCompleted]));
+      setLS(`completedLessons_${module.id}`, JSON.stringify([...newCompleted]));
     }
   };
 
@@ -794,7 +815,7 @@ export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCo
                     const newCompleted = new Set(completedLessons);
                     newCompleted.add(selectedLesson.id);
                     setCompletedLessons(newCompleted);
-                    localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...newCompleted]));
+                    setLS(`completedLessons_${module.id}`, JSON.stringify([...newCompleted]));
                     toast.success('🎉 Lesson Completed!');
                   }}
                 />
