@@ -230,11 +230,13 @@ function AppContent() {
   }, []);
 
   /** Clear all module/quiz/progress data that is NOT scoped to a specific user ID.
-   *  Called when a different user logs in so they start with a clean slate. */
+   *  Called when a different user logs in so they start with a clean slate.
+   *
+   *  IMPORTANT: Before wiping, we first copy every unscoped key into a key scoped to
+   *  the PREVIOUS user (lastLoggedInUserId). This migrates data that was saved before
+   *  the user-scoped key fix so it survives across account switches. */
   const clearProgressDataForNewUser = (newUserId: string) => {
-    const lastUserId = localStorage.getItem(
-      "lastLoggedInUserId",
-    );
+    const lastUserId = localStorage.getItem("lastLoggedInUserId");
     if (lastUserId === newUserId) return; // same user — keep their progress
 
     const progressPrefixes = [
@@ -251,11 +253,33 @@ function AppContent() {
     ];
     // UUID pattern — any key segment that looks like a UUID belongs to a specific user
     const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+    // Step 1: Migrate unscoped keys → lastUser's scoped keys (handles pre-fix data).
+    // This preserves the previous user's data even if they never got user-scoped writes.
+    if (lastUserId) {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i) || "";
+        if (
+          progressPrefixes.some((p) => key.startsWith(p)) &&
+          !uuidRe.test(key)
+        ) {
+          const val = localStorage.getItem(key);
+          if (val !== null) {
+            // Write to scoped key so LessonViewer's getLS() can find it on re-login.
+            const scopedKey = `${key}_${lastUserId}`;
+            // Only write if not already there — don't overwrite a newer scoped value.
+            if (!localStorage.getItem(scopedKey)) {
+              localStorage.setItem(scopedKey, val);
+            }
+          }
+        }
+      }
+    }
+
+    // Step 2: Delete unscoped keys so the new user starts with a clean slate.
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i) || "";
-      // Only delete unscoped keys (no UUID in the key). User-scoped keys (any UUID)
-      // are preserved so every user's progress survives account switching.
       if (
         progressPrefixes.some((p) => key.startsWith(p)) &&
         !uuidRe.test(key)
@@ -352,6 +376,28 @@ function AppContent() {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      // Backup unscoped progress keys to user-scoped keys before logout so data
+      // survives if a different user logs in next and triggers clearProgressDataForNewUser.
+      if (user) {
+        const logoutPrefixes = [
+          "moduleProgress_", "completedLessons_", "quiz_",
+          "lessonPerformance_", "submission_", "code_",
+        ];
+        const uuidCheck = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i) || "";
+          if (logoutPrefixes.some(p => k.startsWith(p)) && !uuidCheck.test(k)) {
+            const val = localStorage.getItem(k);
+            if (val !== null) {
+              const scopedKey = `${k}_${user.id}`;
+              if (!localStorage.getItem(scopedKey)) {
+                localStorage.setItem(scopedKey, val);
+              }
+            }
+          }
+        }
+      }
+
       // Clear local state regardless of backend result
       setUser(null);
       setShowLogin(true);
