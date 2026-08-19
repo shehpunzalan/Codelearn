@@ -86,6 +86,69 @@ export function StudentDetailView({ studentId, studentName, onBack, modules }: S
     setQuizData(quizResults.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()));
   };
 
+  const downloadCSV = (rows: string[][], filename: string) => {
+    const csv = rows
+      .map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportReport = () => {
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `${studentName.replace(/\s+/g, '_')}_report_${dateStr}.csv`;
+    const rows: string[][] = [];
+
+    rows.push(['STUDENT PROGRESS REPORT']);
+    rows.push(['Student Name', studentName]);
+    rows.push(['Export Date', new Date().toLocaleDateString()]);
+    rows.push(['Completion Rate', `${stats.completionRate}%`]);
+    rows.push(['Avg Code Score', `${stats.avgScore}%`]);
+    rows.push(['Avg Quiz Score', `${stats.avgQuizScore}%`]);
+    rows.push(['Total Submissions', String(stats.totalSubmissions)]);
+    rows.push(['Total Quizzes', String(quizData.length)]);
+    rows.push([]);
+
+    rows.push(['LESSON PROGRESS']);
+    rows.push(['Module', 'Lesson ID', 'Status', 'Score', 'Attempts', 'Last Attempt']);
+    progressData.forEach(p => {
+      const mod = modules.find(m => m.id === p.moduleId);
+      const lesson = (mod?.lessons as any[])?.find((l: any) => l.id === p.lessonId);
+      rows.push([
+        mod?.title || p.moduleId,
+        lesson?.title || p.lessonId,
+        p.completed ? 'Completed' : 'In Progress',
+        `${p.score ?? 0}%`,
+        String(p.attempts ?? 1),
+        p.lastAttempt ? new Date(p.lastAttempt).toLocaleDateString() : '-',
+      ]);
+    });
+    rows.push([]);
+
+    rows.push(['QUIZ RESULTS']);
+    rows.push(['Module', 'Lesson ID', 'Score', 'Status', 'Completed At']);
+    quizData.forEach(q => {
+      const mod = modules.find(m => m.id === q.moduleId);
+      rows.push([
+        mod?.title || q.moduleId,
+        q.lessonId,
+        `${Math.round(q.score)}%`,
+        q.passed ? 'Passed' : 'Failed',
+        q.completedAt ? new Date(q.completedAt).toLocaleDateString() : '-',
+      ]);
+    });
+
+    downloadCSV(rows, filename);
+    toast.success(`Report exported: ${filename}`);
+  };
+
   const stats = (() => {
     const totalLessons = progressData.length;
     const completedLessons = progressData.filter(p => p.completed).length;
@@ -174,7 +237,7 @@ export function StudentDetailView({ studentId, studentName, onBack, modules }: S
             <MessageSquare size={16} style={{ marginRight: '0.4rem' }} />
             Send Message
           </Button>
-          <Button variant="outline" size="sm" onClick={() => toast.info('Exporting report...')}>
+          <Button variant="outline" size="sm" onClick={handleExportReport}>
             <FileText size={16} style={{ marginRight: '0.4rem' }} />
             Export Report
           </Button>

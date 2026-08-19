@@ -162,6 +162,86 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
     s.issues.some(i => i.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const handleExportAnalytics = () => {
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `class_analytics_${dateStr}.csv`;
+
+    const usersRaw = localStorage.getItem('registeredUsers');
+    const students: any[] = usersRaw
+      ? (JSON.parse(usersRaw) as any[]).filter((u: any) => u.role === 'student')
+      : [];
+
+    const rows: string[][] = [];
+    rows.push(['CLASS ANALYTICS REPORT']);
+    rows.push(['Export Date', new Date().toLocaleDateString()]);
+    rows.push(['Total Students', String(totalStudents)]);
+    rows.push(['Active Students (Last 7 Days)', String(activeStudents)]);
+    rows.push(['Avg Class Completion', `${avgCompletion}%`]);
+    rows.push([]);
+
+    rows.push(['STUDENT ROSTER']);
+    rows.push(['Name', 'Email', 'Avg Score', 'Completed Modules', 'Last Active', 'Weak Topics']);
+
+    students.forEach(s => {
+      const progress = getAllProgress(s.id);
+      const submissions = getAllSubmissions(s.id);
+      const statsData = getUserStats(s.id);
+
+      const avgScore = statsData?.averageScore ?? (
+        submissions.length > 0
+          ? Math.round(submissions.reduce((sum: number, sub: any) => sum + (sub.score || 0), 0) / submissions.length)
+          : 0
+      );
+
+      const completedLessons = new Set(
+        progress.filter((p: any) => p.completed).map((p: any) => `${p.moduleId}_${p.lessonId}`)
+      ).size;
+      const completedModules = Math.floor(completedLessons / 5);
+
+      const lastProgressMs = progress.length > 0
+        ? Math.max(...progress.map((p: any) => new Date(p.lastAttempt || 0).getTime()))
+        : 0;
+      const lastSubmissionMs = submissions.length > 0
+        ? Math.max(...submissions.map((sub: any) => new Date(sub.timestamp || 0).getTime()))
+        : 0;
+      const lastActivityMs = Math.max(lastProgressMs, lastSubmissionMs);
+      const lastActive = lastActivityMs > 0 ? new Date(lastActivityMs).toLocaleDateString() : 'Never';
+
+      const weakTopics: string[] = [];
+      modules.forEach(m => {
+        const modProgress = progress.filter((p: any) => p.moduleId === m.id && p.completed);
+        const modScores = modProgress.map((p: any) => p.score || 0);
+        const modAvg = modScores.length > 0
+          ? modScores.reduce((a: number, b: number) => a + b, 0) / modScores.length
+          : 0;
+        if (modAvg < 60 && modAvg > 0) weakTopics.push(m.title);
+      });
+
+      rows.push([
+        s.name || '—',
+        s.email || '—',
+        `${avgScore}%`,
+        String(completedModules),
+        lastActive,
+        weakTopics.join('; ') || 'None',
+      ]);
+    });
+
+    const csv = rows
+      .map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Analytics exported: ${filename}`);
+  };
+
   const handleClearStaleUsers = () => {
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     try {
@@ -460,7 +540,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
               <BookOpen className="w-4 h-4 mr-2" />
               View References (IEEE)
             </Button>
-            <Button variant="outline" className="w-full justify-start" size="sm">
+            <Button variant="outline" className="w-full justify-start" size="sm" onClick={handleExportAnalytics}>
               <Download className="w-4 h-4 mr-2" />
               Export Analytics
             </Button>
