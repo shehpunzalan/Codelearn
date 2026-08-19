@@ -90,21 +90,49 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
     const completedLessonIds = allProgress.filter(p => p.completed).map(p => p.lessonId);
     setInsights(generateStudentInsights(completedLessonIds, scores));
 
-    // Collect activities from quiz results (stored as quiz_{moduleId}_{lessonId})
+    // Collect activities from user-scoped quiz results: quiz_result_{userId}_{moduleId}_{lessonId}
     const quizActivities: RecentActivity[] = [];
+    const userQuizPrefix = `quiz_result_${user.id}_`;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (!key?.startsWith('quiz_')) continue;
+      if (!key?.startsWith(userQuizPrefix)) continue;
       try {
         const raw = localStorage.getItem(key);
         if (!raw) continue;
         const entry = JSON.parse(raw);
-        // entry: { lessonId, moduleId, stats: { accuracy, ... }, timestamp }
-        if (!entry.moduleId || !entry.lessonId || !entry.timestamp) continue;
+        // entry: { score, maxScore, completedAt, passed, moduleId, lessonId }
+        if (!entry.moduleId || !entry.lessonId || !entry.completedAt) continue;
         const mod = modules.find(m => m.id === entry.moduleId);
         const lesson = mod?.lessons?.find((l: any) => l.id === entry.lessonId);
         quizActivities.push({
-          id: key, // use storage key as unique id
+          id: key,
+          moduleTitle: mod?.title ?? entry.moduleId,
+          lessonId: lesson?.title ?? entry.lessonId,
+          completed: entry.passed ?? (entry.score ?? 0) >= 70,
+          score: Math.round(entry.score ?? 0),
+          lastAccessed: entry.completedAt,
+        });
+      } catch {}
+    }
+    // Also scan unscoped quiz_ keys as legacy fallback (may exist from old sessions)
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith('quiz_') || key.startsWith('quiz_result_')) continue;
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const entry = JSON.parse(raw);
+        if (!entry.moduleId || !entry.lessonId || !entry.timestamp) continue;
+        // Only include if no user-scoped record already covers this lesson
+        const alreadyCovered = quizActivities.some(a => {
+          const mod = modules.find(m => m.title === a.moduleTitle || m.id === entry.moduleId);
+          return mod?.id === entry.moduleId && a.lessonId === (mod?.lessons?.find((l: any) => l.id === entry.lessonId)?.title ?? entry.lessonId);
+        });
+        if (alreadyCovered) continue;
+        const mod = modules.find(m => m.id === entry.moduleId);
+        const lesson = mod?.lessons?.find((l: any) => l.id === entry.lessonId);
+        quizActivities.push({
+          id: key,
           moduleTitle: mod?.title ?? entry.moduleId,
           lessonId: lesson?.title ?? entry.lessonId,
           completed: (entry.stats?.accuracy ?? 0) >= 70,

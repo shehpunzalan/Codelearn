@@ -93,7 +93,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
             : 0
         );
 
-        // Count completed lessons — prefer progress records, fall back to passed submissions
+        // Count completed lessons — merge progress records, passed submissions, and LessonViewerSimple completedLessons keys
         const completedFromProgress = new Set(
           progress.filter((p: any) => p.completed).map((p: any) => `${p.moduleId}_${p.lessonId}`)
         );
@@ -101,6 +101,16 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
           submissions.filter((sub: any) => sub.passed).map((sub: any) => `${sub.moduleId}_${sub.lessonId}`)
         );
         const completedLessonsSet = new Set([...completedFromProgress, ...completedFromSubmissions]);
+        // Also scan completedLessons_{userId}_{moduleId} (written by LessonViewerSimple on every quiz completion)
+        for (let li = 0; li < localStorage.length; li++) {
+          const lk = localStorage.key(li) || '';
+          if (!lk.startsWith(`completedLessons_${s.id}_`)) continue;
+          try {
+            const arr: string[] = JSON.parse(localStorage.getItem(lk) || '[]');
+            const modId = lk.replace(`completedLessons_${s.id}_`, '');
+            arr.forEach(lessonId => completedLessonsSet.add(`${modId}_${lessonId}`));
+          } catch {}
+        }
         const completedLessons = completedLessonsSet.size;
         const completionRate = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
         totalCompletionSum += completionRate;

@@ -89,10 +89,22 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
         if (key.startsWith(`moduleProgress_${user.id}_`)) {
           try {
             const val = JSON.parse(localStorage.getItem(key) || '{}');
-            if (val.completedLessons && val.completedLessons.length > 0) {
+            if (val.completedLessons && val.completedLessons > 0) {
               const moduleId = key.replace(`moduleProgress_${user.id}_`, '');
               const module = mockModules.find(m => m.id === moduleId);
-              if (module && val.completedLessons.length >= module.lessons.length) {
+              if (module && val.completedLessons >= module.lessons.length) {
+                completedModuleIds.add(moduleId);
+              }
+            }
+          } catch {}
+        }
+        if (key.startsWith(`completedLessons_${user.id}_`)) {
+          try {
+            const arr: string[] = JSON.parse(localStorage.getItem(key) || '[]');
+            if (arr.length > 0) {
+              const moduleId = key.replace(`completedLessons_${user.id}_`, '');
+              const module = mockModules.find(m => m.id === moduleId);
+              if (module && arr.length >= module.lessons.length) {
                 completedModuleIds.add(moduleId);
               }
             }
@@ -100,8 +112,19 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
         }
       }
 
-      // Also check shared quiz keys (quiz_{moduleId}_{lessonId}) if student is logged in
-      // These aren't user-specific but let's use getUserStats as fallback
+      // Also scan progress_{userId}_{moduleId}_{lessonId} keys for scores (written by saveProgress)
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i) || '';
+        if (!key.startsWith(`progress_${user.id}_`)) continue;
+        try {
+          const val = JSON.parse(localStorage.getItem(key) || '{}');
+          if (val.completed && typeof val.score === 'number' && val.score > 0) {
+            quizScores.push(val.score);
+          }
+        } catch {}
+      }
+
+      // Also check getUserStats as additional score fallback
       const statsRaw = localStorage.getItem(`stats_${user.id}`);
       let statsScores: number[] = [];
       let lastActive: string | null = null;
@@ -298,7 +321,7 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
           <CardContent className="p-5 text-center">
             <TrendingUp className="w-6 h-6 mx-auto mb-2" style={{ color: 'var(--warning)' }} />
             <p className="text-3xl font-bold" style={{ color: 'var(--foreground)' }}>{mediumStudents.length}</p>
-            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem' }}>Medium Performers</p>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem' }}>Moderate Performers</p>
           </CardContent>
         </Card>
         <Card style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
@@ -407,12 +430,12 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
                     </div>
                   )}
 
-                  {/* MEDIUM */}
+                  {/* MODERATE */}
                   {mediumStudents.length > 0 && (
                     <div>
                       <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: '2px solid #fdba74' }}>
                         <Activity className="w-5 h-5 text-orange-600" />
-                        <h3 className="font-bold text-orange-800">MEDIUM PERFORMANCE (60-79%) — {mediumStudents.length} Students</h3>
+                        <h3 className="font-bold text-orange-800">MODERATE PERFORMANCE (60-79%) — {mediumStudents.length} Students</h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {mediumStudents.map(s => (
@@ -461,7 +484,7 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
                     <div className="grid grid-cols-3 gap-4 text-center">
                       {[
                         { label: 'High', count: highStudents.length, color: '#16a34a' },
-                        { label: 'Medium', count: mediumStudents.length, color: '#d97706' },
+                        { label: 'Moderate', count: mediumStudents.length, color: '#d97706' },
                         { label: 'Low', count: lowStudents.length, color: '#dc2626' },
                       ].map(({ label, count, color }) => (
                         <div key={label}>
@@ -532,7 +555,7 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
                   <p className="text-xs text-green-700 mt-1">Excelling — assign advanced challenges, encourage peer tutoring</p>
                 </div>
                 <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-                  <p className="font-semibold text-yellow-800">MEDIUM (60–79%)</p>
+                  <p className="font-semibold text-yellow-800">MODERATE (60–79%)</p>
                   <p className="text-xs text-yellow-700 mt-1">Progressing — targeted exercises, supplemental materials</p>
                 </div>
                 <div className="p-3 rounded-lg bg-red-50 border border-red-200">

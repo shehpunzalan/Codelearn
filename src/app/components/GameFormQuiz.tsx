@@ -234,7 +234,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
   const getDifficultyBadge = () => {
     switch (difficulty) {
       case 'easy': return <Badge style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--success, #16a34a)', border: '1px solid rgba(34,197,94,0.4)' }}>EASY</Badge>;
-      case 'medium': return <Badge style={{ background: 'rgba(234,179,8,0.15)', color: 'var(--warning, #92400e)', border: '1px solid rgba(234,179,8,0.4)' }}>MEDIUM</Badge>;
+      case 'medium': return <Badge style={{ background: 'rgba(234,179,8,0.15)', color: 'var(--warning, #92400e)', border: '1px solid rgba(234,179,8,0.4)' }}>MODERATE</Badge>;
       case 'hard': return <Badge style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--destructive, #dc2626)', border: '1px solid rgba(239,68,68,0.4)' }}>HARD</Badge>;
     }
   };
