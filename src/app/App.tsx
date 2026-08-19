@@ -232,9 +232,9 @@ function AppContent() {
   /** Clear all module/quiz/progress data that is NOT scoped to a specific user ID.
    *  Called when a different user logs in so they start with a clean slate.
    *
-   *  IMPORTANT: Before wiping, we first copy every unscoped key into a key scoped to
-   *  the PREVIOUS user (lastLoggedInUserId). This migrates data that was saved before
-   *  the user-scoped key fix so it survives across account switches. */
+   *  A key is considered "user-scoped" if it contains a UUID, the previous user's ID,
+   *  OR the incoming user's ID. This handles both UUID-format IDs (new accounts) and
+   *  old user_${timestamp}_${random} format IDs (pre-fix accounts). */
   const clearProgressDataForNewUser = (newUserId: string) => {
     const lastUserId = localStorage.getItem("lastLoggedInUserId");
     if (lastUserId === newUserId) return; // same user — keep their progress
@@ -251,39 +251,48 @@ function AppContent() {
       "submission_",
       "code_",
     ];
-    // UUID pattern — any key segment that looks like a UUID belongs to a specific user
-    const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
-    // Step 1: Migrate unscoped keys → lastUser's scoped keys (handles pre-fix data).
-    // This preserves the previous user's data even if they never got user-scoped writes.
+    // A key is user-scoped if it contains a standard UUID OR either user's ID as a substring.
+    // This ensures old-format IDs (user_${timestamp}_${random}) are also treated as scoped.
+    const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+    const isUserScoped = (key: string) =>
+      uuidRe.test(key) ||
+      (!!lastUserId && key.includes(lastUserId)) ||
+      key.includes(newUserId);
+
+    // Step 1: Migrate truly-unscoped keys → lastUser's scoped keys.
+    // Writes both formats so LessonViewerSimple and App.tsx re-hydration both find data.
     if (lastUserId) {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i) || "";
-        if (
-          progressPrefixes.some((p) => key.startsWith(p)) &&
-          !uuidRe.test(key)
-        ) {
+        if (progressPrefixes.some((p) => key.startsWith(p)) && !isUserScoped(key)) {
           const val = localStorage.getItem(key);
           if (val !== null) {
-            // Write to scoped key so LessonViewer's getLS() can find it on re-login.
-            const scopedKey = `${key}_${lastUserId}`;
-            // Only write if not already there — don't overwrite a newer scoped value.
-            if (!localStorage.getItem(scopedKey)) {
-              localStorage.setItem(scopedKey, val);
+            // LessonViewerSimple format: completedLessons_${userId}_${moduleId}
+            if (key.startsWith('completedLessons_')) {
+              const modId = key.replace('completedLessons_', '');
+              const k = `completedLessons_${lastUserId}_${modId}`;
+              if (!localStorage.getItem(k)) localStorage.setItem(k, val);
             }
+            // App.tsx moduleProgress format: moduleProgress_${userId}_${moduleId}
+            if (key.startsWith('moduleProgress_')) {
+              const modId = key.replace('moduleProgress_', '');
+              const k = `moduleProgress_${lastUserId}_${modId}`;
+              if (!localStorage.getItem(k)) localStorage.setItem(k, val);
+            }
+            // Generic suffix format for all other keys (used by LessonViewer getLS)
+            const suffixed = `${key}_${lastUserId}`;
+            if (!localStorage.getItem(suffixed)) localStorage.setItem(suffixed, val);
           }
         }
       }
     }
 
-    // Step 2: Delete unscoped keys so the new user starts with a clean slate.
+    // Step 2: Delete only truly-unscoped keys so new user starts clean.
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i) || "";
-      if (
-        progressPrefixes.some((p) => key.startsWith(p)) &&
-        !uuidRe.test(key)
-      ) {
+      if (progressPrefixes.some((p) => key.startsWith(p)) && !isUserScoped(key)) {
         keysToRemove.push(key);
       }
     }
@@ -376,22 +385,35 @@ function AppContent() {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Backup unscoped progress keys to user-scoped keys before logout so data
-      // survives if a different user logs in next and triggers clearProgressDataForNewUser.
+      // Backup ONLY truly-unscoped progress keys to user-scoped keys before logout.
+      // A key is already user-scoped if it contains a UUID or the current user's ID.
       if (user) {
         const logoutPrefixes = [
           "moduleProgress_", "completedLessons_", "quiz_",
           "lessonPerformance_", "submission_", "code_",
         ];
         const uuidCheck = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+        const uid = user.id;
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i) || "";
-          if (logoutPrefixes.some(p => k.startsWith(p)) && !uuidCheck.test(k)) {
+          // Skip keys that already contain a UUID or this user's ID (already scoped)
+          const alreadyScoped = uuidCheck.test(k) || (uid && k.includes(uid));
+          if (logoutPrefixes.some(p => k.startsWith(p)) && !alreadyScoped) {
             const val = localStorage.getItem(k);
             if (val !== null) {
-              const scopedKey = `${k}_${user.id}`;
-              if (!localStorage.getItem(scopedKey)) {
-                localStorage.setItem(scopedKey, val);
+              // Write in both legacy format and LessonViewerSimple format
+              const legacy = `${k}_${uid}`;
+              if (!localStorage.getItem(legacy)) localStorage.setItem(legacy, val);
+              // LessonViewerSimple format: completedLessons_${userId}_${moduleId}
+              if (k.startsWith('completedLessons_')) {
+                const modId = k.replace('completedLessons_', '');
+                const lvsKey = `completedLessons_${uid}_${modId}`;
+                if (!localStorage.getItem(lvsKey)) localStorage.setItem(lvsKey, val);
+              }
+              if (k.startsWith('moduleProgress_')) {
+                const modId = k.replace('moduleProgress_', '');
+                const appKey = `moduleProgress_${uid}_${modId}`;
+                if (!localStorage.getItem(appKey)) localStorage.setItem(appKey, val);
               }
             }
           }

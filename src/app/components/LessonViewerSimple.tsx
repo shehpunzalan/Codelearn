@@ -5,6 +5,7 @@ import { GameFormQuiz } from './GameFormQuiz';
 import { QuizResultsPage } from './QuizResultsPage';
 import { getChallengesForLesson } from '../data/lessonChallenges';
 import { toast } from 'sonner';
+import { saveProgress } from '../utils/storage';
 import type { Module } from '../types';
 
 interface LessonViewerProps {
@@ -99,11 +100,25 @@ export function LessonViewer({
   const handleQuizComplete = (stats: QuizStats) => {
     setQuizStats(stats);
 
-    // Persist result
-    localStorage.setItem(
-      `quiz_${module.id}_${activeLessonId}`,
-      JSON.stringify({ lessonId: activeLessonId, moduleId: module.id, stats, timestamp: new Date().toISOString() })
-    );
+    const now = new Date().toISOString();
+
+    // Persist quiz result — unscoped (legacy) + user-scoped for instructor reads
+    const quizPayload = JSON.stringify({ lessonId: activeLessonId, moduleId: module.id, stats, timestamp: now });
+    localStorage.setItem(`quiz_${module.id}_${activeLessonId}`, quizPayload);
+    if (userId && activeLessonId) {
+      // User-scoped format read by instructor StudentDetailView Quizzes tab
+      localStorage.setItem(
+        `quiz_result_${userId}_${module.id}_${activeLessonId}`,
+        JSON.stringify({
+          score: stats.accuracy,
+          maxScore: 100,
+          completedAt: now,
+          passed: stats.accuracy >= 70,
+          moduleId: module.id,
+          lessonId: activeLessonId,
+        })
+      );
+    }
 
     // Mark lesson complete if passed. Complete the whole module immediately
     // when the final required lesson is passed so dashboards/unlocks update
@@ -114,7 +129,27 @@ export function LessonViewer({
       const completedCount = Math.min(updated.size, module.lessons.length);
 
       setCompletedLessons(updated);
+      // Write user-scoped key (primary, survives account switching)
       localStorage.setItem(completedKey, JSON.stringify([...updated]));
+      // Also write unscoped fallback
+      localStorage.setItem(`completedLessons_${module.id}`, JSON.stringify([...updated]));
+
+      // Persist progress for instructor dashboard (StudentDetailView Progress tab)
+      if (userId) {
+        saveProgress({
+          userId,
+          moduleId: module.id,
+          lessonId: activeLessonId,
+          completed: true,
+          score: Math.round(stats.accuracy),
+          attempts: 1,
+          lastAttempt: now,
+          code: '',
+          feedback: `Quiz score: ${Math.round(stats.accuracy)}/100`,
+          timeSpent: stats.timeSpent || 0,
+        });
+      }
+
       onLessonComplete?.(module.id, completedCount, module.lessons.length);
 
       if (completedCount >= module.lessons.length) {
