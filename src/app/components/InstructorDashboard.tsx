@@ -93,17 +93,29 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
             : 0
         );
 
-        const completedLessons = progress.filter((p: any) => p.completed).length;
+        // Count completed lessons — prefer progress records, fall back to passed submissions
+        const completedFromProgress = new Set(
+          progress.filter((p: any) => p.completed).map((p: any) => `${p.moduleId}_${p.lessonId}`)
+        );
+        const completedFromSubmissions = new Set(
+          submissions.filter((sub: any) => sub.passed).map((sub: any) => `${sub.moduleId}_${sub.lessonId}`)
+        );
+        const completedLessonsSet = new Set([...completedFromProgress, ...completedFromSubmissions]);
+        const completedLessons = completedLessonsSet.size;
         const completionRate = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
         totalCompletionSum += completionRate;
 
-        // Active in last week?
+        // Active in last week — check both progress and submission timestamps
         const lastProgressTime = progress.length > 0
-          ? Math.max(...progress.map((p: any) => new Date(p.lastAccessed || 0).getTime()))
+          ? Math.max(...progress.map((p: any) => new Date(p.lastAttempt || p.lastAccessed || 0).getTime()))
           : 0;
-        if (lastProgressTime > oneWeekAgo) activeCount++;
+        const lastSubmissionTime = submissions.length > 0
+          ? Math.max(...submissions.map((sub: any) => new Date(sub.timestamp || 0).getTime()))
+          : 0;
+        const lastActivityTime = Math.max(lastProgressTime, lastSubmissionTime);
+        if (lastActivityTime > oneWeekAgo) activeCount++;
 
-        const lastActiveMs = lastProgressTime || new Date(s.registeredAt || 0).getTime();
+        const lastActiveMs = lastActivityTime || new Date(s.registeredAt || 0).getTime();
         const diffMs = Date.now() - lastActiveMs;
         const diffHrs = Math.floor(diffMs / 3600000);
         const lastActiveLabel = diffHrs < 1 ? 'just now'

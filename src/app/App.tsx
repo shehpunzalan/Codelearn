@@ -801,6 +801,7 @@ function AppContent() {
                 : undefined
             }
             onLessonOpen={savePosition}
+            onLessonRestored={() => { previewFeedbackLessonId.current = null; }}
           />
         )}
 
@@ -829,8 +830,10 @@ function AppContent() {
           <FeedbackPage
             onBack={() => setCurrentView(previewFeedbackView.current)}
             onReturnToLesson={() => {
-              // Navigate back to the exact view + lesson the user came from
-              setCurrentView(previewFeedbackView.current);
+              // Always land inside the lesson panel (LessonViewer), never the code editor.
+              // previewFeedbackLessonId.current carries the lesson ID so LessonViewer
+              // mounts with initialLessonId set and opens the right lesson immediately.
+              setCurrentView("module");
             }}
           />
         )}

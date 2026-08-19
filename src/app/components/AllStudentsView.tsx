@@ -162,9 +162,15 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
         const allProgress = getAllProgress(student.id);
         const allSubmissions = getAllSubmissions(student.id);
         
-        // Calculate completion rate
-        const totalLessons = 111; // Total lessons across all modules
-        const completedLessons = allProgress.filter((p: any) => p.completed).length;
+        // Calculate completion rate — merge progress records and passed submissions to handle both old and new data
+        const totalLessons = 111;
+        const completedFromProgress = new Set(
+          allProgress.filter((p: any) => p.completed).map((p: any) => `${p.moduleId}_${p.lessonId}`)
+        );
+        const completedFromSubs = new Set(
+          allSubmissions.filter((s: any) => s.passed).map((s: any) => `${s.moduleId}_${s.lessonId}`)
+        );
+        const completedLessons = new Set([...completedFromProgress, ...completedFromSubs]).size;
         const completionRate = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
         
         // Calculate average score
@@ -172,12 +178,15 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
           ? Math.round(allSubmissions.reduce((sum: number, s: any) => sum + s.score, 0) / allSubmissions.length)
           : 0;
         
-        // Get last active time
-        const lastActive = allProgress.length > 0
-          ? allProgress.sort((a: any, b: any) => 
-              new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime()
-            )[0].lastAccessed
-          : student.registeredAt;
+        // Get last active time — check both progress (lastAttempt) and submissions (timestamp)
+        const lastProgressTime = allProgress.length > 0
+          ? Math.max(...allProgress.map((p: any) => new Date(p.lastAttempt || p.lastAccessed || 0).getTime()))
+          : 0;
+        const lastSubTime = allSubmissions.length > 0
+          ? Math.max(...allSubmissions.map((s: any) => new Date(s.timestamp || 0).getTime()))
+          : 0;
+        const lastActivityMs = Math.max(lastProgressTime, lastSubTime);
+        const lastActive = lastActivityMs > 0 ? new Date(lastActivityMs).toISOString() : student.registeredAt;
         
         // Determine status
         let status: 'excellent' | 'good' | 'needs-attention' = 'good';

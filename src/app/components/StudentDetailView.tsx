@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { 
-  ArrowLeft, User, BookOpen, Award, TrendingUp, 
+import {
+  ArrowLeft, User, BookOpen, Award, TrendingUp,
   Brain, CheckCircle, Clock, AlertCircle, FileText,
-  Target, BarChart3, Calendar, Mail, MessageSquare
+  Target, BarChart3, Calendar, MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { projectId, publicAnonKey } from '../../../utils/supabase/info';
+import { getAllProgress, getAllSubmissions, getUserStats } from '../utils/storage';
 import { Module } from '../types';
 
 interface StudentDetailViewProps {
@@ -18,623 +18,406 @@ interface StudentDetailViewProps {
   modules: Module[];
 }
 
-interface StudentProgress {
+interface LocalProgress {
   userId: string;
   moduleId: string;
   lessonId: string;
   completed: boolean;
-  lastAccessed: string;
+  score: number;
+  attempts: number;
+  lastAttempt: string;
+  code: string;
+  feedback: string;
   timeSpent: number;
 }
 
-interface QuizAttempt {
-  quizId: string;
+interface LocalSubmission {
+  id: string;
+  userId: string;
+  moduleId: string;
+  lessonId: string;
+  code: string;
+  timestamp: string;
+  score: number;
+  feedback: string;
+  errors: string[];
+  passed: boolean;
+}
+
+interface LocalQuizResult {
   score: number;
   maxScore: number;
   completedAt: string;
+  passed: boolean;
   moduleId: string;
   lessonId: string;
 }
 
-interface AIFeedback {
-  feedbackId: string;
-  code: string;
-  feedback: string;
-  confidence: number;
-  timestamp: string;
-  moduleId: string;
-}
-
 export function StudentDetailView({ studentId, studentName, onBack, modules }: StudentDetailViewProps) {
-  const [loading, setLoading] = useState(true);
-  const [progressData, setProgressData] = useState<StudentProgress[]>([]);
-  const [quizData, setQuizData] = useState<QuizAttempt[]>([]);
-  const [feedbackData, setFeedbackData] = useState<AIFeedback[]>([]);
+  const [progressData, setProgressData] = useState<LocalProgress[]>([]);
+  const [submissionsData, setSubmissionsData] = useState<LocalSubmission[]>([]);
+  const [quizData, setQuizData] = useState<LocalQuizResult[]>([]);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'progress' | 'quizzes' | 'feedback'>('overview');
 
   useEffect(() => {
-    fetchStudentData();
+    loadFromLocalStorage();
   }, [studentId]);
 
-  const fetchStudentData = async () => {
-    try {
-      setLoading(true);
+  const loadFromLocalStorage = () => {
+    // Progress records (written by LessonViewer after each submission)
+    const progress = getAllProgress(studentId) as LocalProgress[];
+    setProgressData(progress);
 
-      // Fetch progress
-      const progressResponse = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/server/progress/${studentId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+    // Code submissions (written by saveSubmission in LessonViewer)
+    const submissions = getAllSubmissions(studentId) as LocalSubmission[];
+    setSubmissionsData(submissions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
 
-      if (progressResponse.ok) {
-        const progressResult = await progressResponse.json();
-        if (progressResult.success) {
-          setProgressData(progressResult.data);
-        }
+    // Quiz results (written by LessonViewer handleQuizComplete)
+    const quizResults: LocalQuizResult[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i) || '';
+      if (key.startsWith(`quiz_result_${studentId}_`)) {
+        try {
+          const val = JSON.parse(localStorage.getItem(key) || '{}');
+          quizResults.push(val as LocalQuizResult);
+        } catch {}
       }
-
-      // Fetch quiz attempts
-      const quizResponse = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/server/quiz/attempts/${studentId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (quizResponse.ok) {
-        const quizResult = await quizResponse.json();
-        if (quizResult.success) {
-          setQuizData(quizResult.data);
-        }
-      }
-
-      // Fetch AI feedback
-      const feedbackResponse = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/server/feedback/${studentId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (feedbackResponse.ok) {
-        const feedbackResult = await feedbackResponse.json();
-        if (feedbackResult.success) {
-          setFeedbackData(feedbackResult.data);
-        }
-      }
-
-      toast.success('Student data loaded successfully');
-    } catch (error) {
-      console.error('Error fetching student data:', error);
-      toast.error('Failed to load student data');
-      loadDemoData();
-    } finally {
-      setLoading(false);
     }
+    setQuizData(quizResults.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()));
   };
 
-  const loadDemoData = () => {
-    // Demo progress data
-    setProgressData([
-      {
-        userId: studentId,
-        moduleId: 'mod1',
-        lessonId: 'lesson1',
-        completed: true,
-        lastAccessed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        timeSpent: 1800
-      },
-      {
-        userId: studentId,
-        moduleId: 'mod1',
-        lessonId: 'lesson2',
-        completed: true,
-        lastAccessed: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        timeSpent: 2100
-      },
-      {
-        userId: studentId,
-        moduleId: 'mod2',
-        lessonId: 'lesson1',
-        completed: false,
-        lastAccessed: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-        timeSpent: 900
-      }
-    ]);
-
-    // Demo quiz data
-    setQuizData([
-      {
-        quizId: 'quiz1',
-        score: 9,
-        maxScore: 10,
-        completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        moduleId: 'mod1',
-        lessonId: 'lesson1'
-      },
-      {
-        quizId: 'quiz2',
-        score: 8,
-        maxScore: 10,
-        completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        moduleId: 'mod1',
-        lessonId: 'lesson2'
-      }
-    ]);
-
-    // Demo feedback data
-    setFeedbackData([
-      {
-        feedbackId: 'fb1',
-        code: 'public class HelloWorld { ... }',
-        feedback: 'Great use of OOP principles! Your code is well-structured.',
-        confidence: 0.92,
-        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        moduleId: 'mod1'
-      }
-    ]);
-  };
-
-  // Calculate statistics
-  const calculateStats = () => {
+  const stats = (() => {
     const totalLessons = progressData.length;
-    // Count completed lessons
-    const completedLessons = progressData.filter(progressItem => progressItem.completed).length;
+    const completedLessons = progressData.filter(p => p.completed).length;
     const completionRate = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-    const totalQuizzes = quizData.length;
-    const avgQuizScore = totalQuizzes > 0 
-      ? Math.round((quizData.reduce((sum, q) => sum + (q.score / q.maxScore * 100), 0) / totalQuizzes))
+    const avgScore = submissionsData.length > 0
+      ? Math.round(submissionsData.reduce((s, sub) => s + sub.score, 0) / submissionsData.length)
       : 0;
 
-    const totalTimeSpent = progressData.reduce((sum, p) => sum + p.timeSpent, 0);
+    const avgQuizScore = quizData.length > 0
+      ? Math.round(quizData.reduce((s, q) => s + q.score, 0) / quizData.length)
+      : 0;
+
+    const totalTimeSpent = progressData.reduce((s, p) => s + (p.timeSpent || 0), 0);
     const avgTimePerLesson = totalLessons > 0 ? Math.round(totalTimeSpent / totalLessons / 60) : 0;
 
-    const totalFeedback = feedbackData.length;
+    return { completionRate, completedLessons, totalLessons, avgScore, avgQuizScore, totalSubmissions: submissionsData.length, avgTimePerLesson };
+  })();
 
-    return {
-      completionRate,
-      completedLessons,
-      totalLessons,
-      avgQuizScore,
-      totalQuizzes,
-      avgTimePerLesson,
-      totalFeedback
-    };
-  };
-
-  const stats = calculateStats();
-
-  // Get module progress breakdown
-  const getModuleProgress = () => {
-    const moduleProgress = new Map<string, { completed: number; total: number }>();
-
+  const moduleProgress = (() => {
+    const map = new Map<string, { completed: number; total: number }>();
     progressData.forEach(p => {
-      if (!moduleProgress.has(p.moduleId)) {
-        moduleProgress.set(p.moduleId, { completed: 0, total: 0 });
-      }
-      const current = moduleProgress.get(p.moduleId)!;
-      current.total += 1;
-      if (p.completed) {
-        current.completed += 1;
-      }
+      if (!map.has(p.moduleId)) map.set(p.moduleId, { completed: 0, total: 0 });
+      const cur = map.get(p.moduleId)!;
+      cur.total += 1;
+      if (p.completed) cur.completed += 1;
     });
-
-    return Array.from(moduleProgress.entries()).map(([moduleId, data]) => {
-      const module = modules.find(m => m.id === moduleId);
+    return Array.from(map.entries()).map(([moduleId, data]) => {
+      const mod = modules.find(m => m.id === moduleId);
       return {
         moduleId,
-        moduleName: module?.title || moduleId,
+        moduleName: mod?.title || moduleId,
         ...data,
-        percentage: Math.round((data.completed / data.total) * 100)
+        percentage: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0,
       };
     });
-  };
-
-  const moduleProgress = getModuleProgress();
+  })();
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes} min`;
-  };
+  const formatTime = (seconds: number) => `${Math.floor(seconds / 60)} min`;
+
+  const tabBtn = (id: typeof selectedTab, label: string, Icon: React.ElementType) => (
+    <button
+      onClick={() => setSelectedTab(id)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '0.5rem',
+        padding: '0.5rem 1rem',
+        borderBottom: selectedTab === id ? '2px solid var(--primary)' : '2px solid transparent',
+        color: selectedTab === id ? 'var(--primary)' : 'var(--muted-foreground)',
+        background: 'none', border: 'none', borderBottomStyle: 'solid',
+        borderBottomWidth: '2px',
+        borderBottomColor: selectedTab === id ? 'var(--primary)' : 'transparent',
+        cursor: 'pointer', fontFamily: 'var(--font-sans)', fontWeight: 500, fontSize: '0.9rem',
+      }}
+    >
+      <Icon size={16} />
+      {label}
+    </button>
+  );
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6, 1.5rem)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Button variant="outline" size="sm" onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ArrowLeft size={16} />
             Back to Students
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <User className="w-8 h-8 text-blue-600" />
+            <h1 style={{ color: 'var(--foreground)', margin: 0, fontFamily: 'var(--font-sans)', fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <User size={28} style={{ color: 'var(--primary)' }} />
               {studentName}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p style={{ color: 'var(--muted-foreground)', margin: '0.25rem 0 0', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>
               Detailed learning analytics and progress overview
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => toast.info(`Sending message to ${studentName}`)}
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Button variant="outline" size="sm" onClick={() => toast.info(`Message to ${studentName}`)}>
+            <MessageSquare size={16} style={{ marginRight: '0.4rem' }} />
             Send Message
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => toast.info('Downloading report...')}
-          >
-            <FileText className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() => toast.info('Exporting report...')}>
+            <FileText size={16} style={{ marginRight: '0.4rem' }} />
             Export Report
           </Button>
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Completion Rate</p>
-                <p className="text-3xl font-bold text-blue-700">{stats.completionRate}%</p>
-                <p className="text-xs text-gray-600 mt-1">{stats.completedLessons}/{stats.totalLessons} lessons</p>
-              </div>
-              <CheckCircle className="w-10 h-10 text-blue-600" />
+      {/* Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+        {[
+          { label: 'Completion Rate', value: `${stats.completionRate}%`, sub: `${stats.completedLessons}/${stats.totalLessons} lessons`, Icon: CheckCircle, color: 'var(--primary)' },
+          { label: 'Avg Code Score', value: `${stats.avgScore}%`, sub: `${stats.totalSubmissions} submissions`, Icon: Award, color: 'var(--success, #22c55e)' },
+          { label: 'Avg Quiz Score', value: `${stats.avgQuizScore}%`, sub: `${quizData.length} quizzes`, Icon: Target, color: 'var(--secondary)' },
+          { label: 'Avg Time/Lesson', value: `${stats.avgTimePerLesson}`, sub: 'minutes', Icon: Clock, color: 'var(--warning, #f59e0b)' },
+        ].map(({ label, value, sub, Icon, color }) => (
+          <div key={label} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg, 12px)', padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow-sm)' }}>
+            <div>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem', margin: '0 0 0.25rem', fontFamily: 'var(--font-sans)' }}>{label}</p>
+              <p style={{ color, fontSize: '2rem', fontWeight: 700, margin: 0, fontFamily: 'var(--font-sans)' }}>{value}</p>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', margin: '0.25rem 0 0', fontFamily: 'var(--font-sans)' }}>{sub}</p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md bg-gradient-to-br from-green-50 to-green-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Avg Quiz Score</p>
-                <p className="text-3xl font-bold text-green-700">{stats.avgQuizScore}%</p>
-                <p className="text-xs text-gray-600 mt-1">{stats.totalQuizzes} quizzes taken</p>
-              </div>
-              <Award className="w-10 h-10 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md bg-gradient-to-br from-purple-50 to-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Avg Time/Lesson</p>
-                <p className="text-3xl font-bold text-purple-700">{stats.avgTimePerLesson}</p>
-                <p className="text-xs text-gray-600 mt-1">minutes</p>
-              </div>
-              <Clock className="w-10 h-10 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">AI Feedback</p>
-                <p className="text-3xl font-bold text-orange-700">{stats.totalFeedback}</p>
-                <p className="text-xs text-gray-600 mt-1">submissions</p>
-              </div>
-              <Brain className="w-10 h-10 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
+            <Icon size={36} style={{ color, opacity: 0.6 }} />
+          </div>
+        ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
-        <Button
-          variant={selectedTab === 'overview' ? 'default' : 'ghost'}
-          onClick={() => setSelectedTab('overview')}
-          className="rounded-b-none"
-        >
-          <BarChart3 className="w-4 h-4 mr-2" />
-          Overview
-        </Button>
-        <Button
-          variant={selectedTab === 'progress' ? 'default' : 'ghost'}
-          onClick={() => setSelectedTab('progress')}
-          className="rounded-b-none"
-        >
-          <BookOpen className="w-4 h-4 mr-2" />
-          Progress
-        </Button>
-        <Button
-          variant={selectedTab === 'quizzes' ? 'default' : 'ghost'}
-          onClick={() => setSelectedTab('quizzes')}
-          className="rounded-b-none"
-        >
-          <Target className="w-4 h-4 mr-2" />
-          Quizzes
-        </Button>
-        <Button
-          variant={selectedTab === 'feedback' ? 'default' : 'ghost'}
-          onClick={() => setSelectedTab('feedback')}
-          className="rounded-b-none"
-        >
-          <Brain className="w-4 h-4 mr-2" />
-          AI Feedback
-        </Button>
+      {/* Tab Bar */}
+      <div style={{ borderBottom: '1px solid var(--border)', display: 'flex', gap: '0' }}>
+        {tabBtn('overview', 'Overview', BarChart3)}
+        {tabBtn('progress', 'Progress', BookOpen)}
+        {tabBtn('quizzes', 'Quizzes', Target)}
+        {tabBtn('feedback', 'AI Feedback', Brain)}
       </div>
 
       {/* Tab Content */}
-      {loading ? (
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-8 text-center">
-            <p className="text-gray-600">Loading student data...</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {selectedTab === 'overview' && (
-            <div className="space-y-4">
-              {/* Module Progress */}
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle>Module Progress</CardTitle>
-                  <CardDescription>Completion status across all modules</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {moduleProgress.length === 0 ? (
-                    <p className="text-gray-600 text-center py-4">No progress data available</p>
-                  ) : (
-                    moduleProgress.map((mp) => (
-                      <div key={mp.moduleId} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-900">{mp.moduleName}</span>
-                          <span className="text-sm text-gray-600">{mp.completed}/{mp.total} lessons</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${mp.percentage}%` }}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-gray-600">
-                          <span>{mp.percentage}% Complete</span>
-                          {mp.percentage === 100 && (
-                            <Badge className="bg-green-100 text-green-800 border-0 text-xs">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Completed
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Performance Indicators */}
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle>Performance Indicators</CardTitle>
-                  <CardDescription>Key metrics and insights</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex items-center gap-3">
-                        <TrendingUp className="w-5 h-5 text-green-600" />
-                        <div>
-                          <p className="font-medium text-gray-900">Strong Quiz Performance</p>
-                          <p className="text-sm text-gray-600">Average score above 80%</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800 border-0">Excellent</Badge>
+      {selectedTab === 'overview' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Module Progress */}
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg, 12px)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+            <h3 style={{ color: 'var(--foreground)', margin: '0 0 0.25rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>Module Progress</h3>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', margin: '0 0 1.25rem', fontFamily: 'var(--font-sans)' }}>Completion status across all modules</p>
+            {moduleProgress.length === 0 ? (
+              <p style={{ color: 'var(--muted-foreground)', textAlign: 'center', padding: '1.5rem 0', fontFamily: 'var(--font-sans)' }}>No progress data yet — student hasn't submitted any code.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {moduleProgress.map(mp => (
+                  <div key={mp.moduleId}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'var(--foreground)', fontWeight: 500, fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>{mp.moduleName}</span>
+                      <span style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', fontFamily: 'var(--font-sans)' }}>{mp.completed}/{mp.total} lessons</span>
                     </div>
-
-                    {stats.avgTimePerLesson < 20 && (
-                      <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <div className="flex items-center gap-3">
-                          <AlertCircle className="w-5 h-5 text-yellow-600" />
-                          <div>
-                            <p className="font-medium text-gray-900">Quick Study Sessions</p>
-                            <p className="text-sm text-gray-600">Consider spending more time on lessons</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-yellow-100 text-yellow-800 border-0">Monitor</Badge>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex items-center gap-3">
-                        <Brain className="w-5 h-5 text-blue-600" />
-                        <div>
-                          <p className="font-medium text-gray-900">AI Feedback Engagement</p>
-                          <p className="text-sm text-gray-600">{stats.totalFeedback} code submissions analyzed</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-blue-100 text-blue-800 border-0">Active</Badge>
+                    <div style={{ background: 'var(--border)', borderRadius: '999px', height: '8px', overflow: 'hidden' }}>
+                      <div style={{ width: `${mp.percentage}%`, height: '100%', background: 'linear-gradient(90deg, var(--primary), var(--secondary))', borderRadius: '999px', transition: 'width 0.4s' }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem' }}>
+                      <span style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', fontFamily: 'var(--font-sans)' }}>{mp.percentage}% Complete</span>
+                      {mp.percentage === 100 && (
+                        <span style={{ color: 'var(--success, #22c55e)', fontSize: '0.75rem', fontFamily: 'var(--font-sans)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <CheckCircle size={12} /> Completed
+                        </span>
+                      )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Performance Indicators */}
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg, 12px)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+            <h3 style={{ color: 'var(--foreground)', margin: '0 0 1rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>Performance Indicators</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {stats.avgScore >= 80 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem', background: 'color-mix(in srgb, var(--success, #22c55e) 10%, transparent)', borderRadius: 'var(--radius-md, 8px)', border: '1px solid color-mix(in srgb, var(--success, #22c55e) 25%, transparent)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <TrendingUp size={20} style={{ color: 'var(--success, #22c55e)' }} />
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 500, color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>Strong Code Performance</p>
+                      <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Average score above 80%</p>
+                    </div>
+                  </div>
+                  <span style={{ background: 'var(--success, #22c55e)', color: '#fff', borderRadius: '999px', padding: '0.2rem 0.75rem', fontSize: '0.78rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>Excellent</span>
+                </div>
+              )}
+              {stats.avgScore > 0 && stats.avgScore < 70 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem', background: 'color-mix(in srgb, var(--warning, #f59e0b) 10%, transparent)', borderRadius: 'var(--radius-md, 8px)', border: '1px solid color-mix(in srgb, var(--warning, #f59e0b) 25%, transparent)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <AlertCircle size={20} style={{ color: 'var(--warning, #f59e0b)' }} />
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 500, color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>Below Passing Threshold</p>
+                      <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Average score below 70% — consider intervention</p>
+                    </div>
+                  </div>
+                  <span style={{ background: 'var(--warning, #f59e0b)', color: '#fff', borderRadius: '999px', padding: '0.2rem 0.75rem', fontSize: '0.78rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>Monitor</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem', background: 'color-mix(in srgb, var(--primary) 8%, transparent)', borderRadius: 'var(--radius-md, 8px)', border: '1px solid color-mix(in srgb, var(--primary) 20%, transparent)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Brain size={20} style={{ color: 'var(--primary)' }} />
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 500, color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>AI Feedback Engagement</p>
+                    <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>{stats.totalSubmissions} code submission{stats.totalSubmissions !== 1 ? 's' : ''} analyzed</p>
+                  </div>
+                </div>
+                <span style={{ background: 'var(--primary)', color: '#fff', borderRadius: '999px', padding: '0.2rem 0.75rem', fontSize: '0.78rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>{stats.totalSubmissions > 0 ? 'Active' : 'Not Started'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedTab === 'progress' && (
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg, 12px)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+          <h3 style={{ color: 'var(--foreground)', margin: '0 0 0.25rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>Lesson Progress History</h3>
+          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', margin: '0 0 1.25rem', fontFamily: 'var(--font-sans)' }}>Detailed view of all lesson code submissions</p>
+          {progressData.length === 0 ? (
+            <p style={{ color: 'var(--muted-foreground)', textAlign: 'center', padding: '2rem 0', fontFamily: 'var(--font-sans)' }}>No progress data yet — student hasn't submitted any code.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {progressData.map((p, idx) => {
+                const mod = modules.find(m => m.id === p.moduleId);
+                return (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md, 8px)', background: 'var(--background)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                      {p.completed
+                        ? <CheckCircle size={20} style={{ color: 'var(--success, #22c55e)', flexShrink: 0 }} />
+                        : <Clock size={20} style={{ color: 'var(--warning, #f59e0b)', flexShrink: 0 }} />}
+                      <div>
+                        <p style={{ margin: 0, fontWeight: 500, color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>{mod?.title || p.moduleId}</p>
+                        <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Lesson {p.lessonId}</p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
+                      <span style={{ color: 'var(--foreground)', fontWeight: 700, fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>{p.score}%</span>
+                      <span style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Clock size={13} /> {formatTime(p.timeSpent || 0)}
+                      </span>
+                      <span style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Calendar size={13} /> {formatDate(p.lastAttempt)}
+                      </span>
+                      <span style={{
+                        padding: '0.15rem 0.65rem', borderRadius: '999px', fontSize: '0.75rem', fontFamily: 'var(--font-sans)', fontWeight: 600,
+                        background: p.completed ? 'color-mix(in srgb, var(--success, #22c55e) 15%, transparent)' : 'color-mix(in srgb, var(--warning, #f59e0b) 15%, transparent)',
+                        color: p.completed ? 'var(--success, #22c55e)' : 'var(--warning, #f59e0b)',
+                      }}>
+                        {p.completed ? 'Passed' : 'In Progress'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
+        </div>
+      )}
 
-          {selectedTab === 'progress' && (
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle>Lesson Progress History</CardTitle>
-                <CardDescription>Detailed view of all lesson activities</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {progressData.length === 0 ? (
-                  <p className="text-gray-600 text-center py-4">No progress data available</p>
-                ) : (
-                  <div className="space-y-3">
-                    {progressData.map((progress, idx) => {
-                      const module = modules.find(m => m.id === progress.moduleId);
-                      return (
-                        <div key={idx} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                          <div className="flex items-center gap-3 flex-1">
-                            {progress.completed ? (
-                              <CheckCircle className="w-5 h-5 text-green-600" />
-                            ) : (
-                              <Clock className="w-5 h-5 text-yellow-600" />
-                            )}
-                            <div>
-                              <p className="font-medium text-gray-900">{module?.title || progress.moduleId}</p>
-                              <p className="text-sm text-gray-600">Lesson {progress.lessonId}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {formatTime(progress.timeSpent)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(progress.lastAccessed)}
-                            </span>
-                            {progress.completed ? (
-                              <Badge className="bg-green-100 text-green-800 border-0">Completed</Badge>
-                            ) : (
-                              <Badge className="bg-yellow-100 text-yellow-800 border-0">In Progress</Badge>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+      {selectedTab === 'quizzes' && (
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg, 12px)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+          <h3 style={{ color: 'var(--foreground)', margin: '0 0 0.25rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>Quiz Attempts</h3>
+          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', margin: '0 0 1.25rem', fontFamily: 'var(--font-sans)' }}>All quiz submissions and scores</p>
+          {quizData.length === 0 ? (
+            <p style={{ color: 'var(--muted-foreground)', textAlign: 'center', padding: '2rem 0', fontFamily: 'var(--font-sans)' }}>No quiz attempts yet — student hasn't completed any lesson quizzes.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {quizData.map((q, idx) => {
+                const mod = modules.find(m => m.id === q.moduleId);
+                const pct = Math.round(q.score);
+                const scoreColor = pct >= 90 ? 'var(--success, #22c55e)' : pct >= 70 ? 'var(--primary)' : 'var(--destructive, #ef4444)';
+                return (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md, 8px)', background: 'var(--background)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                      <div style={{ width: '3.5rem', height: '3.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `color-mix(in srgb, ${scoreColor} 15%, transparent)`, fontWeight: 700, fontSize: '1.1rem', color: scoreColor, fontFamily: 'var(--font-sans)', flexShrink: 0 }}>
+                        {pct}%
+                      </div>
+                      <div>
+                        <p style={{ margin: 0, fontWeight: 500, color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>{mod?.title || q.moduleId}</p>
+                        <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Lesson {q.lessonId}</p>
+                        <p style={{ margin: '0.15rem 0 0', color: 'var(--muted-foreground)', fontSize: '0.75rem', fontFamily: 'var(--font-sans)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Calendar size={12} /> {formatDate(q.completedAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <span style={{
+                      padding: '0.2rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', fontFamily: 'var(--font-sans)', fontWeight: 600,
+                      background: `color-mix(in srgb, ${scoreColor} 15%, transparent)`,
+                      color: scoreColor,
+                    }}>
+                      {pct >= 90 ? 'Excellent' : pct >= 80 ? 'Very Good' : pct >= 70 ? 'Good' : 'Needs Review'}
+                    </span>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                );
+              })}
+            </div>
           )}
+        </div>
+      )}
 
-          {selectedTab === 'quizzes' && (
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle>Quiz Attempts</CardTitle>
-                <CardDescription>All quiz submissions and scores</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {quizData.length === 0 ? (
-                  <p className="text-gray-600 text-center py-4">No quiz attempts available</p>
-                ) : (
-                  <div className="space-y-3">
-                    {quizData.map((quiz, idx) => {
-                      const percentage = Math.round((quiz.score / quiz.maxScore) * 100);
-                      const module = modules.find(m => m.id === quiz.moduleId);
-                      return (
-                        <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl ${
-                              percentage >= 90 ? 'bg-green-100 text-green-700' :
-                              percentage >= 80 ? 'bg-blue-100 text-blue-700' :
-                              percentage >= 70 ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-red-100 text-red-700'
-                            }`}>
-                              {percentage}%
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{module?.title || quiz.moduleId}</p>
-                              <p className="text-sm text-gray-600">Lesson {quiz.lessonId} - Quiz {quiz.quizId}</p>
-                              <p className="text-xs text-gray-500 mt-1">Score: {quiz.score}/{quiz.maxScore}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-600 flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(quiz.completedAt)}
-                            </span>
-                            {percentage >= 90 ? (
-                              <Badge className="bg-green-100 text-green-800 border-0">Excellent</Badge>
-                            ) : percentage >= 80 ? (
-                              <Badge className="bg-blue-100 text-blue-800 border-0">Very Good</Badge>
-                            ) : percentage >= 70 ? (
-                              <Badge className="bg-yellow-100 text-yellow-800 border-0">Good</Badge>
-                            ) : (
-                              <Badge className="bg-red-100 text-red-800 border-0">Needs Review</Badge>
-                            )}
-                          </div>
+      {selectedTab === 'feedback' && (
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg, 12px)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+          <h3 style={{ color: 'var(--foreground)', margin: '0 0 0.25rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>AI Feedback History</h3>
+          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem', margin: '0 0 1.25rem', fontFamily: 'var(--font-sans)' }}>Neural network analysis of all code submissions</p>
+          {submissionsData.length === 0 ? (
+            <p style={{ color: 'var(--muted-foreground)', textAlign: 'center', padding: '2rem 0', fontFamily: 'var(--font-sans)' }}>No AI feedback yet — student hasn't submitted any code.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {submissionsData.map((sub, idx) => {
+                const mod = modules.find(m => m.id === sub.moduleId);
+                const confidencePct = sub.score;
+                const scoreColor = confidencePct >= 80 ? 'var(--success, #22c55e)' : confidencePct >= 60 ? 'var(--warning, #f59e0b)' : 'var(--destructive, #ef4444)';
+                return (
+                  <div key={idx} style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md, 8px)', background: 'var(--background)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <Brain size={20} style={{ color: 'var(--secondary)' }} />
+                        <div>
+                          <p style={{ margin: 0, fontWeight: 500, color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>{mod?.title || sub.moduleId} — Lesson {sub.lessonId}</p>
+                          <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.78rem', fontFamily: 'var(--font-sans)' }}>{formatDate(sub.timestamp)}</p>
                         </div>
-                      );
-                    })}
+                      </div>
+                      <span style={{ background: `color-mix(in srgb, ${scoreColor} 15%, transparent)`, color: scoreColor, padding: '0.2rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
+                        Score: {confidencePct}/100
+                      </span>
+                    </div>
+                    <div style={{ background: 'color-mix(in srgb, var(--foreground) 4%, transparent)', borderRadius: 'var(--radius-sm, 6px)', padding: '0.75rem', border: '1px solid var(--border)' }}>
+                      <p style={{ margin: '0 0 0.4rem', color: 'var(--muted-foreground)', fontSize: '0.73rem', fontFamily: 'var(--font-sans)' }}>CODE SAMPLE</p>
+                      <pre style={{ margin: 0, fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem', color: 'var(--foreground)', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{sub.code.slice(0, 300)}{sub.code.length > 300 ? '\n…' : ''}</pre>
+                    </div>
+                    <div style={{ background: 'color-mix(in srgb, var(--primary) 8%, transparent)', borderRadius: 'var(--radius-sm, 6px)', padding: '0.75rem', border: '1px solid color-mix(in srgb, var(--primary) 20%, transparent)' }}>
+                      <p style={{ margin: '0 0 0.4rem', color: 'var(--primary)', fontSize: '0.73rem', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>AI ANALYSIS</p>
+                      <p style={{ margin: 0, color: 'var(--foreground)', fontSize: '0.85rem', fontFamily: 'var(--font-sans)' }}>{sub.feedback}</p>
+                    </div>
+                    {sub.errors && sub.errors.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                        {sub.errors.map((err, i) => (
+                          <span key={i} style={{ background: 'color-mix(in srgb, var(--destructive, #ef4444) 10%, transparent)', color: 'var(--destructive, #ef4444)', padding: '0.15rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontFamily: 'var(--font-sans)' }}>{err}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                );
+              })}
+            </div>
           )}
-
-          {selectedTab === 'feedback' && (
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle>AI Feedback History</CardTitle>
-                <CardDescription>Neural network analysis of code submissions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {feedbackData.length === 0 ? (
-                  <p className="text-gray-600 text-center py-4">No AI feedback available</p>
-                ) : (
-                  <div className="space-y-4">
-                    {feedbackData.map((feedback, idx) => {
-                      const confidencePercentage = Math.round(feedback.confidence * 100);
-                      const module = modules.find(m => m.id === feedback.moduleId);
-                      return (
-                        <div key={idx} className="p-4 border border-gray-200 rounded-lg space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <Brain className="w-5 h-5 text-purple-600" />
-                              <div>
-                                <p className="font-medium text-gray-900">{module?.title || feedback.moduleId}</p>
-                                <p className="text-xs text-gray-500">{formatDate(feedback.timestamp)}</p>
-                              </div>
-                            </div>
-                            <Badge className="bg-purple-100 text-purple-800 border-0">
-                              {confidencePercentage}% confidence
-                            </Badge>
-                          </div>
-                          <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                            <p className="text-xs text-gray-500 mb-1">Code Sample:</p>
-                            <pre className="text-sm text-gray-700 font-mono overflow-x-auto">{feedback.code}</pre>
-                          </div>
-                          <div className="bg-blue-50 p-3 rounded border border-blue-200">
-                            <p className="text-xs text-blue-600 mb-1">AI Analysis:</p>
-                            <p className="text-sm text-gray-700">{feedback.feedback}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </>
+        </div>
       )}
     </div>
   );

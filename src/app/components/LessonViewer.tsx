@@ -17,14 +17,17 @@ import { GameFormQuiz } from './GameFormQuiz';
 import { QuizResultsPage } from './QuizResultsPage';
 import { toast } from 'sonner';
 import { comprehensiveLessonsContent } from '../data/comprehensiveLessonsContent';
+import { saveSubmission, saveProgress } from '../utils/storage';
 import type { Module } from '../types';
 
 interface LessonViewerProps {
   module: Module;
+  userId?: string;
   onBack: () => void;
   onViewFeedback?: (lessonId?: string) => void;
   onStartCoding: (moduleId: string, lessonId: string) => void;
   initialLessonId?: string;
+  onLessonRestored?: () => void;
   onOpenVideoTutorial?: (moduleId: string, lessonId: string, lessonTitle: string) => void;
   onOpenReadingContent?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
   onOpenAudioLecture?: (moduleId: string, lessonId: string, lessonTitle: string, lessonContent: any) => void;
@@ -76,7 +79,7 @@ interface LessonPerformance {
   completedAt?: string;
 }
 
-export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, onOpenVideoTutorial, onOpenReadingContent, onOpenAudioLecture, onOpenInteractiveGame, initialLessonId }: LessonViewerProps) {
+export function LessonViewer({ module, userId, onBack, onViewFeedback, onStartCoding, onOpenVideoTutorial, onOpenReadingContent, onOpenAudioLecture, onOpenInteractiveGame, initialLessonId, onLessonRestored }: LessonViewerProps) {
   const [viewMode, setViewMode] = useState<'lessons' | 'feedback'>('lessons');
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(initialLessonId ?? null);
   const [code, setCode] = useState('');
@@ -117,6 +120,15 @@ export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, on
   const [quizStats, setQuizStats] = useState<any>(null);
   
   const selectedLesson = module.lessons.find(l => l.id === selectedLessonId);
+
+  // If we mounted with an initialLessonId (returned from feedback), notify the parent
+  // so it can clear the stored lesson ref — preventing stale pre-selection later.
+  useEffect(() => {
+    if (initialLessonId && onLessonRestored) {
+      onLessonRestored();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Track session time
   useEffect(() => {
@@ -410,13 +422,43 @@ export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, on
         }
       };
 
-      // Save submission
+      // Save submission snapshot (per-lesson key used by student's own views)
       localStorage.setItem(`submission_${module.id}_${selectedLessonId}`, JSON.stringify(submission));
-      
-      // Save all submissions history
+
+      // Save to instructor-facing store so submissions appear in the instructor dashboard
+      if (userId) {
+        saveSubmission({
+          id: `${userId}_${module.id}_${selectedLessonId}_${Date.now()}`,
+          userId,
+          moduleId: module.id,
+          lessonId: selectedLessonId!,
+          code,
+          timestamp: new Date().toISOString(),
+          score: feedback.codeQuality,
+          feedback: `Score: ${feedback.codeQuality}/100. OOP Principles: ${feedback.oopPrinciples.join(', ') || 'none detected'}. ${feedback.errors.length > 0 ? 'Issues: ' + feedback.errors.join('; ') : 'No major issues.'}`,
+          errors: feedback.errors,
+          passed: feedback.codeQuality >= 70,
+        });
+
+        // Save progress so instructor avg completion and StudentDetailView Progress tab are populated
+        saveProgress({
+          userId,
+          moduleId: module.id,
+          lessonId: selectedLessonId!,
+          completed: feedback.codeQuality >= 70,
+          score: feedback.codeQuality,
+          attempts: performanceMetrics.submitAttempts,
+          lastAttempt: new Date().toISOString(),
+          code,
+          feedback: `Score: ${feedback.codeQuality}/100`,
+          timeSpent,
+        });
+      }
+
+      // Save all submissions history (for student FeedbackPage)
       const allSubmissions = JSON.parse(localStorage.getItem('allSubmissions') || '[]');
       allSubmissions.unshift(submission);
-      localStorage.setItem('allSubmissions', JSON.stringify(allSubmissions.slice(0, 20))); // Keep last 20
+      localStorage.setItem('allSubmissions', JSON.stringify(allSubmissions.slice(0, 20)));
 
       // Update lesson performance
       const newPerformance: LessonPerformance = {
@@ -553,6 +595,21 @@ export function LessonViewer({ module, onBack, onViewFeedback, onStartCoding, on
       timestamp: new Date().toISOString()
     };
     localStorage.setItem(`quiz_${module.id}_${selectedLessonId}`, JSON.stringify(quizData));
+
+    // Save per-user quiz result so instructor StudentDetailView Quizzes tab can read it
+    if (userId) {
+      localStorage.setItem(
+        `quiz_result_${userId}_${module.id}_${selectedLessonId}`,
+        JSON.stringify({
+          score: stats.accuracy ?? stats.percentage ?? 0,
+          maxScore: 100,
+          completedAt: new Date().toISOString(),
+          passed: (stats.accuracy ?? stats.percentage ?? 0) >= 70,
+          moduleId: module.id,
+          lessonId: selectedLessonId,
+        })
+      );
+    }
     
     // Mark lesson as completed if passed
     if (stats.accuracy >= 70) {
