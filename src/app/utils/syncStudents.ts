@@ -172,3 +172,50 @@ export function startRegistrationPolling(): () => void {
   const intervalId = setInterval(runSync, 30_000);
   return () => clearInterval(intervalId);
 }
+
+/**
+ * Retries pushing any locally-created accounts that failed to reach the
+ * backend during registration (Register.tsx marks these pendingSync: true
+ * when backendApi.signUp() throws or times out).
+ *
+ * Uses updateProfile() rather than signUp() so it reuses the same local
+ * user ID already stamped on this student's progress/submissions records,
+ * instead of minting a second, mismatched identity on the backend.
+ *
+ * This must run on the STUDENT's own device/session (call it from App.tsx
+ * whenever `user` is set) — the pendingSync record only exists in that
+ * browser's localStorage, so the instructor's device has nothing to retry.
+ */
+export async function retryPendingRegistrations(): Promise<void> {
+  try {
+    let local: any[] = [];
+    try {
+      local = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    } catch (_e: unknown) { local = []; }
+
+    const pending = local.filter((u: any) => u.pendingSync);
+    if (pending.length === 0) return;
+
+    let changed = false;
+    for (const u of pending) {
+      try {
+        await backendApi.updateProfile({
+          userId: u.id,
+          name: u.name,
+          email: u.email,
+          studentId: u.studentId,
+          section: u.department || u.section,
+        });
+        u.pendingSync = false;
+        changed = true;
+      } catch (_e: unknown) {
+        // Still unreachable — leave pendingSync true, retry on the next pass
+      }
+    }
+    if (changed) {
+      localStorage.setItem('registeredUsers', JSON.stringify(local));
+    }
+  } catch (_e: unknown) {
+    // Nothing to do — localStorage unreadable
+  }
+}
