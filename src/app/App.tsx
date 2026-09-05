@@ -883,6 +883,7 @@ function AppContent() {
               key={`${selectedModule.id}-${selectedLesson.id}-${editorRefreshKey}`}
               module={selectedModule}
               lesson={selectedLesson}
+              user={user}
               onBack={() => {
                 previewFeedbackLessonId.current = null;
                 setCurrentView("module");
