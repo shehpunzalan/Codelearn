@@ -1,11 +1,19 @@
-import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+import { publicAnonKey } from '/utils/supabase/info';
 
-const SUPABASE_URL = `https://${projectId}.supabase.co`;
+// Use plain fetch against the Supabase REST API — no createClient needed.
+// This avoids creating a second GoTrueClient alongside the one the Make platform
+// already instantiates internally for the linked project.
+const SUPABASE_REST = `https://hovedryqutuucipuqxca.supabase.co/rest/v1`;
+const ANON_KEY = publicAnonKey as string;
 
-// Direct Supabase client — bypasses the Edge Function entirely.
-// Used for cross-device user sync via the user_profiles table.
-export const supabase = createClient(SUPABASE_URL, publicAnonKey as string);
+function restHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': ANON_KEY,
+    'Authorization': `Bearer ${ANON_KEY}`,
+    'Prefer': 'return=minimal',
+  };
+}
 
 // Save (upsert) a user profile so other devices can discover it.
 export async function upsertUserProfile(user: {
@@ -17,8 +25,10 @@ export async function upsertUserProfile(user: {
   section?: string;
 }): Promise<void> {
   try {
-    const { error } = await supabase.from('user_profiles').upsert(
-      {
+    await fetch(`${SUPABASE_REST}/user_profiles`, {
+      method: 'POST',
+      headers: { ...restHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({
         user_id: user.id,
         name: user.name,
         email: user.email,
@@ -26,10 +36,8 @@ export async function upsertUserProfile(user: {
         student_id: user.studentId || null,
         section: user.section || null,
         updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' }
-    );
-    if (error) console.debug('[supabase] upsertUserProfile error:', error.message);
+      }),
+    });
   } catch (e) {
     console.debug('[supabase] upsertUserProfile failed:', e);
   }
@@ -38,14 +46,12 @@ export async function upsertUserProfile(user: {
 // Fetch all user profiles from Supabase (for cross-device instructor sync).
 export async function fetchAllUserProfiles(): Promise<any[]> {
   try {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('user_id, name, email, role, student_id, section, year_level, created_at');
-    if (error) {
-      console.debug('[supabase] fetchAllUserProfiles error:', error.message);
-      return [];
-    }
-    return data || [];
+    const res = await fetch(
+      `${SUPABASE_REST}/user_profiles?select=user_id,name,email,role,student_id,section,year_level,created_at`,
+      { headers: restHeaders() }
+    );
+    if (!res.ok) return [];
+    return await res.json();
   } catch (e) {
     console.debug('[supabase] fetchAllUserProfiles failed:', e);
     return [];

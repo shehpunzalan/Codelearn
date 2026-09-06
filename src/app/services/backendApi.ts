@@ -4,8 +4,8 @@ import { publicAnonKey } from '/utils/supabase/info';
 // Supabase project the user links. The make-server-c61d3fdc function lives here.
 const MAKE_PROJECT_ID = 'hnlhcbzpeijdzueipejx';
 const MAKE_API_URL = `https://${MAKE_PROJECT_ID}.supabase.co/functions/v1/make-server-c61d3fdc`;
-// Secondary: User's own deployed function on hoofdryqutuucipuqxca (after GitHub Action deploys it)
-const USER_API_URL = `https://hoofdryqutuucipuqxca.supabase.co/functions/v1/server`;
+// Secondary: User's own deployed function (project ref decoded from anon key JWT)
+const USER_API_URL = `https://hovedryqutuucipuqxca.supabase.co/functions/v1/server`;
 const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
 
 // Helper to get auth token
@@ -43,28 +43,23 @@ async function fetchFromUrl(url: string, endpoint: string, options: RequestInit,
 
 // Helper function to make API requests — tries Make platform first, then user's own function
 async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
-  // Try Make platform backend (primary — browser CSP allows this, but may return 404
-  // if the edge function hasn't been redeployed with the latest routes yet)
+  // Try Make platform backend (primary — returns 404 since it's not deployed)
   try {
     return await fetchFromUrl(MAKE_API_URL, endpoint, options, getAuthToken());
   } catch (makeErr: unknown) {
-    const isNotDeployed = String(makeErr).includes('404');
-    if (isNotDeployed) {
-      console.warn(`Make backend: route ${endpoint} not yet deployed (404) — trying fallback`);
-    } else {
-      console.warn(`Make backend failed for ${endpoint}:`, makeErr);
-    }
+    // Silently fall through to secondary — Make function not deployed
+    console.debug(`[api] primary failed for ${endpoint}:`, String(makeErr));
   }
-  // Try user's own Supabase function (secondary — may fail due to browser CSP if direct call)
+  // Try user's own Supabase function (secondary)
   try {
     return await fetchFromUrl(USER_API_URL, endpoint, options, USER_ANON_KEY);
   } catch (userErr: unknown) {
-    const isCsp = String(userErr).includes('Failed to fetch');
-    if (isCsp) {
-      throw new Error('backend-csp');
+    const isNetwork = String(userErr).includes('Failed to fetch') || String(userErr).includes('NetworkError');
+    if (isNetwork) {
+      return null;
     }
-    console.error(`Both backends failed for ${endpoint}:`, userErr);
-    throw new Error('Cannot reach the server. Please check your connection and try again.');
+    console.debug(`[api] both backends failed for ${endpoint}:`, String(userErr));
+    return null;
   }
 }
 
@@ -465,16 +460,7 @@ export async function saveUserPosition(data: {
   } catch {}
   // Fire-and-forget backend sync — swallow any errors silently
   try {
-    const url = `${API_BASE_URL}/user-position`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      const text = await response.text();
-      try { JSON.parse(text); } catch {}
-    }
+    await apiRequest('/user-position', { method: 'POST', body: JSON.stringify(data) });
   } catch {}
 }
 
@@ -491,18 +477,9 @@ export async function getUserPosition(userId: string): Promise<{ data: { moduleI
   } catch {}
   // Attempt backend as fallback — silently fail
   try {
-    const url = `${API_BASE_URL}/user-position/${userId}`;
-    const response = await fetch(url, {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
-    });
-    if (response.ok) {
-      const text = await response.text();
-      try {
-        const json = JSON.parse(text);
-        if (json?.data?.moduleId && json?.data?.lessonId) {
-          return { data: json.data };
-        }
-      } catch {}
+    const json = await apiRequest(`/user-position/${userId}`);
+    if (json?.data?.moduleId && json?.data?.lessonId) {
+      return { data: json.data };
     }
   } catch {}
   return { data: null };
