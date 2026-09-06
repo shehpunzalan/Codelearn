@@ -30,17 +30,32 @@ interface QuizStats {
   timeSpent: number;
 }
 
+// Fisher-Yates shuffle — returns a new shuffled array, does not mutate the input
+function shuffleArray<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, attemptKey }: GameFormQuizProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [showHint, setShowHint] = useState(false);
   const [timeLeft, setTimeLeft] = useState(SECONDS_PER_QUESTION);
   const [timedOut, setTimedOut] = useState(false);
   const [attemptsUsed, setAttemptsUsed] = useState<number>(() => {
     if (!attemptKey) return 0;
     try { return parseInt(localStorage.getItem(attemptKey) || '0', 10); } catch { return 0; }
   });
+
+  // The order/composition of questions for THIS attempt. Re-shuffled every
+  // time a new attempt starts (initial mount, and again if this same
+  // component instance is reused for a retry — see startNewAttempt below),
+  // so the question set differs attempt to attempt.
+  const [orderedQuestions, setOrderedQuestions] = useState<Challenge[]>(() => shuffleArray(questions));
 
   // Gamification states
   const [totalXP, setTotalXP] = useState(0);
@@ -98,16 +113,12 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
 
   // Shuffle options for current question
   useEffect(() => {
-    if (questions && questions[currentQuestionIndex]) {
-      const question = questions[currentQuestionIndex];
-      const options = [...question.options];
-      for (let i = options.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [options[i], options[j]] = [options[j], options[i]];
-      }
+    if (orderedQuestions && orderedQuestions[currentQuestionIndex]) {
+      const question = orderedQuestions[currentQuestionIndex];
+      const options = shuffleArray(question.options);
       setCurrentShuffledQuestion({ ...question, options });
     }
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, orderedQuestions]);
 
   const handleTimeout = () => {
     if (isAnswered) return;
@@ -121,6 +132,25 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
     quizTotalsRef.current.totalTimeSpent += questionTime;
     setTotalTimeSpent(prev => prev + questionTime);
     toast.error("⏰ Time's up!", { description: 'No answer selected — marked incorrect.', duration: 2000 });
+  };
+
+  // Kick off a fresh attempt: reshuffle the question set/order and reset all
+  // per-attempt state. Called when attemptsUsed increments, in case this same
+  // component instance is reused for a retry instead of being remounted.
+  const startNewAttempt = () => {
+    setOrderedQuestions(shuffleArray(questions));
+    setCurrentQuestionIndex(0);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setTimedOut(false);
+    setQuestionStartTime(Date.now());
+    setTotalXP(0);
+    setCorrectCount(0);
+    setIncorrectCount(0);
+    setCurrentStreak(0);
+    setBestStreak(0);
+    setTotalTimeSpent(0);
+    quizTotalsRef.current = { correctCount: 0, incorrectCount: 0, totalXP: 0, bestStreak: 0, totalTimeSpent: 0 };
   };
 
   if (attemptsUsed >= MAX_ATTEMPTS) {
@@ -151,7 +181,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
   if (!currentShuffledQuestion) return null;
 
   const currentQuestion = currentShuffledQuestion;
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+  const isLastQuestion = currentQuestionIndex === orderedQuestions.length - 1;
   const remainingAttempts = MAX_ATTEMPTS - attemptsUsed - 1; // after this attempt
 
   const getQuestionDifficulty = (): 'easy' | 'medium' | 'hard' => {
@@ -203,9 +233,9 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
   };
 
   const nextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
+    if (currentQuestionIndex < orderedQuestions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      setSelectedOption(null); setIsAnswered(false); setShowHint(false);
+      setSelectedOption(null); setIsAnswered(false);
       setQuestionStartTime(Date.now()); setTimedOut(false);
     } else {
       finishQuiz();
@@ -221,14 +251,17 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
     }
     const totals = quizTotalsRef.current;
     onComplete({
-      totalQuestions: questions.length,
+      totalQuestions: orderedQuestions.length,
       correctAnswers: totals.correctCount,
       incorrectAnswers: totals.incorrectCount,
       totalXP: totals.totalXP,
       streak: totals.bestStreak,
-      accuracy: Math.round((totals.correctCount / questions.length) * 100),
+      accuracy: Math.round((totals.correctCount / orderedQuestions.length) * 100),
       timeSpent: Math.round(totals.totalTimeSpent),
     });
+    // If the parent keeps this same component mounted and lets the user
+    // retry in place, this reshuffles the question set for the next attempt.
+    startNewAttempt();
   };
 
   const getDifficultyBadge = () => {
@@ -274,7 +307,7 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
               <div style={{ display: 'flex', gap: '1.5rem' }}>
                 <div className="text-center">
                   <p style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', marginBottom: 2 }}>Question</p>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--foreground)', margin: 0 }}>{currentQuestionIndex + 1}/{questions.length}</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--foreground)', margin: 0 }}>{currentQuestionIndex + 1}/{orderedQuestions.length}</p>
                 </div>
                 <div className="text-center">
                   <p style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', marginBottom: 2 }}>Score</p>
@@ -421,24 +454,6 @@ export function GameFormQuiz({ questions, onComplete, onClose, lessonTitle, atte
                 </div>
               );
             })()}
-
-            {/* Hint */}
-            {!isAnswered && (
-              <div style={{ marginBottom: '1.25rem' }}>
-                <button
-                  onClick={() => setShowHint(!showHint)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.85rem', border: '1.5px solid var(--primary, #6366f1)', borderRadius: 'var(--radius-sm, 6px)', background: 'transparent', color: 'var(--primary, #6366f1)', fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}
-                >
-                  <Lightbulb style={{ width: 14, height: 14 }} />
-                  {showHint ? 'Hide Hint' : 'Show Hint'}
-                </button>
-                {showHint && (
-                  <div style={{ marginTop: '0.6rem', padding: '0.75rem 1rem', background: 'rgba(99,102,241,0.07)', border: '1.5px solid rgba(99,102,241,0.25)', borderRadius: 'var(--radius-sm, 6px)', fontSize: '0.85rem', color: 'var(--foreground)' }}>
-                    💡 Review the key concepts from this lesson carefully before selecting your answer.
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Action Buttons */}
             {!isAnswered ? (
