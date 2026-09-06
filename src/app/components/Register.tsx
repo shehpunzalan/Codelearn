@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // v2
+import React, { useState, useRef } from 'react'; // v3
 import { User, UserRole } from '../types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
@@ -14,6 +14,14 @@ interface RegisterProps {
   onShowLogin: () => void;
 }
 
+// Letters and spaces only (supports multi-word names like "Juan Dela Cruz").
+// Kept as a module-level constant so it's reused identically by the live
+// input filter and the submit-time validator below.
+const NAME_ALPHA_REGEX = /^[A-Za-z\s]*$/;
+
+// Available course sections for students to choose from.
+const SECTIONS = ['CS-A', 'CS-B', 'CS-C', 'IT-A', 'IT-B', 'IT-C'];
+
 export function Register({ onRegister, onShowLogin }: RegisterProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,9 +29,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<UserRole>('student');
   const [studentId, setStudentId] = useState('');
+  const [section, setSection] = useState('');
   const [department, setDepartment] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,9 +43,12 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     password?: string;
     confirmPassword?: string;
     studentId?: string;
+    section?: string;
     department?: string;
     terms?: string;
   }>({});
+
+  const termsScrollRef = useRef<HTMLDivElement>(null);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,14 +71,54 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     return { valid: true };
   };
 
+  /**
+   * Handler: Name field input — strips out anything that isn't a letter or
+   * space as the user types, so numbers/symbols/punctuation never make it
+   * into the field at all (rather than being caught only at submit time).
+   */
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const filtered = raw.replace(/[^A-Za-z\s]/g, '');
+    setName(filtered);
+    if (errors.name) setErrors({ ...errors, name: undefined });
+  };
+
+  /**
+   * Handler: blocks copy/paste/cut on password fields. Applied via onCopy/
+   * onPaste/onCut so the browser's native clipboard interaction never fires,
+   * rather than trying to detect and undo it after the fact.
+   */
+  const blockClipboard = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    toast.error('Copy/paste is disabled for password fields', { duration: 2000 });
+  };
+
+  /**
+   * Handler: tracks whether the user has scrolled the Terms and Conditions
+   * box all the way to the bottom. The agreement checkbox stays disabled
+   * until this is true, so the checkbox can't be checked without reading
+   * through (or at least scrolling past) the full terms text.
+   */
+  const handleTermsScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (hasScrolledTerms) return; // already unlocked, nothing more to do
+    const el = e.currentTarget;
+    const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+    if (reachedBottom) {
+      setHasScrolledTerms(true);
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
     // Name validation
-    if (!name.trim()) {
+    const trimmedNameForValidation = name.trim();
+    if (!trimmedNameForValidation) {
       newErrors.name = 'Full name is required';
-    } else if (name.trim().length < 3) {
+    } else if (trimmedNameForValidation.length < 3) {
       newErrors.name = 'Name must be at least 3 characters';
+    } else if (!NAME_ALPHA_REGEX.test(trimmedNameForValidation)) {
+      newErrors.name = 'Name can only contain letters';
     }
 
     // Email validation
@@ -107,6 +160,9 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
         newErrors.studentId = 'Student ID is required';
       } else if (!/^[0-9]{4,10}$/.test(studentId)) {
         newErrors.studentId = 'Student ID must be 4-10 digits';
+      }
+      if (!section) {
+        newErrors.section = 'Section is required';
       }
     }
 
@@ -163,7 +219,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
         name: trimmedName,
         role,
         studentId: role === 'student' ? studentId : undefined,
-        section: role === 'student' ? department : undefined,
+        section: role === 'student' ? section : undefined,
         yearLevel: role === 'student' ? '1st Year' : undefined,
       });
       supabaseUserId = result?.data?.userId || null;
@@ -190,6 +246,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       email: trimmedEmail,
       role,
       studentId: role === 'student' ? studentId : undefined,
+      section: role === 'student' ? section : undefined,
       department: role === 'instructor' ? department : undefined,
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
       registeredAt: new Date().toISOString(),
@@ -281,7 +338,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setRole('instructor'); setStudentId(''); setErrors({ ...errors, studentId: undefined }); }}
+                    onClick={() => { setRole('instructor'); setStudentId(''); setSection(''); setErrors({ ...errors, studentId: undefined, section: undefined }); }}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                       padding: '0.75rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 500,
@@ -308,10 +365,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                       type="text"
                       placeholder="Enter your full name"
                       value={name}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                        if (errors.name) setErrors({ ...errors, name: undefined });
-                      }}
+                      onChange={handleNameChange}
                       className={`pl-10 h-12 border-gray-200 ${errors.name ? 'border-red-500' : ''}`}
                       disabled={isLoading}
                     />
@@ -372,6 +426,34 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                 )}
               </div>
 
+              {/* Section — students only */}
+              {role === 'student' && (
+                <div className="space-y-2">
+                  <Label htmlFor="section" className="text-sm font-medium">Section *</Label>
+                  <select
+                    id="section"
+                    value={section}
+                    onChange={(e) => {
+                      setSection(e.target.value);
+                      if (errors.section) setErrors({ ...errors, section: undefined });
+                    }}
+                    className={`w-full h-12 rounded-md border bg-white px-3 text-sm border-gray-200 ${errors.section ? 'border-red-500' : ''}`}
+                    disabled={isLoading}
+                  >
+                    <option value="" disabled>Select your section</option>
+                    {SECTIONS.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  {errors.section && (
+                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.section}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
@@ -412,6 +494,9 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                       setPassword(e.target.value);
                       if (errors.password) setErrors({ ...errors, password: undefined });
                     }}
+                    onCopy={blockClipboard}
+                    onPaste={blockClipboard}
+                    onCut={blockClipboard}
                     className={`pl-10 pr-10 h-12 border-gray-200 ${errors.password ? 'border-red-500' : ''}`}
                     disabled={isLoading}
                   />
@@ -467,6 +552,9 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                       setConfirmPassword(e.target.value);
                       if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
                     }}
+                    onCopy={blockClipboard}
+                    onPaste={blockClipboard}
+                    onCut={blockClipboard}
                     className={`pl-10 pr-10 h-12 border-gray-200 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                     disabled={isLoading}
                   />
@@ -507,7 +595,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                 </button>
 
                 {showTerms && (
-                  <div className="mt-3 space-y-3 text-sm text-gray-700 max-h-64 overflow-y-auto pr-2">
+                  <div
+                    ref={termsScrollRef}
+                    onScroll={handleTermsScroll}
+                    className="mt-3 space-y-3 text-sm text-gray-700 max-h-64 overflow-y-auto pr-2"
+                  >
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">1. Acceptance of Terms</h4>
                       <p>By registering for CodeLearn AI, you agree to comply with these terms and conditions. This platform is designed for educational purposes in CCS108 - Object-Oriented Programming with Java.</p>
@@ -559,6 +651,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                   <Checkbox
                     id="terms"
                     checked={agreedToTerms}
+                    disabled={!hasScrolledTerms}
                     onCheckedChange={(checked) => {
                       setAgreedToTerms(checked as boolean);
                       if (checked) setErrors({ ...errors, terms: undefined });
@@ -566,11 +659,19 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                   />
                   <label
                     htmlFor="terms"
-                    className="text-sm text-gray-700 cursor-pointer leading-tight"
+                    className={`text-sm leading-tight ${hasScrolledTerms ? 'text-gray-700 cursor-pointer' : 'text-gray-400 cursor-not-allowed'}`}
                   >
                     I have read and agree to the Terms and Conditions *
                   </label>
                 </div>
+                {!hasScrolledTerms && (
+                  <p className="text-gray-500 text-xs mt-2 flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
+                    {showTerms
+                      ? 'Scroll to the end of the Terms and Conditions to enable the checkbox.'
+                      : 'Open and read through the Terms and Conditions to enable the checkbox.'}
+                  </p>
+                )}
                 {errors.terms && (
                   <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
