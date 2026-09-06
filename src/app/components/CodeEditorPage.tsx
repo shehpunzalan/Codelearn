@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Module, Lesson, User } from '../types';
+import { Module, Lesson } from '../types';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -22,9 +22,6 @@ import { toast } from 'sonner';
 interface CodeEditorPageProps {
   module: Module;              // Current module being studied
   lesson: Lesson;              // Current lesson within the module
-  user: User;                  // Currently logged-in user (passed down from App.tsx,
-                                // same source of truth every other view uses — no more
-                                // re-deriving "am I logged in?" from localStorage here)
   onBack: () => void;          // Callback function to navigate back to lesson
   onViewFeedback: () => void;  // Callback function to view detailed feedback
 }
@@ -99,7 +96,7 @@ interface Submission {
  * Main component for the Java code editor with AI-powered feedback
  * Provides Monaco editor integration, code analysis, and submission handling
  */
-export function CodeEditorPage({ module, lesson, user, onBack, onViewFeedback }: CodeEditorPageProps) {
+export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeEditorPageProps) {
   // State management for code content and editor behavior
   const [code, setCode] = useState<string>(lesson.starterCode || 'public class Solution {\n\n    public static void main(String[] args) {\n        \n    }\n\n}');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -362,14 +359,14 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${
    * Compiles code, analyzes with AI, and saves submission details
    */
   const handleSubmit = async () => {
-    // Use the logged-in user passed down from App.tsx — the same source of
-    // truth every other view relies on — instead of re-reading localStorage
-    // directly, which can be stale or cleared independently of React state.
-    if (!user) {
+    // Get current user
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
       toast.error('Please log in to submit code');
       return;
     }
 
+    const user = JSON.parse(currentUser);
     setIsSubmitting(true);
     toast.info('Checking your code...');
 

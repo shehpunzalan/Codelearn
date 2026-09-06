@@ -25,7 +25,6 @@ import { toast, Toaster } from "sonner";
 import * as backendApi from "./services/backendApi";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { getUserStats } from "./utils/storage";
-import { retryPendingRegistrations } from "./utils/syncStudents";
 
 // CodeLearn AI - Neural Network Pattern Recognition System for Java OOP
 function AppContent() {
@@ -309,19 +308,6 @@ function AppContent() {
       })),
     );
   };
-
-  // Retry any account that registered locally but failed to reach the backend
-  // (Register.tsx marks these pendingSync: true), so it eventually shows up
-  // on the instructor's roster too — this must run on the student's own
-  // session, since the pendingSync flag only exists in their browser.
-  useEffect(() => {
-    if (!user) return;
-    retryPendingRegistrations().catch(() => {});
-    const intervalId = setInterval(() => {
-      retryPendingRegistrations().catch(() => {});
-    }, 30_000);
-    return () => clearInterval(intervalId);
-  }, [user?.id]);
 
   // Re-hydrate module progress from localStorage whenever user identity is known.
   // Always try the user-scoped key first — it survives clearProgressDataForNewUser.
@@ -897,7 +883,6 @@ function AppContent() {
               key={`${selectedModule.id}-${selectedLesson.id}-${editorRefreshKey}`}
               module={selectedModule}
               lesson={selectedLesson}
-              user={user}
               onBack={() => {
                 previewFeedbackLessonId.current = null;
                 setCurrentView("module");

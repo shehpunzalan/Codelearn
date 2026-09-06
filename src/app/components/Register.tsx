@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'; // v4
+import React, { useState } from 'react'; // v2
 import { User, UserRole } from '../types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
@@ -8,19 +8,12 @@ import { Checkbox } from './ui/checkbox';
 import { Brain, Mail, Lock, UserCircle as UserIcon, GraduationCap, Shield, FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import * as backendApi from '../services/backendApi';
+import { upsertUserProfile } from '../utils/supabaseClient';
 
 interface RegisterProps {
   onRegister: (user: User) => void;
   onShowLogin: () => void;
 }
-
-// Letters and spaces only (supports multi-word names like "Juan Dela Cruz").
-// Kept as a module-level constant so it's reused identically by the live
-// input filter and the submit-time validator below.
-const NAME_ALPHA_REGEX = /^[A-Za-z\s]*$/;
-
-// Available course sections for students to choose from.
-const SECTIONS = ['CS-A', 'CS-B', 'CS-C', 'IT-A', 'IT-B', 'IT-C'];
 
 export function Register({ onRegister, onShowLogin }: RegisterProps) {
   const [name, setName] = useState('');
@@ -29,10 +22,9 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<UserRole>('student');
   const [studentId, setStudentId] = useState('');
-  const [section, setSection] = useState('');
+  const [department, setDepartment] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,11 +34,9 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     password?: string;
     confirmPassword?: string;
     studentId?: string;
-    section?: string;
+    department?: string;
     terms?: string;
   }>({});
-
-  const termsScrollRef = useRef<HTMLDivElement>(null);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -69,54 +59,14 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     return { valid: true };
   };
 
-  /**
-   * Handler: Name field input — strips out anything that isn't a letter or
-   * space as the user types, so numbers/symbols/punctuation never make it
-   * into the field at all (rather than being caught only at submit time).
-   */
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    const filtered = raw.replace(/[^A-Za-z\s]/g, '');
-    setName(filtered);
-    if (errors.name) setErrors({ ...errors, name: undefined });
-  };
-
-  /**
-   * Handler: blocks copy/paste/cut on password fields. Applied via onCopy/
-   * onPaste/onCut so the browser's native clipboard interaction never fires,
-   * rather than trying to detect and undo it after the fact.
-   */
-  const blockClipboard = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    toast.error('Copy/paste is disabled for password fields', { duration: 2000 });
-  };
-
-  /**
-   * Handler: tracks whether the user has scrolled the Terms and Conditions
-   * box all the way to the bottom. The agreement checkbox stays disabled
-   * until this is true, so the checkbox can't be checked without reading
-   * through (or at least scrolling past) the full terms text.
-   */
-  const handleTermsScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (hasScrolledTerms) return; // already unlocked, nothing more to do
-    const el = e.currentTarget;
-    const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
-    if (reachedBottom) {
-      setHasScrolledTerms(true);
-    }
-  };
-
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
     // Name validation
-    const trimmedNameForValidation = name.trim();
-    if (!trimmedNameForValidation) {
-      newErrors.name = 'Name is required';
-    } else if (trimmedNameForValidation.length < 3) {
+    if (!name.trim()) {
+      newErrors.name = 'Full name is required';
+    } else if (name.trim().length < 3) {
       newErrors.name = 'Name must be at least 3 characters';
-    } else if (!NAME_ALPHA_REGEX.test(trimmedNameForValidation)) {
-      newErrors.name = 'Name can only contain letters';
     }
 
     // Email validation
@@ -159,12 +109,16 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       } else if (!/^[0-9]{4,10}$/.test(studentId)) {
         newErrors.studentId = 'Student ID must be 4-10 digits';
       }
-      if (!section) {
-        newErrors.section = 'Section is required';
-      }
     }
 
-    // Instructor-specific validation — none currently (Department field removed)
+    // Instructor-specific validation
+    if (role === 'instructor') {
+      if (!department.trim()) {
+        newErrors.department = 'Department is required';
+      } else if (department.trim().length < 3) {
+        newErrors.department = 'Department must be at least 3 characters';
+      }
+    }
 
     // Terms agreement validation
     if (!agreedToTerms) {
@@ -210,7 +164,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
         name: trimmedName,
         role,
         studentId: role === 'student' ? studentId : undefined,
-        section: role === 'student' ? section : undefined,
+        section: role === 'student' ? department : undefined,
         yearLevel: role === 'student' ? '1st Year' : undefined,
       });
       supabaseUserId = result?.data?.userId || null;
@@ -237,7 +191,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       email: trimmedEmail,
       role,
       studentId: role === 'student' ? studentId : undefined,
-      section: role === 'student' ? section : undefined,
+      department: role === 'instructor' ? department : undefined,
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
       registeredAt: new Date().toISOString(),
       pendingSync: !supabaseUserId,
@@ -245,6 +199,16 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     existingUsers.push(newUser);
     localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
     localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: userId }));
+
+    // Persist to Supabase so instructors on other devices can see this user
+    upsertUserProfile({
+      id: userId,
+      name: trimmedName,
+      email: trimmedEmail,
+      role,
+      studentId: role === 'student' ? studentId : undefined,
+      section: role === 'student' ? department : undefined,
+    }).catch(() => {/* silently ignore — localStorage is the source of truth */});
 
     // Notify instructor dashboards on any open tabs to refresh student list
     window.dispatchEvent(new CustomEvent('codelearn:userRegistered', { detail: newUser }));
@@ -313,7 +277,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => { setRole('student'); }}
+                    onClick={() => { setRole('student'); setDepartment(''); setErrors({ ...errors, department: undefined }); }}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                       padding: '0.75rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 500,
@@ -328,7 +292,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setRole('instructor'); setStudentId(''); setSection(''); setErrors({ ...errors, studentId: undefined, section: undefined }); }}
+                    onClick={() => { setRole('instructor'); setStudentId(''); setErrors({ ...errors, studentId: undefined }); }}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                       padding: '0.75rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 500,
@@ -344,31 +308,35 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                 </div>
               </div>
 
-              {/* Full Name (+ Student ID, for students only) */}
-              {role === 'student' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-medium"> Name *</Label>
-                    <div className="relative">
-                      <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="Enter your Name"
-                        value={name}
-                        onChange={handleNameChange}
-                        className={`pl-10 h-12 border-gray-200 ${errors.name ? 'border-red-500' : ''}`}
-                        disabled={isLoading}
-                      />
-                      {errors.name && (
-                        <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
-                          {errors.name}
-                        </p>
-                      )}
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">Full Name *</Label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (errors.name) setErrors({ ...errors, name: undefined });
+                      }}
+                      className={`pl-10 h-12 border-gray-200 ${errors.name ? 'border-red-500' : ''}`}
+                      disabled={isLoading}
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.name}
+                      </p>
+                    )}
                   </div>
+                </div>
 
+                {/* Student ID or Department */}
+                {role === 'student' ? (
                   <div className="space-y-2">
                     <Label htmlFor="studentId" className="text-sm font-medium">Student ID *</Label>
                     <Input
@@ -390,58 +358,30 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                       </p>
                     )}
                   </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium"> Name *</Label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="department" className="text-sm font-medium">Department *</Label>
                     <Input
-                      id="name"
+                      id="department"
                       type="text"
-                      placeholder="Enter your Name"
-                      value={name}
-                      onChange={handleNameChange}
-                      className={`pl-10 h-12 border-gray-200 ${errors.name ? 'border-red-500' : ''}`}
+                      placeholder="e.g., Computer Science"
+                      value={department}
+                      onChange={(e) => {
+                        setDepartment(e.target.value);
+                        if (errors.department) setErrors({ ...errors, department: undefined });
+                      }}
+                      className={`h-12 border-gray-200 ${errors.department ? 'border-red-500' : ''}`}
                       disabled={isLoading}
                     />
-                    {errors.name && (
+                    {errors.department && (
                       <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
-                        {errors.name}
+                        {errors.department}
                       </p>
                     )}
                   </div>
-                </div>
-              )}
-
-              {/* Section — students only */}
-              {role === 'student' && (
-                <div className="space-y-2">
-                  <Label htmlFor="section" className="text-sm font-medium">Section *</Label>
-                  <select
-                    id="section"
-                    value={section}
-                    onChange={(e) => {
-                      setSection(e.target.value);
-                      if (errors.section) setErrors({ ...errors, section: undefined });
-                    }}
-                    className={`w-full h-12 rounded-md border bg-white px-3 text-sm border-gray-200 ${errors.section ? 'border-red-500' : ''}`}
-                    disabled={isLoading}
-                  >
-                    <option value="" disabled>Select your section</option>
-                    {SECTIONS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  {errors.section && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.section}
-                    </p>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Email */}
               <div className="space-y-2">
@@ -483,9 +423,6 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                       setPassword(e.target.value);
                       if (errors.password) setErrors({ ...errors, password: undefined });
                     }}
-                    onCopy={blockClipboard}
-                    onPaste={blockClipboard}
-                    onCut={blockClipboard}
                     className={`pl-10 pr-10 h-12 border-gray-200 ${errors.password ? 'border-red-500' : ''}`}
                     disabled={isLoading}
                   />
@@ -541,9 +478,6 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                       setConfirmPassword(e.target.value);
                       if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
                     }}
-                    onCopy={blockClipboard}
-                    onPaste={blockClipboard}
-                    onCut={blockClipboard}
                     className={`pl-10 pr-10 h-12 border-gray-200 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                     disabled={isLoading}
                   />
@@ -584,11 +518,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                 </button>
 
                 {showTerms && (
-                  <div
-                    ref={termsScrollRef}
-                    onScroll={handleTermsScroll}
-                    className="mt-3 space-y-3 text-sm text-gray-700 max-h-64 overflow-y-auto pr-2"
-                  >
+                  <div className="mt-3 space-y-3 text-sm text-gray-700 max-h-64 overflow-y-auto pr-2">
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">1. Acceptance of Terms</h4>
                       <p>By registering for CodeLearn AI, you agree to comply with these terms and conditions. This platform is designed for educational purposes in CCS108 - Object-Oriented Programming with Java.</p>
@@ -640,7 +570,6 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                   <Checkbox
                     id="terms"
                     checked={agreedToTerms}
-                    disabled={!hasScrolledTerms}
                     onCheckedChange={(checked) => {
                       setAgreedToTerms(checked as boolean);
                       if (checked) setErrors({ ...errors, terms: undefined });
@@ -648,19 +577,11 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                   />
                   <label
                     htmlFor="terms"
-                    className={`text-sm leading-tight ${hasScrolledTerms ? 'text-gray-700 cursor-pointer' : 'text-gray-400 cursor-not-allowed'}`}
+                    className="text-sm text-gray-700 cursor-pointer leading-tight"
                   >
                     I have read and agree to the Terms and Conditions *
                   </label>
                 </div>
-                {!hasScrolledTerms && (
-                  <p className="text-gray-500 text-xs mt-2 flex items-center gap-1">
-                    <FileText className="w-3 h-3" />
-                    {showTerms
-                      ? 'Scroll to the end of the Terms and Conditions to enable the checkbox.'
-                      : 'Open and read through the Terms and Conditions to enable the checkbox.'}
-                  </p>
-                )}
                 {errors.terms && (
                   <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />

@@ -2,29 +2,11 @@ import { publicAnonKey } from '/utils/supabase/info';
 
 // Make platform's own project ID — hardcoded because it never changes regardless of which
 // Supabase project the user links. The make-server-c61d3fdc function lives here.
-//
-// FIXED: this was previously pointing at project ref "hnlhcbzpeijdzueipejx", which only has
-// a function named "make-server-aaa3a86f" deployed — not "make-server-c61d3fdc". The correct
-// project (confirmed via the Supabase dashboard) is "hovedryqutuucipuqxca", which has BOTH
-// "make-server-c61d3fdc" (45 deployments, updated 8 days ago) and "server" deployed.
-const MAKE_PROJECT_ID = 'hovedryqutuucipuqxca';
+const MAKE_PROJECT_ID = 'hnlhcbzpeijdzueipejx';
 const MAKE_API_URL = `https://${MAKE_PROJECT_ID}.supabase.co/functions/v1/make-server-c61d3fdc`;
-
-// Secondary: User's own deployed function — same project as above.
-//
-// FIXED: this was previously "hoofdryqutuucipuqxca" (note "hoof" vs the correct "hoved") —
-// a one-character-block typo that pointed at a domain that doesn't resolve, producing
-// ERR_NAME_NOT_RESOLVED / ERR_TUNNEL_CONNECTION_FAILED regardless of anything else being
-// configured correctly.
-const USER_API_URL = `https://hovedryqutuucipuqxca.supabase.co/functions/v1/server`;
-
-// IMPORTANT: this anon key MUST belong to the "hovedryqutuucipuqxca" project specifically —
-// anon keys are JWTs signed per-project, so a key from any other project (including the old
-// "hoofdryqutuucipuqxca" typo'd one this constant previously held) will be rejected even
-// once the URL above is correct. Get the right value from:
-//   Supabase Dashboard → (hovedryqutuucipuqxca project) → Settings → API → "anon" "public" key
-// and paste it in below, replacing the placeholder.
-const USER_ANON_KEY = 'REPLACE_WITH_THE_ANON_KEY_FROM_THE_HOVEDRYQUTUUCIPUQXCA_PROJECT_SETTINGS_API_PAGE';
+// Secondary: User's own deployed function on hoofdryqutuucipuqxca (after GitHub Action deploys it)
+const USER_API_URL = `https://hoofdryqutuucipuqxca.supabase.co/functions/v1/server`;
+const USER_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmVkcnlxdXR1dWNpcHVxeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjI2MTIsImV4cCI6MjA5NTQzODYxMn0.KCiq9UdAV83MdMlWEiMWoP-JsxsRnJW4M2z_XJNJnW0';
 
 // Helper to get auth token
 function getAuthToken(): string {
@@ -483,7 +465,7 @@ export async function saveUserPosition(data: {
   } catch {}
   // Fire-and-forget backend sync — swallow any errors silently
   try {
-    const url = `${MAKE_API_URL}/user-position`;
+    const url = `${API_BASE_URL}/user-position`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
@@ -509,7 +491,7 @@ export async function getUserPosition(userId: string): Promise<{ data: { moduleI
   } catch {}
   // Attempt backend as fallback — silently fail
   try {
-    const url = `${MAKE_API_URL}/user-position/${userId}`;
+    const url = `${API_BASE_URL}/user-position/${userId}`;
     const response = await fetch(url, {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
     });

@@ -68,22 +68,6 @@ export const saveProgress = (progress: StudentProgress): void => {
   const key = `progress_${progress.userId}_${progress.moduleId}_${progress.lessonId}`;
   localStorage.setItem(key, JSON.stringify(progress));
   updateUserStats(progress.userId);
-
-  // Best-effort push to backend so this record is visible from any device,
-  // not just the browser that saved it. Fire-and-forget: never blocks or
-  // throws on the caller, and silently no-ops if the backend is unreachable.
-  import('../services/backendApi')
-    .then(({ saveProgress: pushProgress }) =>
-      pushProgress({
-        userId: progress.userId,
-        moduleId: progress.moduleId,
-        lessonId: progress.lessonId,
-        completed: progress.completed,
-        timeSpent: progress.timeSpent,
-        score: progress.score,
-      }).catch(() => {})
-    )
-    .catch(() => {});
 };
 
 export const getProgress = (userId: string, moduleId: string, lessonId: string): StudentProgress | null => {
@@ -206,23 +190,6 @@ export const saveSubmission = (submission: CodeSubmission): void => {
   const submissions = getAllSubmissions(submission.userId);
   submissions.push(submission);
   localStorage.setItem(`submissions_${submission.userId}`, JSON.stringify(submissions));
-
-  // Best-effort push to backend via the existing /feedback/save endpoint,
-  // which already accepts code/feedback/score keyed by user+module+lesson.
-  // Fire-and-forget: never blocks or throws on the caller.
-  import('../services/backendApi')
-    .then(({ saveFeedback }) =>
-      saveFeedback({
-        userId: submission.userId,
-        moduleId: submission.moduleId,
-        lessonId: submission.lessonId,
-        code: submission.code,
-        feedback: submission.feedback,
-        analysisResults: { errors: submission.errors, passed: submission.passed },
-        score: submission.score,
-      }).catch(() => {})
-    )
-    .catch(() => {});
 };
 
 export const getAllSubmissions = (userId: string): CodeSubmission[] => {
