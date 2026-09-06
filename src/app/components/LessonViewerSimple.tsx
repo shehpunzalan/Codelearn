@@ -321,7 +321,11 @@ export function LessonViewer({
           lessonContent={activeLesson.content}
           onStartCoding={onStartCoding}
           onComplete={() => {
-            toast.success('Lesson reviewed! Take the quiz above to mark it as complete.');
+            if (quizQuestions && quizQuestions.length > 0) {
+              setScreen('quiz');
+            } else {
+              toast.info('No quiz available for this lesson.');
+            }
           }}
           onOpenVideoTutorial={onOpenVideoTutorial}
           onOpenReadingContent={onOpenReadingContent}
