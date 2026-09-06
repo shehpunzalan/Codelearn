@@ -114,7 +114,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     // Name validation
     const trimmedNameForValidation = name.trim();
     if (!trimmedNameForValidation) {
-      newErrors.name = 'Full name is required';
+      newErrors.name = 'Name is required';
     } else if (trimmedNameForValidation.length < 3) {
       newErrors.name = 'Name must be at least 3 characters';
     } else if (!NAME_ALPHA_REGEX.test(trimmedNameForValidation)) {
