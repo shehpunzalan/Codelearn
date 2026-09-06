@@ -77,18 +77,10 @@ export function ReadingContentPage({
       icon: Code,
       color: 'bg-green-500'
     },
-    { 
-      id: 5, 
-      title: 'Knowledge Check', 
-      duration: '4 min', 
-      type: 'quiz' as const,
-      icon: CheckCircle,
-      color: 'bg-orange-500'
-    },
-    { 
-      id: 6, 
-      title: 'Summary & Next Steps', 
-      duration: '2 min', 
+    {
+      id: 5,
+      title: 'Summary & Next Steps',
+      duration: '2 min',
       type: 'summary' as const,
       icon: Trophy,
       color: 'bg-purple-500'
@@ -497,33 +489,7 @@ export function ReadingContentPage({
           </div>
         );
 
-      case 5: // Knowledge Check
-        return (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg border-2 border-gray-200 p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <CheckCircle className="w-6 h-6 text-orange-600" />
-                Knowledge Check
-              </h3>
-              
-              <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-xl border-2 border-orange-200">
-                <p className="text-gray-700 mb-4">
-                  Test your understanding of the concepts covered in this lesson. Complete the interactive quiz to assess your knowledge.
-                </p>
-                
-                <div className="flex items-center gap-3 p-4 bg-white rounded-lg border-2 border-orange-300">
-                  <CheckCircle className="w-8 h-8 text-orange-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">Interactive Quiz Available</h4>
-                    <p className="text-sm text-gray-600">Return to the main lesson page to take the quiz</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 6: // Summary & Next Steps
+      case 5: // Summary & Next Steps
         return (
           <div className="space-y-4">
             <div className="bg-white rounded-lg border-2 border-gray-200 p-6">

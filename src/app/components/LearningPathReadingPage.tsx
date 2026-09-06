@@ -74,17 +74,10 @@ export function LearningPathReadingPage({
       badge: 'practice',
       badgeColor: 'bg-blue-600'
     },
-    { 
-      id: 5, 
-      title: 'Knowledge Check', 
-      duration: '4 min', 
-      badge: 'quiz',
-      badgeColor: 'bg-yellow-500'
-    },
-    { 
-      id: 6, 
-      title: 'Summary & Next Steps', 
-      duration: '2 min', 
+    {
+      id: 5,
+      title: 'Summary & Next Steps',
+      duration: '2 min',
       badge: 'summary',
       badgeColor: 'bg-gray-600'
     }
@@ -100,7 +93,7 @@ export function LearningPathReadingPage({
 
   // Continue to next section
   const handleContinue = () => {
-    if (activeSection < 6) {
+    if (activeSection < 5) {
       const newCompleted = new Set(completedSections);
       newCompleted.add(activeSection);
       setCompletedSections(newCompleted);
@@ -259,7 +252,7 @@ export function LearningPathReadingPage({
                       Introduction & Objectives
                     </CardTitle>
                     <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                      Section 1 of 6
+                      Section 1 of 5
                     </span>
                   </div>
                 </CardHeader>
@@ -337,7 +330,7 @@ export function LearningPathReadingPage({
                       Core Concepts Explained
                     </CardTitle>
                     <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                      Section 2 of 6
+                      Section 2 of 5
                     </span>
                   </div>
                 </CardHeader>
@@ -405,7 +398,7 @@ export function LearningPathReadingPage({
                       Real-World Examples
                     </CardTitle>
                     <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                      Section 3 of 6
+                      Section 3 of 5
                     </span>
                   </div>
                 </CardHeader>
@@ -474,7 +467,7 @@ export function LearningPathReadingPage({
                       Hands-On Practice
                     </CardTitle>
                     <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                      Section 4 of 6
+                      Section 4 of 5
                     </span>
                   </div>
                 </CardHeader>
@@ -536,118 +529,8 @@ export function LearningPathReadingPage({
               </Card>
             )}
 
-            {/* Section 5: Knowledge Check */}
+            {/* Section 5: Summary & Next Steps */}
             {activeSection === 5 && (
-              <Card className="border border-blue-200 shadow-sm bg-white">
-                <CardHeader className="border-b border-gray-100 pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-base font-bold text-gray-900">
-                      <AlertCircle className="w-5 h-5 text-yellow-600" />
-                      Knowledge Check
-                    </CardTitle>
-                    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                      Section 5 of 6
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  {quiz ? (
-                    <div className="bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50 border-2 border-yellow-400 rounded-xl p-6 space-y-4">
-                      <div className="flex items-start gap-4">
-                        <div className="bg-orange-500 p-3 rounded-lg">
-                          <Trophy className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">Quiz in Game Form</h3>
-                          <p className="text-sm text-gray-700 mb-4">
-                            Test your knowledge with {quiz.questions.length} interactive questions! Earn XP, build streaks, and master {lessonTitle}.
-                          </p>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            <Badge className="bg-white text-red-600 border border-red-300">
-                              {quiz.questions.length} Questions
-                            </Badge>
-                            <Badge className="bg-white text-green-600 border border-green-300">
-                              {quiz.passingScore}% to Pass
-                            </Badge>
-                            <Badge className="bg-white text-blue-600 border border-blue-300">
-                              Earn XP & Streaks
-                            </Badge>
-                          </div>
-                          <Button
-                            onClick={() => setShowQuizModal(true)}
-                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-6 text-lg shadow-lg"
-                          >
-                            <Trophy className="w-5 h-5 mr-2" />
-                            Start Quiz Game
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 pt-4 border-t border-orange-200">
-                        <div className="text-center">
-                          <Trophy className="w-5 h-5 text-orange-600 mx-auto mb-1" />
-                          <div className="text-xs text-gray-600">XP Earned</div>
-                          <div className="font-bold text-gray-900">0</div>
-                        </div>
-                        <div className="text-center">
-                          <Target className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-                          <div className="text-xs text-gray-600">Completed</div>
-                          <div className="font-bold text-gray-900">0/{quiz.questions.length}</div>
-                        </div>
-                        <div className="text-center">
-                          <Trophy className="w-5 h-5 text-purple-600 mx-auto mb-1" />
-                          <div className="text-xs text-gray-600">Progress</div>
-                          <div className="font-bold text-gray-900">Level 1</div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
-                      <p className="text-sm text-gray-700 mb-3">
-                        Test your understanding with a quiz! Quiz not yet available for this lesson.
-                      </p>
-                      <Button
-                        size="sm"
-                        className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
-                        onClick={() => {
-                          toast.info('Quiz not available for this lesson yet');
-                        }}
-                      >
-                        Coming Soon
-                      </Button>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setHighlightEnabled(!highlightEnabled);
-                        toast.success(highlightEnabled ? 'Highlighting disabled' : 'Key terms highlighted');
-                      }}
-                      className="flex items-center gap-2 text-gray-700"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Highlight Key Terms
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        toast.success('PDF download coming soon!');
-                      }}
-                      className="flex items-center gap-2 text-gray-700"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download PDF
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Section 6: Summary & Next Steps */}
-            {activeSection === 6 && (
               <Card className="border border-blue-200 shadow-sm bg-white">
                 <CardHeader className="border-b border-gray-100 pb-3">
                   <div className="flex items-center justify-between">
@@ -656,7 +539,7 @@ export function LearningPathReadingPage({
                       Summary & Next Steps
                     </CardTitle>
                     <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                      Section 6 of 6
+                      Section 5 of 5
                     </span>
                   </div>
                 </CardHeader>
@@ -733,7 +616,7 @@ export function LearningPathReadingPage({
               onClick={handleContinue}
               className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white"
             >
-              {activeSection === 6 ? 'Complete Lesson' : 'Continue'}
+              {activeSection === 5 ? 'Complete Lesson' : 'Continue'}
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

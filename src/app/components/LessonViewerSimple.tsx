@@ -329,18 +329,6 @@ export function LessonViewer({
           onOpenInteractiveGame={onOpenInteractiveGame}
         />
 
-        {/* Bottom quiz button */}
-        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '2px solid var(--color-neutral-200)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-sans)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-            Done reviewing? Take the quiz to complete this lesson.
-          </p>
-          <button
-            onClick={startQuiz}
-            style={{ backgroundColor: 'var(--color-primary-600)', color: '#fff', fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: '1rem', padding: '0.85rem 2rem', borderRadius: 'var(--radius-xl)', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}
-          >
-            <ClipboardList size={18} /> Start Knowledge Check Quiz
-          </button>
-        </div>
       </div>
     );
   }

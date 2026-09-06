@@ -334,6 +334,18 @@ function AppContent() {
     );
   }, [user?.id]);
 
+  // Auto-logout when the user switches to another browser tab or minimizes the window.
+  useEffect(() => {
+    if (!user) return;
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        handleLogout();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [user]);
+
   const handleLogin = async (loggedInUser: User) => {
     clearProgressDataForNewUser(loggedInUser.id);
     setUser(loggedInUser);

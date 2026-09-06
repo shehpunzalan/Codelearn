@@ -491,35 +491,80 @@ export function ProgressView({ onBack }: ProgressViewProps) {
           </CardContent>
         </Card>
 
-        {/* Achievements */}
+        {/* Certificates */}
         <Card className="border-0 shadow-md">
           <CardContent className="p-6">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-              <Trophy style={{ width: 20, height: 20, color: '#ca8a04' }} />
-              <h3 style={{ margin: 0, color: 'var(--foreground)' }} className="text-base font-bold">
-                Achievements
+              <Award style={{ width: 20, height: 20, color: 'var(--primary)' }} />
+              <h3 style={{ margin: 0, color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }} className="text-base font-bold">
+                Certificates
               </h3>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {achievements.map(a => (
                 <div
                   key={a.id}
                   style={{
-                    padding: '0.75rem',
-                    borderRadius: 'var(--radius-md, 8px)',
-                    border: `1px solid ${a.unlocked ? 'var(--success)' : 'var(--border)'}`,
-                    background: a.unlocked ? 'color-mix(in srgb, var(--success) 8%, var(--card))' : 'var(--muted)',
-                    opacity: a.unlocked ? 1 : 0.6,
+                    position: 'relative',
+                    borderRadius: 'var(--radius-lg, 12px)',
+                    border: `2px solid ${a.unlocked ? 'var(--primary)' : 'var(--border)'}`,
+                    background: a.unlocked
+                      ? 'linear-gradient(135deg, color-mix(in srgb, var(--primary) 6%, var(--card)), color-mix(in srgb, var(--secondary) 6%, var(--card)))'
+                      : 'var(--muted)',
+                    opacity: a.unlocked ? 1 : 0.5,
+                    overflow: 'hidden',
                   }}
                 >
-                  <div style={{ fontSize: '1.4rem', marginBottom: 4 }}>{a.icon}</div>
-                  <p style={{ margin: '0 0 2px', fontWeight: 600, color: 'var(--foreground)', fontSize: '0.78rem' }}>{a.title}</p>
-                  <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.7rem' }}>{a.description}</p>
-                  {a.unlocked && (
-                    <Badge className="mt-1 text-xs" style={{ background: 'var(--success)', color: 'var(--success-foreground)', border: 'none' }}>
-                      ✓ Unlocked
-                    </Badge>
-                  )}
+                  {/* Decorative ribbon stripe */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: 6,
+                    height: '100%',
+                    background: a.unlocked
+                      ? 'linear-gradient(180deg, var(--primary), var(--secondary))'
+                      : 'var(--border)',
+                  }} />
+                  <div style={{ padding: '0.875rem 1rem 0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                    {/* Seal */}
+                    <div style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: a.unlocked
+                        ? 'linear-gradient(135deg, var(--primary), var(--secondary))'
+                        : 'var(--muted-foreground)',
+                      boxShadow: a.unlocked ? '0 2px 8px color-mix(in srgb, var(--primary) 30%, transparent)' : 'none',
+                    }}>
+                      <Award style={{ width: 22, height: 22, color: '#fff' }} />
+                    </div>
+                    {/* Text */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: '0 0 2px', fontWeight: 700, color: 'var(--foreground)', fontSize: '0.82rem', fontFamily: 'var(--font-sans)', letterSpacing: '0.01em' }}>
+                        {a.title}
+                      </p>
+                      <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.72rem', fontFamily: 'var(--font-sans)' }}>
+                        {a.description}
+                      </p>
+                    </div>
+                    {/* Status */}
+                    {a.unlocked ? (
+                      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <CheckCircle style={{ width: 18, height: 18, color: 'var(--success)' }} />
+                        <span style={{ fontSize: '0.65rem', color: 'var(--success)', fontWeight: 600, fontFamily: 'var(--font-sans)', whiteSpace: 'nowrap' }}>Earned</span>
+                      </div>
+                    ) : (
+                      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px dashed var(--border)' }} />
+                        <span style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)', whiteSpace: 'nowrap' }}>Locked</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
