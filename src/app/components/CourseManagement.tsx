@@ -183,7 +183,7 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="activity-due">Due Date *</Label>
-                    <Input id="activity-due" type="date" />
+                    <Input id="activity-due" type="date" min={new Date().toISOString().split('T')[0]} defaultValue={new Date().toISOString().split('T')[0]} />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -271,6 +271,16 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                 <div className="space-y-2">
                   <Label htmlFor="module-topics">Key Topics (comma-separated)</Label>
                   <Input id="module-topics" placeholder="e.g., Abstract Classes, Interfaces, Method Overriding" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="module-start-date">Availability Start *</Label>
+                    <Input id="module-start-date" type="date" min={new Date().toISOString().split('T')[0]} defaultValue={new Date().toISOString().split('T')[0]} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="module-deadline">Completion Deadline *</Label>
+                    <Input id="module-deadline" type="date" min={new Date().toISOString().split('T')[0]} />
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setShowCreateModule(false)}>
@@ -447,6 +457,16 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                         <Label htmlFor="module-topics">Key Topics (comma-separated)</Label>
                         <Input id="module-topics" placeholder="e.g., Abstract Classes, Interfaces, Method Overriding" />
                       </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="module-start-date">Availability Start *</Label>
+                          <Input id="module-start-date" type="date" min={new Date().toISOString().split('T')[0]} defaultValue={new Date().toISOString().split('T')[0]} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="module-deadline">Completion Deadline *</Label>
+                          <Input id="module-deadline" type="date" min={new Date().toISOString().split('T')[0]} />
+                        </div>
+                      </div>
                       <div className="flex justify-end gap-2 pt-4">
                         <Button variant="outline" onClick={() => setShowCreateModule(false)}>
                           Cancel
@@ -536,7 +556,7 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="activity-due">Due Date *</Label>
-                          <Input id="activity-due" type="date" />
+                          <Input id="activity-due" type="date" min={new Date().toISOString().split('T')[0]} defaultValue={new Date().toISOString().split('T')[0]} />
                         </div>
                       </div>
                       <div className="space-y-2">

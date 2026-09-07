@@ -8,7 +8,7 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import {
   Users, BookOpen, TrendingUp, Brain, Activity,
-  AlertCircle, MessageSquare, Award, Download, Bell, Search
+  AlertCircle, MessageSquare, Award, Download, Bell, Search, Trophy
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createModuleNotification, createActivityNotification, createAnnouncementNotification } from '../utils/notifications';
@@ -37,6 +37,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
   const [interventionDialogOpen, setInterventionDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null);
   const [interventionMessage, setInterventionMessage] = useState('');
+  const [interventionActivity, setInterventionActivity] = useState('');
   const [showAllStudents, setShowAllStudents] = useState(false);
   const [viewingStudentId, setViewingStudentId] = useState<string | null>(null);
   const [viewingStudentName, setViewingStudentName] = useState<string>('');
@@ -150,7 +151,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
 
       const sorted = [...summaries].sort((a, b) => b.avgScore - a.avgScore);
       setTopStudents(sorted.filter(s => s.avgScore >= 70).slice(0, 3));
-      setNeedsAttention(sorted.filter(s => s.avgScore > 0 && s.avgScore < 60).slice(0, 3));
+      setNeedsAttention(sorted.filter(s => s.avgScore < 60).slice(0, 5));
     } catch (err) {
       console.error('InstructorDashboard load error:', err);
     }
@@ -205,7 +206,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
         ? Math.max(...submissions.map((sub: any) => new Date(sub.timestamp || 0).getTime()))
         : 0;
       const lastActivityMs = Math.max(lastProgressMs, lastSubmissionMs);
-      const lastActive = lastActivityMs > 0 ? new Date(lastActivityMs).toLocaleDateString() : 'Never';
+      const lastActive = lastActivityMs > 0 ? new Date(lastActivityMs).toLocaleDateString() : '';
 
       const weakTopics: string[] = [];
       modules.forEach(m => {
@@ -265,18 +266,17 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
 
   const handleSendIntervention = (student: StudentSummary) => {
     setSelectedStudent(student);
-    const issueText = student.issues.length > 0 ? student.issues.join(' and ') : 'certain OOP concepts';
-    setInterventionMessage(
-      `Dear ${student.name},\n\nI noticed you've been struggling with ${issueText}. I'd like to offer some additional support.\n\nWould you be available for a one-on-one session this week? We can work through these concepts together.\n\nBest regards,\n${user.name}`
-    );
+    setInterventionMessage('');
+    setInterventionActivity('');
     setInterventionDialogOpen(true);
   };
 
   const confirmSendIntervention = () => {
-    if (!interventionMessage.trim()) { toast.error('Please enter a message'); return; }
-    toast.success(`Intervention message sent to ${selectedStudent?.name}!`);
+    if (!interventionMessage.trim()) { toast.error('Please enter your instructions for the student'); return; }
+    toast.success(`Intervention sent to ${selectedStudent?.name}!`);
     setInterventionDialogOpen(false);
     setInterventionMessage('');
+    setInterventionActivity('');
     setSelectedStudent(null);
   };
 
@@ -522,6 +522,80 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
           </CardContent>
         </Card>
 
+        {/* Class Leaderboard — Top 10 */}
+        <Card className="border-0 shadow-md" style={{ gridColumn: '1 / -1' }}>
+          <CardHeader>
+            <CardTitle style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}>
+              <Trophy style={{ width: 20, height: 20, color: '#ca8a04' }} />
+              Class Leaderboard — Top 10
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              let users: any[] = [];
+              try { users = JSON.parse(localStorage.getItem('registeredUsers') || '[]'); } catch {}
+              const students = users.filter((u: any) => u.role !== 'instructor' && u.id !== 'demo-instructor');
+              const ranked = students.map((u: any) => {
+                let points = 0;
+                let lessons = 0;
+                modules.forEach(m => {
+                  try {
+                    const raw = localStorage.getItem(`moduleProgress_${u.id}_${m.id}`) || localStorage.getItem(`moduleProgress_${m.id}`);
+                    if (raw) {
+                      const { completedLessons, progress } = JSON.parse(raw);
+                      lessons += completedLessons || 0;
+                      points += (completedLessons || 0) * 10 + (progress === 100 ? 50 : 0);
+                    }
+                  } catch {}
+                });
+                try {
+                  const s = JSON.parse(localStorage.getItem(`stats_${u.id}`) || '{}');
+                  points += (s.totalLessonsCompleted || 0) * 10;
+                } catch {}
+                return { name: u.name || u.email || 'Student', email: u.email || '', points, lessonsCompleted: lessons };
+              }).sort((a: any, b: any) => b.points - a.points || b.lessonsCompleted - a.lessonsCompleted).slice(0, 10);
+
+              if (ranked.length === 0) {
+                return <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', fontFamily: 'var(--font-sans)' }}>No student data yet. Students will appear here once they complete lessons.</p>;
+              }
+
+              return (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-sans)', fontSize: '0.875rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid var(--border)', background: 'var(--accent)' }}>
+                        <th style={{ padding: '0.625rem 1rem', textAlign: 'left', color: 'var(--muted-foreground)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rank</th>
+                        <th style={{ padding: '0.625rem 1rem', textAlign: 'left', color: 'var(--muted-foreground)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Student</th>
+                        <th style={{ padding: '0.625rem 1rem', textAlign: 'left', color: 'var(--muted-foreground)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lessons Done</th>
+                        <th style={{ padding: '0.625rem 1rem', textAlign: 'right', color: 'var(--muted-foreground)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>XP Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ranked.map((entry: any, idx: number) => {
+                        const isGold = idx === 0;
+                        const isSilver = idx === 1;
+                        const isBronze = idx === 2;
+                        const medal = isGold ? '🥇' : isSilver ? '🥈' : isBronze ? '🥉' : null;
+                        const rowBg = isGold ? 'linear-gradient(90deg,#fef9c3,var(--card))' : isSilver ? 'linear-gradient(90deg,#f1f5f9,var(--card))' : isBronze ? 'linear-gradient(90deg,#fdf4e7,var(--card))' : 'var(--card)';
+                        return (
+                          <tr key={entry.email} style={{ borderBottom: '1px solid var(--border)', background: rowBg }}>
+                            <td style={{ padding: '0.625rem 1rem', fontWeight: 700, fontSize: medal ? '1.1rem' : '0.875rem', color: isGold ? '#ca8a04' : isSilver ? '#94a3b8' : isBronze ? '#c27631' : 'var(--muted-foreground)' }}>
+                              {medal || `#${idx + 1}`}
+                            </td>
+                            <td style={{ padding: '0.625rem 1rem', color: 'var(--foreground)', fontWeight: (isGold || isSilver || isBronze) ? 700 : 400 }}>{entry.name}</td>
+                            <td style={{ padding: '0.625rem 1rem', color: 'var(--muted-foreground)' }}>{entry.lessonsCompleted}</td>
+                            <td style={{ padding: '0.625rem 1rem', textAlign: 'right', fontWeight: 700, color: isGold ? '#ca8a04' : isSilver ? '#94a3b8' : isBronze ? '#c27631' : 'var(--primary)' }}>{entry.points} pts</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <Card className="border-0 shadow-md" style={{ background: 'linear-gradient(135deg, var(--accent), #dbeafe)' }}>
           <CardHeader>
@@ -563,60 +637,100 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
 
       {/* Intervention Dialog */}
       <Dialog open={interventionDialogOpen} onOpenChange={setInterventionDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
           <DialogHeader>
-            <DialogTitle style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--foreground)' }}>
-              <MessageSquare style={{ width: 20, height: 20, color: 'var(--destructive)' }} />
-              Send Intervention Message
+            <DialogTitle style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}>
+              <MessageSquare style={{ width: 20, height: 20, color: 'var(--primary)' }} />
+              Send Intervention
             </DialogTitle>
-            <DialogDescription style={{ color: 'var(--muted-foreground)' }}>
-              Send a personalized support message to {selectedStudent?.name}
+            <DialogDescription style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>
+              Review the student's quiz result, then provide your instructions and remedial activity.
             </DialogDescription>
           </DialogHeader>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* READ-ONLY: Student submission result */}
             {selectedStudent && (
-              <div style={{ padding: '1rem', background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 'var(--radius-md, 8px)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <h4 style={{ margin: 0, color: 'var(--foreground)', fontWeight: 600 }}>{selectedStudent.name}</h4>
-                  <Badge className="bg-red-100 text-red-800 border-0">{selectedStudent.avgScore}% Average</Badge>
+              <div style={{ borderRadius: 'var(--radius-md, 8px)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                <div style={{ padding: '0.625rem 1rem', background: 'var(--muted)', borderBottom: '1px solid var(--border)' }}>
+                  <p style={{ margin: 0, fontWeight: 600, fontSize: '0.8rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Student Submission Result (Read-Only)
+                  </p>
                 </div>
-                {selectedStudent.issues.length > 0 && (
-                  <div>
-                    <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', margin: '0 0 4px' }}>Struggling with:</p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                      {selectedStudent.issues.map((issue, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">{issue}</Badge>
-                      ))}
+                <div style={{ padding: '1rem', background: 'var(--card)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 700, color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}>{selectedStudent.name}</p>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>Last active: {selectedStudent.lastActive || '—'}</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: 'var(--destructive)', fontFamily: 'var(--font-sans)' }}>{selectedStudent.avgScore}%</p>
+                      <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>Quiz Average</p>
                     </div>
                   </div>
-                )}
+                  {selectedStudent.issues.length > 0 && (
+                    <div>
+                      <p style={{ margin: '0 0 6px', fontSize: '0.8rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>Areas struggling with:</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {selectedStudent.issues.map((issue, idx) => (
+                          <Badge key={idx} variant="outline" style={{ fontSize: '0.72rem', fontFamily: 'var(--font-sans)' }}>{issue}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ padding: '0.5rem 0.75rem', background: 'color-mix(in srgb, var(--destructive) 8%, var(--card))', borderRadius: 'var(--radius-sm, 4px)', border: '1px solid color-mix(in srgb, var(--destructive) 20%, transparent)' }}>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>
+                      Status: <span style={{ color: 'var(--destructive)', fontWeight: 600 }}>Failed — score below passing threshold (70%)</span>
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
+
+            {/* INSTRUCTOR INPUT: Instructions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Label htmlFor="intervention-message" style={{ color: 'var(--foreground)' }}>Intervention Message</Label>
+              <Label htmlFor="intervention-message" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
+                Instructor Instructions *
+              </Label>
               <Textarea
                 id="intervention-message"
                 value={interventionMessage}
                 onChange={(e) => setInterventionMessage(e.target.value)}
-                rows={10}
-                placeholder="Enter your message to the student..."
+                rows={5}
+                placeholder="Provide specific guidance on what concepts to review and how to improve..."
                 className="resize-none"
+                style={{ fontFamily: 'var(--font-sans)' }}
               />
-              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', margin: 0 }}>
-                💡 Tip: Be encouraging and specific about the support you're offering
+            </div>
+
+            {/* INSTRUCTOR INPUT: Remedial Activity */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <Label htmlFor="intervention-activity" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
+                Remedial Activity
+              </Label>
+              <Textarea
+                id="intervention-activity"
+                value={interventionActivity}
+                onChange={(e) => setInterventionActivity(e.target.value)}
+                rows={4}
+                placeholder="Describe the activity the student must complete to gain a passing grade before moving to the next lesson..."
+                className="resize-none"
+                style={{ fontFamily: 'var(--font-sans)' }}
+              />
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>
+                Completing this activity will allow the student to retake the quiz and advance to the next lesson.
               </p>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setInterventionDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setInterventionDialogOpen(false)} style={{ fontFamily: 'var(--font-sans)' }}>Cancel</Button>
             <Button
               onClick={confirmSendIntervention}
-              style={{ background: 'var(--destructive)', color: 'var(--destructive-foreground)' }}
+              style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', fontFamily: 'var(--font-sans)' }}
             >
               <MessageSquare className="w-4 h-4 mr-2" />
-              Send Intervention Message
+              Send Intervention
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -419,7 +419,7 @@ export function LessonViewer({
       >
         {module.lessons.map((lesson, index) => {
           const isCompleted = completedLessons.has(lesson.id) || lesson.completed;
-          const isLocked = lesson.locked;
+          const isLocked = index > 0 && !completedLessons.has(module.lessons[index - 1].id) && !module.lessons[index - 1].completed;
           const isActive = activeLessonId === lesson.id;
 
           return (

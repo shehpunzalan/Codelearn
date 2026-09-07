@@ -474,12 +474,6 @@ export function ReadingContentPage({
                           <HighlightedText text={challenge.description} enabled={highlightEnabled} />
                         </p>
                         
-                        {challenge.hint && (
-                          <div className="bg-white p-4 rounded-lg border border-green-300 mt-4">
-                            <p className="text-sm font-semibold text-green-800 mb-2">💡 Hint:</p>
-                            <p className="text-sm text-gray-700">{challenge.hint}</p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

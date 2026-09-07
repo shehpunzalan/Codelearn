@@ -55,6 +55,7 @@ function getRelativeTime(ts: number): string {
 
 export function MonitoringView({ onBack }: MonitoringViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterLevel, setFilterLevel] = useState<'ALL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NEW'>('ALL');
   const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
   const [adjustmentType, setAdjustmentType] = useState('');
@@ -225,10 +226,12 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
     setRecentActivities(activities.slice(0, 10));
   }, []);
 
-  const filtered = students.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = students.filter(s => {
+    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLevel = filterLevel === 'ALL' || s.level === filterLevel;
+    return matchesSearch && matchesLevel;
+  });
 
   const highStudents = filtered.filter(s => s.level === 'HIGH');
   const mediumStudents = filtered.filter(s => s.level === 'MEDIUM');
@@ -275,9 +278,23 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
             <h1 style={{ color: 'var(--foreground)' }} className="mt-2">Monitoring and Evaluation</h1>
             <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem' }}>Real-time student activity tracking and performance analysis</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
-            <Button variant="outline"><Settings className="w-4 h-4 mr-2" />Configure Alerts</Button>
+          <div className="flex gap-2 flex-wrap">
+            <select
+              value={filterLevel}
+              onChange={e => setFilterLevel(e.target.value as typeof filterLevel)}
+              style={{ padding: '0.4rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md, 8px)', background: 'var(--card)', color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.875rem', cursor: 'pointer' }}
+            >
+              <option value="ALL">All Levels</option>
+              <option value="HIGH">High Performance</option>
+              <option value="MEDIUM">Moderate Performance</option>
+              <option value="LOW">Low Performance</option>
+              <option value="NEW">New Students</option>
+            </select>
+            {filterLevel !== 'ALL' && (
+              <Button variant="outline" size="sm" onClick={() => setFilterLevel('ALL')} style={{ fontFamily: 'var(--font-sans)' }}>
+                Clear Filter
+              </Button>
+            )}
           </div>
         </div>
       </div>

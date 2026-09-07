@@ -43,27 +43,7 @@ export function SettingsPage({ user, onSave, onNavigate }: SettingsPageProps) {
   // Generate user initials from name for avatar display
   const initials = name.split(' ').map(namePart => namePart[0]).join('').toUpperCase();
 
-  const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'es', name: 'Spanish (Español)', flag: '🇪🇸' },
-    { code: 'fr', name: 'French (Français)', flag: '🇫🇷' },
-    { code: 'de', name: 'German (Deutsch)', flag: '🇩🇪' },
-    { code: 'zh', name: 'Chinese (中文)', flag: '🇨🇳' },
-    { code: 'ja', name: 'Japanese (日本語)', flag: '🇯🇵' },
-    { code: 'ko', name: 'Korean (한국어)', flag: '🇰🇷' },
-    { code: 'pt', name: 'Portuguese (Português)', flag: '🇵🇹' },
-    { code: 'ru', name: 'Russian (Русский)', flag: '🇷🇺' },
-    { code: 'ar', name: 'Arabic (العربية)', flag: '🇸🇦' },
-    { code: 'hi', name: 'Hindi (हिन्दी)', flag: '🇮🇳' },
-    { code: 'it', name: 'Italian (Italiano)', flag: '🇮🇹' },
-    { code: 'nl', name: 'Dutch (Nederlands)', flag: '🇳🇱' },
-    { code: 'pl', name: 'Polish (Polski)', flag: '🇵🇱' },
-    { code: 'tr', name: 'Turkish (Türkçe)', flag: '🇹🇷' },
-    { code: 'vi', name: 'Vietnamese (Tiếng Việt)', flag: '🇻🇳' },
-    { code: 'th', name: 'Thai (ไทย)', flag: '🇹🇭' },
-    { code: 'id', name: 'Indonesian (Bahasa Indonesia)', flag: '🇮🇩' },
-    { code: 'tl', name: 'Filipino (Tagalog)', flag: '🇵🇭' },
-  ];
+  const languages = [{ code: 'en', name: 'English', flag: '🇺🇸' }];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -161,58 +141,23 @@ export function SettingsPage({ user, onSave, onNavigate }: SettingsPageProps) {
       </Card>
 
       {/* Language Preferences Card */}
-      <Card className="shadow-xl">
-        <CardContent className="p-8 space-y-6">
+      <Card className="shadow-xl" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+        <CardContent className="p-8 space-y-4">
           <div className="flex items-center gap-3">
-            <Globe className="w-6 h-6 text-blue-600" />
+            <Globe className="w-6 h-6" style={{ color: 'var(--primary)' }} />
             <div>
-              <h3 className="text-2xl font-bold text-gray-900">Language Preferences</h3>
-              <p className="text-gray-600 text-sm">Choose your preferred language</p>
+              <h3 className="text-2xl font-bold" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}>Language</h3>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', fontFamily: 'var(--font-sans)' }}>Platform language setting</p>
             </div>
           </div>
-
-          {/* Language Preference */}
-          <div className="space-y-2">
-            <Label htmlFor="language" className="text-sm font-semibold text-gray-700">
-              Interface Language
-            </Label>
-            <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <SelectValue>
-                  <div className="flex items-center gap-2">
-                    <span>{languages.find(languageOption => languageOption.code === language)?.flag}</span>
-                    <span>{languages.find(languageOption => languageOption.code === language)?.name}</span>
-                  </div>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    <div className="flex items-center gap-2">
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
-                      {language === lang.code && (
-                        <Check className="w-4 h-4 ml-auto text-blue-600" />
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500 flex items-start gap-1 mt-2">
-              <span className="text-blue-600">ℹ️</span>
-              <span>Select your preferred language for the CodeLearn AI platform. This will update the interface language for a better learning experience.</span>
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.875rem 1rem', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'var(--accent)' }}>
+            <span style={{ fontSize: '1.25rem' }}>🇺🇸</span>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}>English</p>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>This platform is English-only</p>
+            </div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.2rem 0.6rem', borderRadius: '999px', background: 'var(--primary)', color: 'var(--primary-foreground)', fontFamily: 'var(--font-sans)' }}>Default</span>
           </div>
-
-          {/* Save Language Button */}
-          <Button
-            onClick={handleSave}
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-md hover:shadow-lg transition-all"
-          >
-            <Save className="w-5 h-5 mr-2" />
-            Save Language Preference
-          </Button>
         </CardContent>
       </Card>
 

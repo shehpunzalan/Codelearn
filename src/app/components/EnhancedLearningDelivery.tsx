@@ -3,14 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { 
-  BookOpen, Video, Headphones, FileText, Code, 
-  CheckCircle, Play, Pause, Volume2, VolumeX, 
+  BookOpen, Video, Headphones, FileText, Code,
+  CheckCircle, Play, Pause, Volume2, VolumeX,
   Maximize2, Download, MessageCircle,
   Lightbulb, Users, Brain, Target, Zap, Award,
   ChevronRight, ChevronLeft, Sparkles, Eye,
   Clock, BarChart3, TrendingUp, Gamepad2, Trophy,
   AlertCircle, XCircle, User, ExternalLink, ArrowLeft,
-  BookMarked
+  BookMarked, Lock
 } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
@@ -609,12 +609,16 @@ export function EnhancedLearningDelivery({
             {learningSections.map((section, index) => {
               const isCompleted = completedSections.has(section.id);
               const isCurrent = currentSection === index;
+              const isLocked = index > 0 && !completedSections.has(learningSections[index - 1].id);
               return (
                 <button
                   key={section.id}
-                  onClick={() => setCurrentSection(index)}
+                  onClick={() => !isLocked && setCurrentSection(index)}
+                  disabled={isLocked}
                   className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                    isCurrent
+                    isLocked
+                      ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
+                      : isCurrent
                       ? 'border-purple-500 bg-purple-50 shadow-md'
                       : isCompleted
                       ? 'border-green-300 bg-green-50'
@@ -623,13 +627,17 @@ export function EnhancedLearningDelivery({
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      isCompleted
+                      isLocked
+                        ? 'bg-gray-300 text-gray-500'
+                        : isCompleted
                         ? 'bg-green-500 text-white'
                         : isCurrent
                         ? 'bg-purple-500 text-white'
                         : 'bg-gray-200 text-gray-600'
                     }`}>
-                      {isCompleted ? (
+                      {isLocked ? (
+                        <Lock className="w-4 h-4" />
+                      ) : isCompleted ? (
                         <CheckCircle className="w-5 h-5" />
                       ) : (
                         <span className="font-bold">{index + 1}</span>
@@ -637,15 +645,17 @@ export function EnhancedLearningDelivery({
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">{section.title}</h4>
-                      <p className="text-sm text-gray-600">{section.duration}</p>
+                      <p className="text-sm text-gray-600">{isLocked ? 'Complete previous section to unlock' : section.duration}</p>
                     </div>
-                    <Badge className={
-                      section.type === 'quiz' ? 'bg-yellow-500' :
-                      section.type === 'practice' ? 'bg-blue-500' :
-                      'bg-gray-500'
-                    }>
-                      {section.type}
-                    </Badge>
+                    {!isLocked && (
+                      <Badge className={
+                        section.type === 'quiz' ? 'bg-yellow-500' :
+                        section.type === 'practice' ? 'bg-blue-500' :
+                        'bg-gray-500'
+                      }>
+                        {section.type}
+                      </Badge>
+                    )}
                   </div>
                 </button>
               );

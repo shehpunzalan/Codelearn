@@ -400,35 +400,42 @@ export function StudentDetailView({ studentId, studentName, onBack, modules }: S
           {quizData.length === 0 ? (
             <p style={{ color: 'var(--muted-foreground)', textAlign: 'center', padding: '2rem 0', fontFamily: 'var(--font-sans)' }}>No quiz attempts yet — student hasn't completed any lesson quizzes.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {quizData.map((q, idx) => {
-                const mod = modules.find(m => m.id === q.moduleId);
-                const pct = Math.round(q.score);
-                const scoreColor = pct >= 90 ? 'var(--success, #22c55e)' : pct >= 70 ? 'var(--primary)' : 'var(--destructive, #ef4444)';
-                return (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md, 8px)', background: 'var(--background)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                      <div style={{ width: '3.5rem', height: '3.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `color-mix(in srgb, ${scoreColor} 15%, transparent)`, fontWeight: 700, fontSize: '1.1rem', color: scoreColor, fontFamily: 'var(--font-sans)', flexShrink: 0 }}>
-                        {pct}%
-                      </div>
-                      <div>
-                        <p style={{ margin: 0, fontWeight: 500, color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontSize: '0.9rem' }}>{mod?.title || q.moduleId}</p>
-                        <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Lesson {q.lessonId}</p>
-                        <p style={{ margin: '0.15rem 0 0', color: 'var(--muted-foreground)', fontSize: '0.75rem', fontFamily: 'var(--font-sans)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <Calendar size={12} /> {formatDate(q.completedAt)}
-                        </p>
-                      </div>
-                    </div>
-                    <span style={{
-                      padding: '0.2rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', fontFamily: 'var(--font-sans)', fontWeight: 600,
-                      background: `color-mix(in srgb, ${scoreColor} 15%, transparent)`,
-                      color: scoreColor,
-                    }}>
-                      {pct >= 90 ? 'Excellent' : pct >= 80 ? 'Very Good' : pct >= 70 ? 'Good' : 'Needs Review'}
-                    </span>
-                  </div>
-                );
-              })}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-sans)', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                    {['#', 'Module', 'Lesson', 'Score', 'Status', 'Date'].map(h => (
+                      <th key={h} style={{ padding: '0.65rem 1rem', textAlign: 'left', color: 'var(--muted-foreground)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {quizData.map((q, idx) => {
+                    const mod = modules.find(m => m.id === q.moduleId);
+                    const pct = Math.round(q.score);
+                    const passed = pct >= 70;
+                    const scoreColor = pct >= 90 ? 'var(--success, #22c55e)' : pct >= 70 ? 'var(--primary)' : 'var(--destructive, #ef4444)';
+                    return (
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.12s' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent, #f4f4f5)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <td style={{ padding: '0.85rem 1rem', color: 'var(--muted-foreground)', fontWeight: 500 }}>{idx + 1}</td>
+                        <td style={{ padding: '0.85rem 1rem', color: 'var(--foreground)', fontWeight: 500, maxWidth: '14rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mod?.title || q.moduleId}</td>
+                        <td style={{ padding: '0.85rem 1rem', color: 'var(--muted-foreground)' }}>Lesson {q.lessonId}</td>
+                        <td style={{ padding: '0.85rem 1rem' }}>
+                          <span style={{ fontWeight: 700, color: scoreColor }}>{pct}%</span>
+                        </td>
+                        <td style={{ padding: '0.85rem 1rem' }}>
+                          <span style={{ padding: '0.2rem 0.7rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, background: passed ? 'color-mix(in srgb, var(--success, #22c55e) 15%, transparent)' : 'color-mix(in srgb, var(--destructive, #ef4444) 12%, transparent)', color: passed ? 'var(--success, #16a34a)' : 'var(--destructive, #dc2626)' }}>
+                            {passed ? 'Pass' : 'Fail'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem 1rem', color: 'var(--muted-foreground)', whiteSpace: 'nowrap' }}>{formatDate(q.completedAt)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

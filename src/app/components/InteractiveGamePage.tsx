@@ -36,9 +36,11 @@ export function InteractiveGamePage({
   const [gameStarted, setGameStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
+  const [incorrectCount, setIncorrectCount] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [answeredQuestions, setAnsweredQuestions] = useState<boolean[]>([]);
+  const [correctPerQuestion, setCorrectPerQuestion] = useState<boolean[]>([]);
   const [streak, setStreak] = useState(0);
   const [xpEarned, setXpEarned] = useState(0);
   const [level, setLevel] = useState(1);
@@ -264,6 +266,9 @@ export function InteractiveGamePage({
     setGameStarted(true);
     setIsTimerActive(true);
     setAnsweredQuestions(new Array(totalQuestions).fill(false));
+    setCorrectPerQuestion(new Array(totalQuestions).fill(false));
+    setScore(0);
+    setIncorrectCount(0);
     toast.success('🎮 Game Started! Good luck!');
   };
 
@@ -279,23 +284,26 @@ export function InteractiveGamePage({
     setShowResult(true);
     setIsTimerActive(false);
 
-    const isCorrect = answerIndex === questions[currentQuestion].correctAnswer;
-    
+    const isCorrect = answerIndex !== null && answerIndex === questions[currentQuestion].correctAnswer;
+
+    const newCorrectPerQuestion = [...correctPerQuestion];
+    newCorrectPerQuestion[currentQuestion] = isCorrect;
+    setCorrectPerQuestion(newCorrectPerQuestion);
+
     if (isCorrect) {
       const earnedXP = 10 + (streak * 5) + Math.floor(timeRemaining / 3);
       setScore(score + 1);
       setXpEarned(xpEarned + earnedXP);
       setStreak(streak + 1);
-      
-      // Level up every 50 XP
+
       const newLevel = Math.floor((xpEarned + earnedXP) / 50) + 1;
       if (newLevel > level) {
         setLevel(newLevel);
         toast.success(`🎉 Level Up! You're now Level ${newLevel}!`);
       }
-      
       toast.success(`✅ Correct! +${earnedXP} XP`);
     } else {
+      setIncorrectCount(incorrectCount + 1);
       setStreak(0);
       toast.error('❌ Incorrect! Keep trying!');
     }
@@ -315,19 +323,17 @@ export function InteractiveGamePage({
     } else {
       setGameCompleted(true);
       setIsTimerActive(false);
-      
-      // Save game results
-      const finalScore = (score / totalQuestions) * 100;
-      const gameData = {
-        lessonId,
-        moduleId,
-        score: finalScore,
-        xpEarned,
-        level,
-        timestamp: new Date().toISOString()
-      };
+
+      // Use score+1 if the last answer was correct to avoid stale closure
+      const lastWasCorrect = correctPerQuestion[currentQuestion] === true;
+      const finalCorrect = lastWasCorrect ? score + 1 : score;
+      const finalScore = (finalCorrect / totalQuestions) * 100;
+      const userId = (() => { try { return JSON.parse(localStorage.getItem('currentUser') || '{}').id || ''; } catch { return ''; } })();
+      const gameData = { lessonId, moduleId, score: finalScore, xpEarned, level, timestamp: new Date().toISOString() };
+      // Unscoped (legacy) + user-scoped for instructor reads
       localStorage.setItem(`game_${moduleId}_${lessonId}`, JSON.stringify(gameData));
-      
+      if (userId) localStorage.setItem(`game_${userId}_${moduleId}_${lessonId}`, JSON.stringify(gameData));
+
       if (finalScore >= passPercentage) {
         toast.success('🎉 Congratulations! You passed the game!');
       }
@@ -338,6 +344,7 @@ export function InteractiveGamePage({
     setGameStarted(true);
     setCurrentQuestion(0);
     setScore(0);
+    setIncorrectCount(0);
     setSelectedAnswer(null);
     setShowResult(false);
     setStreak(0);
@@ -345,6 +352,7 @@ export function InteractiveGamePage({
     setIsTimerActive(true);
     setGameCompleted(false);
     setAnsweredQuestions(new Array(totalQuestions).fill(false));
+    setCorrectPerQuestion(new Array(totalQuestions).fill(false));
   };
 
   // Game start screen
@@ -622,8 +630,9 @@ export function InteractiveGamePage({
                   {Array.from({ length: totalQuestions }).map((_, idx) => {
                     const isAnswered = answeredQuestions[idx];
                     const isCurrent = idx === currentQuestion;
-                    const isPast = idx < currentQuestion;
-                    
+                    const wasCorrect = correctPerQuestion[idx] === true;
+                    const wasIncorrect = isAnswered && !wasCorrect;
+
                     return (
                       <div
                         key={idx}
@@ -631,8 +640,9 @@ export function InteractiveGamePage({
                           aspect-square rounded-lg flex items-center justify-center text-xs font-bold
                           transition-all duration-300
                           ${isCurrent ? 'bg-orange-500 text-white ring-4 ring-orange-300 scale-110' : ''}
-                          ${isPast && isAnswered ? 'bg-green-500 text-white' : ''}
-                          ${!isPast && !isCurrent ? 'bg-gray-200 text-gray-500' : ''}
+                          ${!isCurrent && isAnswered && wasCorrect ? 'bg-green-500 text-white' : ''}
+                          ${!isCurrent && wasIncorrect ? 'bg-red-500 text-white' : ''}
+                          ${!isCurrent && !isAnswered ? 'bg-gray-200 text-gray-500' : ''}
                         `}
                         title={`Question ${idx + 1}`}
                       >
@@ -642,7 +652,7 @@ export function InteractiveGamePage({
                   })}
                 </div>
                 <p className="text-xs text-gray-600 mt-2 text-center">
-                  🟠 Current • 🟢 Completed • ⚪ Upcoming
+                  🟠 Current • 🟢 Correct • 🔴 Incorrect • ⚪ Upcoming
                 </p>
               </CardContent>
             </Card>
@@ -734,7 +744,7 @@ export function InteractiveGamePage({
                 </div>
                 <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                   <span className="text-sm font-medium">Incorrect</span>
-                  <span className="text-lg font-bold text-red-600">{currentQuestion + 1 - score - (showResult ? 0 : 1)}</span>
+                  <span className="text-lg font-bold text-red-600">{incorrectCount}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium">Remaining</span>

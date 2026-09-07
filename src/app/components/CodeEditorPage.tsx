@@ -248,107 +248,168 @@ export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeE
     const lines = code.split('\n');
     let qualityScore = 85;
 
-    // Detect OOP principles
-    if (code.includes('class ')) {
-      feedback.oopPrinciples.push('✓ Class definition found - Good structure');
-      feedback.strengths?.push('Proper class structure implemented');
-    } else {
-      feedback.errors.push('No class definition found');
-      feedback.errorDetails?.push({
-        line: 1,
-        severity: 'error',
-        message: 'Missing class definition',
-        suggestion: 'Define a class using: public class ClassName { }'
-      });
+    // ── SYNTAX ERRORS ──────────────────────────────────────────────────────────
+    // Java is case-sensitive: `class` must be lowercase, `void`, `int`, etc.
+    const openBraces = (code.match(/\{/g) || []).length;
+    const closeBraces = (code.match(/\}/g) || []).length;
+    if (openBraces !== closeBraces) {
+      const msg = openBraces > closeBraces ? 'Missing closing brace }' : 'Extra closing brace } without matching {';
+      feedback.errors.push(`[Syntax] ${msg}`);
+      feedback.errorDetails?.push({ line: lines.length, severity: 'error', message: `Syntax error: ${msg}`, suggestion: 'Ensure every opening { has a matching closing }' });
+      qualityScore -= 15;
+    }
+
+    const openParens = (code.match(/\(/g) || []).length;
+    const closeParens = (code.match(/\)/g) || []).length;
+    if (openParens !== closeParens) {
+      feedback.errors.push('[Syntax] Unmatched parentheses — check method calls and conditions');
+      feedback.errorDetails?.push({ line: 1, severity: 'error', message: 'Syntax error: Unmatched parentheses', suggestion: 'Every ( must have a matching )' });
+      qualityScore -= 10;
+    }
+
+    // Check statements for missing semicolons (lines that look like statements but lack ;)
+    const missingSemicolon = lines.some(l => {
+      const t = l.trim();
+      return t.length > 0 && !t.startsWith('//') && !t.startsWith('*') && !t.startsWith('/*')
+        && !t.endsWith('{') && !t.endsWith('}') && !t.endsWith(';')
+        && /^(return|int|double|String|boolean|float|long|char|byte|short|this\.|[a-zA-Z_]\w*\s*=)/.test(t);
+    });
+    if (missingSemicolon) {
+      feedback.errors.push('[Syntax] Missing semicolon — Java statements must end with ;');
+      feedback.errorDetails?.push({ line: 1, severity: 'error', message: 'Syntax error: Missing semicolon', suggestion: 'End each statement with a semicolon: int x = 5;' });
+      qualityScore -= 10;
+    }
+
+    // Wrong keyword casing (Java is case-sensitive)
+    if (/\bClass\b/.test(code) && !/\bclass\b/.test(code)) {
+      feedback.errors.push('[Syntax] "Class" should be lowercase "class" — Java is case-sensitive');
+      feedback.errorDetails?.push({ line: 1, severity: 'error', message: 'Syntax error: Invalid keyword "Class"', suggestion: 'Use lowercase: class ClassName { }' });
+      qualityScore -= 15;
+    }
+    if (/\bVoid\b/.test(code)) {
+      feedback.errors.push('[Syntax] "Void" should be lowercase "void" — Java is case-sensitive');
+      feedback.errorDetails?.push({ line: 1, severity: 'error', message: 'Syntax error: Invalid keyword "Void"', suggestion: 'Use lowercase: public void methodName()' });
+      qualityScore -= 10;
+    }
+    if (/\bPublic\b/.test(code) || /\bPrivate\b/.test(code) || /\bProtected\b/.test(code)) {
+      feedback.errors.push('[Syntax] Access modifiers (public/private/protected) must be lowercase — Java is case-sensitive');
+      feedback.errorDetails?.push({ line: 1, severity: 'error', message: 'Syntax error: Capitalized access modifier', suggestion: 'Use: public, private, protected (all lowercase)' });
+      qualityScore -= 10;
+    }
+    if (/\bStatic\b/.test(code)) {
+      feedback.errors.push('[Syntax] "Static" should be lowercase "static"');
+      feedback.errorDetails?.push({ line: 1, severity: 'warning', message: 'Syntax error: "Static" is not a keyword', suggestion: 'Use lowercase: public static void main(String[] args)' });
+      qualityScore -= 5;
+    }
+
+    // ── SEMANTIC ERRORS ────────────────────────────────────────────────────────
+    if (!code.includes('class ')) {
+      feedback.errors.push('[Semantic] No class definition found — every Java program needs at least one class');
+      feedback.errorDetails?.push({ line: 1, severity: 'error', message: 'Semantic error: Missing class definition', suggestion: 'Define a class using: public class ClassName { }' });
       qualityScore -= 20;
+    } else {
+      feedback.oopPrinciples.push('✓ Class definition found');
+      feedback.strengths?.push('Proper class structure implemented');
+
+      const classMatch = code.match(/class\s+([A-Z][a-zA-Z0-9_]*)/);
+      if (!classMatch) {
+        feedback.errors.push('[Semantic] Class name does not follow PascalCase — must start with an uppercase letter');
+        feedback.errorDetails?.push({ line: 1, severity: 'error', message: 'Semantic error: Invalid class name', suggestion: 'Class names must start with uppercase: class MyClass { }' });
+        qualityScore -= 10;
+      } else {
+        const className = classMatch[1];
+        if (!code.includes(`${className}(`)) {
+          feedback.suggestions.push(`[Semantic] No constructor found for ${className} — add: public ${className}() { }`);
+          feedback.improvements?.push(`Create a constructor: public ${className}() { }`);
+          qualityScore -= 5;
+        }
+      }
     }
 
     if (code.includes('private ') || code.includes('protected ')) {
-      feedback.oopPrinciples.push('✓ Encapsulation - Good use of access modifiers');
+      feedback.oopPrinciples.push('✓ Encapsulation — access modifiers present');
       feedback.strengths?.push('Proper encapsulation with access modifiers');
-    } else {
-      feedback.suggestions.push('Consider using private fields for encapsulation');
-      feedback.improvements?.push('Add access modifiers to enforce encapsulation');
+    } else if (code.includes('class ')) {
+      feedback.suggestions.push('[Semantic] Fields should be private — expose them via getters/setters');
+      feedback.improvements?.push('Declare fields as private: private int age;');
       qualityScore -= 10;
     }
 
     if (code.includes('extends ')) {
-      feedback.oopPrinciples.push('✓ Inheritance - Class hierarchy detected');
+      feedback.oopPrinciples.push('✓ Inheritance — class hierarchy detected');
       feedback.strengths?.push('Good use of inheritance');
     }
-
     if (code.includes('@Override') || code.includes('interface ')) {
-      feedback.oopPrinciples.push('✓ Polymorphism - Method overriding or interface implementation');
+      feedback.oopPrinciples.push('✓ Polymorphism — method overriding or interface implementation');
       feedback.strengths?.push('Polymorphism principles applied');
     }
 
-    // Check for constructor
-    const classMatch = code.match(/class\s+(\w+)/);
-    if (classMatch) {
-      const className = classMatch[1];
-      if (!code.includes(`${className}(`)) {
-        feedback.suggestions.push('Add a constructor for proper object initialization');
-        feedback.improvements?.push(`Create a constructor: public ${className}() { }`);
-        qualityScore -= 5;
+    // ── LOGICAL ERRORS ─────────────────────────────────────────────────────────
+    // Unreachable code after return
+    lines.forEach((line, idx) => {
+      const t = line.trim();
+      if (t.startsWith('return ') || t === 'return;') {
+        const next = lines[idx + 1]?.trim();
+        if (next && next.length > 0 && !next.startsWith('}') && !next.startsWith('//')) {
+          feedback.errors.push(`[Logical] Unreachable code after return on line ${idx + 1}`);
+          feedback.errorDetails?.push({ line: idx + 2, severity: 'warning', message: 'Logical error: Unreachable code after return', suggestion: 'Remove or restructure code after the return statement' });
+          qualityScore -= 5;
+        }
       }
+      // Empty catch block
+      if (t === 'catch' || /catch\s*\(/.test(t)) {
+        const catchBody = lines[idx + 1]?.trim();
+        if (catchBody === '}') {
+          feedback.errors.push(`[Logical] Empty catch block on line ${idx + 1} — exceptions are silently swallowed`);
+          feedback.errorDetails?.push({ line: idx + 1, severity: 'warning', message: 'Logical error: Empty catch block', suggestion: 'Handle exceptions: catch (Exception e) { e.printStackTrace(); }' });
+          qualityScore -= 5;
+        }
+      }
+    });
+
+    // Comparison using = instead of ==
+    if (/if\s*\([^)]*=[^=>][^)]*\)/.test(code)) {
+      feedback.errors.push('[Logical] Possible assignment (=) inside if condition — did you mean == for comparison?');
+      feedback.errorDetails?.push({ line: 1, severity: 'warning', message: 'Logical error: Assignment in condition', suggestion: 'Use == for comparison: if (x == 5)' });
+      qualityScore -= 8;
     }
 
-    // Check for getter/setter methods
-    if (!code.includes('get') && !code.includes('set')) {
-      feedback.suggestions.push('Consider adding getter and setter methods');
-      qualityScore -= 5;
-    }
-
-    // Code style checks
-    if (!code.includes('{')) {
-      feedback.errors.push('Missing opening brace');
-      feedback.errorDetails?.push({
-        line: 1,
-        severity: 'error',
-        message: 'Syntax error: Missing opening brace',
-        suggestion: 'Ensure all code blocks have proper braces { }'
-      });
-      qualityScore -= 15;
-    }
-
-    // Check for comments
+    // ── CODE STYLE ─────────────────────────────────────────────────────────────
     if (!code.includes('//') && !code.includes('/*')) {
       feedback.suggestions.push('Add comments to explain your code');
-      feedback.codeSmells?.push('Lack of code documentation');
+      feedback.codeSmells?.push('No code documentation');
       qualityScore -= 5;
     }
-
-    // Check naming conventions
-    if (/class\s+[a-z]/.test(code)) {
-      feedback.errors.push('Class name should start with uppercase letter');
-      feedback.errorDetails?.push({
-        line: 1,
-        severity: 'warning',
-        message: 'Naming convention violation',
-        suggestion: 'Class names should follow PascalCase convention'
-      });
+    if (!code.includes('get') && !code.includes('set') && code.includes('private ')) {
+      feedback.suggestions.push('Consider adding getter/setter methods for private fields');
       qualityScore -= 5;
     }
 
     feedback.codeQuality = Math.max(0, Math.min(100, qualityScore));
 
-    // Generate detailed feedback
+    const syntaxErrors = feedback.errorDetails?.filter(e => e.message.startsWith('Syntax')) || [];
+    const semanticErrors = feedback.errorDetails?.filter(e => e.message.startsWith('Semantic')) || [];
+    const logicalErrors = feedback.errorDetails?.filter(e => e.message.startsWith('Logical')) || [];
+
     feedback.detailedFeedback = `
 **Code Analysis Summary**
 
-Your code has been analyzed by our neural network system. Overall quality score: ${feedback.codeQuality}/100
+Quality score: ${feedback.codeQuality}/100 | Java is case-sensitive — keywords must be exact.
+
+**Syntax Errors (${syntaxErrors.length}):**
+${syntaxErrors.length > 0 ? syntaxErrors.map(e => `- ${e.message}\n  → ${e.suggestion}`).join('\n') : '- None detected ✓'}
+
+**Semantic Errors (${semanticErrors.length}):**
+${semanticErrors.length > 0 ? semanticErrors.map(e => `- ${e.message}\n  → ${e.suggestion}`).join('\n') : '- None detected ✓'}
+
+**Logical Errors (${logicalErrors.length}):**
+${logicalErrors.length > 0 ? logicalErrors.map(e => `- ${e.message}\n  → ${e.suggestion}`).join('\n') : '- None detected ✓'}
 
 **OOP Principles Detected:**
-${feedback.oopPrinciples.length > 0 ? feedback.oopPrinciples.map(principle => `- ${principle}`).join('\n') : '- No OOP principles detected'}
-
-**Strengths:**
-${feedback.strengths && feedback.strengths.length > 0 ? feedback.strengths.map(strength => `- ${strength}`).join('\n') : '- Continue building your skills'}
-
-**Areas for Improvement:**
-${feedback.improvements && feedback.improvements.length > 0 ? feedback.improvements.map(improvement => `- ${improvement}`).join('\n') : '- Great job! Keep up the good work'}
+${feedback.oopPrinciples.length > 0 ? feedback.oopPrinciples.map(p => `- ${p}`).join('\n') : '- No OOP principles detected'}
 
 **Suggestions:**
-${feedback.suggestions.length > 0 ? feedback.suggestions.map(suggestion => `- ${suggestion}`).join('\n') : '- Your code looks good'}
+${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join('\n') : '- Code looks good!'}
     `.trim();
 
     return feedback;

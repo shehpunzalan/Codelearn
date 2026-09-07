@@ -571,15 +571,6 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                           Intervene
                         </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeleteTarget(student)}
-                        style={{ borderColor: 'var(--destructive)', color: 'var(--destructive)' }}
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
-                      </Button>
                     </div>
                   </div>
                 </div>

@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Checkbox } from './ui/checkbox';
-import { Brain, Mail, Lock, UserCircle as UserIcon, GraduationCap, Shield, FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Brain, Mail, Lock, UserCircle as UserIcon, GraduationCap, Shield, FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle, CheckCircle, MailCheck, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import * as backendApi from '../services/backendApi';
 
@@ -17,10 +17,19 @@ interface RegisterProps {
 // Letters and spaces only (supports multi-word names like "Juan Dela Cruz").
 // Kept as a module-level constant so it's reused identically by the live
 // input filter and the submit-time validator below.
-const NAME_ALPHA_REGEX = /^[A-Za-z\s]*$/;
+const NAME_ALPHA_REGEX = /^[A-Za-z\s-]*$/;
 
 // Available course sections for students to choose from.
 const SECTIONS = ['CS-A', 'CS-B', 'CS-C', 'IT-A', 'IT-B', 'IT-C'];
+
+const CLASS_SCHEDULES = [
+  'CCS108 - TTH 7:30–9:00 AM',
+  'CCS108 - TTH 9:00–10:30 AM',
+  'CCS108 - TTH 10:30–12:00 PM',
+  'CCS108 - MW 1:00–2:30 PM',
+  'CCS108 - MW 3:00–4:30 PM',
+  'CCS108 - F 8:00–11:00 AM',
+];
 
 export function Register({ onRegister, onShowLogin }: RegisterProps) {
   const [name, setName] = useState('');
@@ -30,6 +39,10 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
   const [role, setRole] = useState<UserRole>('student');
   const [studentId, setStudentId] = useState('');
   const [section, setSection] = useState('');
+  const [classSchedule, setClassSchedule] = useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [pendingUser, setPendingUser] = useState<User | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
@@ -43,6 +56,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     confirmPassword?: string;
     studentId?: string;
     section?: string;
+    classSchedule?: string;
     terms?: string;
   }>({});
 
@@ -76,7 +90,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
    */
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    const filtered = raw.replace(/[^A-Za-z\s]/g, '');
+    const filtered = raw.replace(/[^A-Za-z\s-]/g, '');
     setName(filtered);
     if (errors.name) setErrors({ ...errors, name: undefined });
   };
@@ -116,7 +130,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     } else if (trimmedNameForValidation.length < 3) {
       newErrors.name = 'Name must be at least 3 characters';
     } else if (!NAME_ALPHA_REGEX.test(trimmedNameForValidation)) {
-      newErrors.name = 'Name can only contain letters';
+      newErrors.name = 'Name can only contain letters and hyphens';
     }
 
     // Email validation
@@ -162,6 +176,10 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       if (!section) {
         newErrors.section = 'Section is required';
       }
+    }
+
+    if (!classSchedule) {
+      newErrors.classSchedule = 'Class schedule is required';
     }
 
     // Instructor-specific validation — none currently (Department field removed)
@@ -212,6 +230,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
         studentId: role === 'student' ? studentId : undefined,
         section: role === 'student' ? section : undefined,
         yearLevel: role === 'student' ? '1st Year' : undefined,
+        classSchedule,
       });
       supabaseUserId = result?.data?.userId || null;
       console.log('✅ Saved to Supabase via backend, userId:', supabaseUserId);
@@ -241,6 +260,7 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
       registeredAt: new Date().toISOString(),
       pendingSync: !supabaseUserId,
+      classSchedule,
     };
     existingUsers.push(newUser);
     localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
@@ -257,13 +277,19 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       enrolledCourses: role === 'student' ? ['CCS108'] : [],
     };
 
-    toast.success('Registration successful!', {
-      description: supabaseUserId
-        ? `Welcome to CodeLearn AI, ${trimmedName}! Account saved to database.`
-        : `Welcome, ${trimmedName}! Account created locally.`,
-    });
+    toast.success('Registration successful! Check your email to verify your account.', { duration: 5000 });
     setIsLoading(false);
-    onRegister(appUser);
+    setPendingUser(appUser);
+    setPendingVerification(true);
+  };
+
+  const handleResendVerification = () => {
+    if (resendCooldown > 0) return;
+    toast.info('Verification email resent. Please check your inbox.');
+    setResendCooldown(60);
+    const interval = setInterval(() => {
+      setResendCooldown(prev => { if (prev <= 1) { clearInterval(interval); return 0; } return prev - 1; });
+    }, 1000);
   };
 
   const getPasswordStrength = (password: string): { strength: string; color: string; width: string } => {
@@ -283,6 +309,54 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
   };
 
   const passwordStrength = getPasswordStrength(password);
+
+  if (pendingVerification && pendingUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--background)', fontFamily: 'var(--font-sans)' }}>
+        <div className="w-full max-w-md text-center">
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'color-mix(in srgb, var(--primary) 12%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <MailCheck style={{ width: 40, height: 40, color: 'var(--primary)' }} />
+          </div>
+          <h1 style={{ color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '1.75rem', marginBottom: '0.5rem' }}>Verify your email</h1>
+          <p style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+            We sent a verification link to <strong style={{ color: 'var(--foreground)' }}>{pendingUser.email}</strong>.
+            Please click the link in that email to activate your account.
+          </p>
+          <div style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', textAlign: 'left', marginBottom: '1.5rem' }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--muted-foreground)', margin: '0 0 0.75rem', fontWeight: 600 }}>{"Didn't receive the email?"}</p>
+            <ul style={{ fontFamily: 'var(--font-sans)', fontSize: '0.82rem', color: 'var(--muted-foreground)', margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+              <li>Check your spam or junk folder</li>
+              <li>Make sure the email address is correct</li>
+              <li>Wait a few minutes for delivery</li>
+            </ul>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <button
+              onClick={handleResendVerification}
+              disabled={resendCooldown > 0}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', height: '2.75rem', background: 'var(--primary)', color: 'var(--primary-foreground)', border: 'none', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-sans)', fontWeight: 600, cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer', opacity: resendCooldown > 0 ? 0.6 : 1 }}
+            >
+              <RefreshCw style={{ width: 16, height: 16 }} />
+              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Verification Email'}
+            </button>
+            <button
+              onClick={() => { setPendingVerification(false); onShowLogin(); }}
+              style={{ height: '2.75rem', background: 'var(--card)', color: 'var(--foreground)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-sans)', fontWeight: 500, cursor: 'pointer' }}
+            >
+              Back to Login
+            </button>
+            <button
+              type="button"
+              onClick={() => pendingUser && onRegister(pendingUser)}
+              style={{ background: 'none', border: 'none', color: 'var(--muted-foreground)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Continue without verifying (demo)
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-8" style={{ background: 'var(--background)' }}>
@@ -442,6 +516,30 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
                   )}
                 </div>
               )}
+
+              {/* Class Schedule — both roles */}
+              <div className="space-y-2">
+                <Label htmlFor="classSchedule" className="text-sm font-medium">Class Schedule *</Label>
+                <select
+                  id="classSchedule"
+                  value={classSchedule}
+                  onChange={(e) => { setClassSchedule(e.target.value); if (errors.classSchedule) setErrors({ ...errors, classSchedule: undefined }); }}
+                  style={{ fontFamily: 'var(--font-sans)' }}
+                  className={`w-full h-12 rounded-md border bg-white px-3 text-sm border-gray-200 ${errors.classSchedule ? 'border-red-500' : ''}`}
+                  disabled={isLoading}
+                >
+                  <option value="" disabled>Select your class schedule</option>
+                  {CLASS_SCHEDULES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                {errors.classSchedule && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.classSchedule}
+                  </p>
+                )}
+              </div>
 
               {/* Email */}
               <div className="space-y-2">

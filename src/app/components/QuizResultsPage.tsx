@@ -125,6 +125,26 @@ export function QuizResultsPage({ stats, onRetry, onContinue, onBackToLesson, on
           </CardContent>
         </Card>
 
+        {/* Certificate of Completion */}
+        {passed && (
+          <div style={{ border: '2px solid var(--primary)', borderRadius: 'var(--radius-lg)', background: 'var(--card)', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', fontFamily: 'var(--font-sans)' }}>
+            <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary, #7c3aed))', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Award style={{ width: 28, height: 28, color: '#fff' }} />
+              <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.04em' }}>CERTIFICATE OF COMPLETION</span>
+            </div>
+            <div style={{ padding: '1.5rem 2rem', textAlign: 'center' }}>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem', margin: '0 0 0.25rem', textTransform: 'uppercase', letterSpacing: '0.07em' }}>This certifies quiz completion</p>
+              {lessonTitle && <p style={{ color: 'var(--foreground)', fontWeight: 700, fontSize: '1.2rem', margin: '0 0 1rem' }}>{lessonTitle}</p>}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', margin: '0.75rem 0 1rem', flexWrap: 'wrap' }}>
+                <div><p style={{ fontWeight: 700, fontSize: '1.5rem', color: 'var(--primary)', margin: 0 }}>{stats.accuracy}%</p><p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', margin: 0 }}>Score</p></div>
+                <div><p style={{ fontWeight: 700, fontSize: '1.5rem', color: 'var(--primary)', margin: 0 }}>{stats.correctAnswers}/{stats.totalQuestions}</p><p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', margin: 0 }}>Correct</p></div>
+                <div><p style={{ fontWeight: 700, fontSize: '1.5rem', color: 'var(--primary)', margin: 0 }}>{stats.totalXP}</p><p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', margin: 0 }}>XP Earned</p></div>
+              </div>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', margin: 0 }}>{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+          </div>
+        )}
+
         {/* Score Summary */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Grade Card */}
@@ -207,12 +227,12 @@ export function QuizResultsPage({ stats, onRetry, onContinue, onBackToLesson, on
               </div>
 
               <div className="bg-blue-50 rounded-2xl p-6 border-4 border-blue-200 text-center transform hover:scale-105 transition-transform">
-                <Star className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+                <Award className="w-12 h-12 text-blue-600 mx-auto mb-3" />
                 <div className="text-5xl font-bold text-blue-600 mb-2">
                   {stats.totalQuestions}
                 </div>
                 <p className="text-gray-700 font-semibold">Total Questions</p>
-                <p className="text-xs text-gray-600 mt-1">Quiz completed</p>
+                <p className="text-xs text-gray-600 mt-1">Certificate earned</p>
               </div>
             </div>
           </CardContent>

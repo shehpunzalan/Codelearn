@@ -4,8 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { UserCircle, Mail, Save } from 'lucide-react';
+import { UserCircle, Mail, Save, AlertCircle } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { toast } from 'sonner';
+
+const NAME_REGEX = /^[A-Za-z\s-]*$/;
 
 interface EditProfileProps {
   user: User;
@@ -15,13 +18,34 @@ interface EditProfileProps {
 export function EditProfile({ user, onSave }: EditProfileProps) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
+  const [nameError, setNameError] = useState('');
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const filtered = e.target.value.replace(/[^A-Za-z\s-]/g, '');
+    setName(filtered);
+    if (nameError) setNameError('');
+  };
 
   const handleSave = () => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setNameError('Full name is required');
+      return;
+    }
+    if (trimmed.length < 3) {
+      setNameError('Name must be at least 3 characters');
+      return;
+    }
+    if (!NAME_REGEX.test(trimmed)) {
+      setNameError('Name can only contain letters and hyphens');
+      return;
+    }
     onSave({
       ...user,
       name,
       email
     });
+    toast.success('Profile updated');
   };
 
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -64,10 +88,16 @@ export function EditProfile({ user, onSave }: EditProfileProps) {
               <Input
                 id="fullName"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
                 className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 placeholder="John Doe"
               />
+              {nameError && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {nameError}
+                </p>
+              )}
             </div>
           </div>
 

@@ -400,30 +400,39 @@ export function StudentDashboard({ user, modules, onSelectModule, onViewFeedback
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   {leaderboard.map((entry) => {
-                    const rankIcon = entry.rank === 1
-                      ? <Crown style={{ width: 15, height: 15, color: 'var(--warning, #ca8a04)' }} />
-                      : entry.rank === 2
-                      ? <Medal style={{ width: 15, height: 15, color: 'var(--muted-foreground)' }} />
-                      : entry.rank === 3
-                      ? <Medal style={{ width: 15, height: 15, color: 'var(--secondary)' }} />
-                      : null;
-                    const rowBg = entry.isCurrentUser ? 'var(--accent)' : 'transparent';
-                    const rowBorder = entry.isCurrentUser ? '1.5px solid var(--primary)' : '1px solid var(--border)';
+                    const isGold = entry.rank === 1;
+                    const isSilver = entry.rank === 2;
+                    const isBronze = entry.rank === 3;
+                    const rowBg = isGold
+                      ? 'linear-gradient(90deg,#fef9c3,#fff)'
+                      : isSilver
+                      ? 'linear-gradient(90deg,#f1f5f9,#fff)'
+                      : isBronze
+                      ? 'linear-gradient(90deg,#fdf4e7,#fff)'
+                      : entry.isCurrentUser ? 'var(--accent)' : 'transparent';
+                    const rowBorder = isGold
+                      ? '2px solid #ca8a04'
+                      : isSilver
+                      ? '2px solid #94a3b8'
+                      : isBronze
+                      ? '2px solid #c27631'
+                      : entry.isCurrentUser ? '1.5px solid var(--primary)' : '1px solid var(--border)';
+                    const medal = isGold ? '🥇' : isSilver ? '🥈' : isBronze ? '🥉' : null;
                     return (
                       <div
                         key={entry.email}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', background: rowBg, border: rowBorder, fontFamily: 'var(--font-sans)' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', background: rowBg, border: rowBorder, fontFamily: 'var(--font-sans)', boxShadow: isGold ? '0 2px 8px rgba(202,138,4,0.2)' : 'none' }}
                       >
-                        <span style={{ width: 22, textAlign: 'center', fontWeight: 700, fontSize: '0.82rem', color: entry.rank <= 3 ? 'var(--warning, #ca8a04)' : 'var(--muted-foreground)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {rankIcon || `#${entry.rank}`}
+                        <span style={{ width: 28, textAlign: 'center', fontWeight: 700, fontSize: (isGold || isSilver || isBronze) ? '1.1rem' : '0.82rem', color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {medal || `#${entry.rank}`}
                         </span>
-                        <span style={{ flex: 1, fontSize: '0.875rem', fontWeight: entry.isCurrentUser ? 700 : 500, color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ flex: 1, fontSize: '0.875rem', fontWeight: (isGold || isSilver || isBronze || entry.isCurrentUser) ? 700 : 500, color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {entry.name}{entry.isCurrentUser ? ' (You)' : ''}
                         </span>
                         <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', whiteSpace: 'nowrap' }}>
                           {entry.lessonsCompleted} lessons
                         </span>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary)', minWidth: 48, textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: isGold ? '#ca8a04' : isSilver ? '#64748b' : isBronze ? '#c27631' : 'var(--primary)', minWidth: 48, textAlign: 'right' }}>
                           {entry.points} pts
                         </span>
                       </div>
