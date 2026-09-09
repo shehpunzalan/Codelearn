@@ -63,12 +63,23 @@ export function EnhancedLearningDelivery({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentSection, setCurrentSection] = useState(0);
+  const [currentSection, setCurrentSection] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`currentSection_${moduleId}_${lessonId}`);
+      return saved ? parseInt(saved, 10) : 0;
+    } catch { return 0; }
+  });
   const [quizAnswers, setQuizAnswers] = useState<{[key: number]: string}>({});
   const [showTranscript, setShowTranscript] = useState(false);
   const [timeSpent, setTimeSpent] = useState(0);
   const [engagementScore, setEngagementScore] = useState(0);
-  const [completedSections, setCompletedSections] = useState<Set<number>>(new Set());
+  const [completedSections, setCompletedSections] = useState<Set<number>>(() => {
+    try {
+      const key = `completedSections_${moduleId}_${lessonId}`;
+      const saved = localStorage.getItem(key);
+      return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
+    } catch { return new Set<number>(); }
+  });
   const [highlightEnabled, setHighlightEnabled] = useState(false);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
@@ -85,6 +96,20 @@ export function EnhancedLearningDelivery({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
+  // Persist section progress so it survives page reloads / PC shutdown
+  useEffect(() => {
+    try {
+      const key = `completedSections_${moduleId}_${lessonId}`;
+      localStorage.setItem(key, JSON.stringify(Array.from(completedSections)));
+    } catch { /* storage full or unavailable */ }
+  }, [completedSections, moduleId, lessonId]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`currentSection_${moduleId}_${lessonId}`, String(currentSection));
+    } catch { /* ignore */ }
+  }, [currentSection, moduleId, lessonId]);
+
   // Construct the comprehensive lesson content key (format: 'mod1-lesson1-1')
   const comprehensiveLessonKey = `${moduleId}-${lessonId}`;
 
@@ -94,7 +119,6 @@ export function EnhancedLearningDelivery({
     { id: 2, title: 'Core Concepts Explained', duration: '8 min', type: 'content' },
     { id: 3, title: 'Real-World Examples', duration: '5 min', type: 'examples' },
     { id: 4, title: 'Hands-On Practice', duration: '10 min', type: 'practice' },
-    { id: 5, title: 'Knowledge Check', duration: '4 min', type: 'quiz' },
     { id: 6, title: 'Summary & Next Steps', duration: '2 min', type: 'summary' }
   ];
 
@@ -1037,336 +1061,6 @@ export function EnhancedLearningDelivery({
                   </div>
                 </div>
               )}
-
-              {/* Section 5: Knowledge Check */}
-              {learningSections[currentSection].type === 'quiz' && (() => {
-                const quizQuestions = shuffledQuizQuestions;
-
-                if (!quizQuestions || quizQuestions.length === 0) {
-                  return (
-                    <Card className="border-4 border-yellow-200 shadow-lg bg-gradient-to-br from-yellow-50 to-amber-50">
-                      <CardContent className="p-8 text-center">
-                        <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3">Knowledge Check</h3>
-                        <p className="text-gray-600">No quiz available for this lesson yet.</p>
-                      </CardContent>
-                    </Card>
-                  );
-                }
-
-                const handleAnswerSelect = (questionIndex: number, optionIndex: number) => {
-                  if (!quizSubmitted) {
-                    setSelectedAnswers(prev => ({...prev, [questionIndex]: optionIndex}));
-                  }
-                };
-
-                const handleQuizSubmit = () => {
-                  let correct = 0;
-                  quizQuestions.forEach((q: Challenge, idx: number) => {
-                    if (!q || !q.question || !q.options) return;
-                    const selectedOptionIndex = selectedAnswers[idx];
-                    if (selectedOptionIndex !== undefined && q.options[selectedOptionIndex]?.isCorrect) {
-                      correct++;
-                    }
-                  });
-                  const total = quizQuestions.length;
-                  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
-                  const passed = accuracy >= 70;
-
-                  setQuizScore(correct);
-                  setQuizSubmitted(true);
-
-                  if (passed) {
-                    const newCompleted = new Set(completedSections);
-                    newCompleted.add(learningSections[currentSection].id);
-                    setCompletedSections(newCompleted);
-                    toast.success(`🎉 Quiz Passed! You scored ${correct}/${total}`);
-                    // Notify parent so lesson can be marked complete
-                    onQuizComplete?.({ totalQuestions: total, correctAnswers: correct, accuracy, passed });
-                  } else {
-                    toast.error(`Quiz score: ${correct}/${total}. You need 70% to pass.`);
-                    onQuizComplete?.({ totalQuestions: total, correctAnswers: correct, accuracy, passed });
-                  }
-                };
-
-                const handleQuizReset = () => {
-                  setSelectedAnswers({});
-                  setQuizSubmitted(false);
-                  setQuizScore(0);
-                  setCurrentQuizQuestion(0);
-                };
-
-                return (
-                  <div className="space-y-6">
-                    {/* Quiz Header */}
-                    <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-purple-50">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                              <BookOpen className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-900">Knowledge Check</h3>
-                              {!quizSubmitted ? (
-                                <p className="text-sm text-gray-600">
-                                  Question {currentQuizQuestion + 1} of {quizQuestions.length}
-                                </p>
-                              ) : (
-                                <p className="text-sm text-gray-600">Quiz Complete - Review Your Answers</p>
-                              )}
-                            </div>
-                          </div>
-                          {quizSubmitted && (
-                            <div className="text-right">
-                              <p className="text-sm text-gray-600">Your Score</p>
-                              <p className={`text-2xl font-bold ${quizScore / quizQuestions.length >= 0.7 ? 'text-green-600' : 'text-red-600'}`}>
-                                {quizScore}/{quizQuestions.length}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {Math.round((quizScore / quizQuestions.length) * 100)}%
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Progress Bar */}
-                        {!quizSubmitted && (
-                          <div className="mt-4">
-                            <div className="flex justify-between text-xs text-gray-600 mb-1">
-                              <span>Progress</span>
-                              <span>{Object.keys(selectedAnswers).length}/{quizQuestions.length} answered</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                style={{ width: `${(Object.keys(selectedAnswers).length / quizQuestions.length) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Quiz Questions */}
-                    {!quizSubmitted ? (() => {
-                      const question = quizQuestions[currentQuizQuestion];
-                      if (!question || !question.question) {
-                        return (
-                          <Card className="border-0 shadow-md">
-                            <CardContent className="p-6 text-center">
-                              <p className="text-gray-500">Question not available</p>
-                            </CardContent>
-                          </Card>
-                        );
-                      }
-                      const qIndex = currentQuizQuestion;
-                      const isAnswered = selectedAnswers[qIndex] !== undefined;
-                      const selectedOption = selectedAnswers[qIndex];
-                      
-                      return (
-                        <Card key={qIndex} className="border-0 shadow-md">
-                          <CardContent className="p-6">
-                            <div className="flex items-start gap-4 mb-4">
-                              <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-sm font-bold">
-                                {qIndex + 1}
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                                  {question.question}
-                                </h4>
-                                
-                                <div className="space-y-3">
-                                  {question.options.map((option: any, oIndex: number) => {
-                                    const isSelected = selectedOption === oIndex;
-                                    const optionStyle = isSelected 
-                                      ? 'border-blue-500 bg-blue-50' 
-                                      : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50';
-                                    
-                                    return (
-                                      <button
-                                        key={oIndex}
-                                        onClick={() => handleAnswerSelect(qIndex, oIndex)}
-                                        className={`w-full text-left p-4 rounded-lg border-2 transition-all cursor-pointer ${optionStyle}`}
-                                      >
-                                        <div className="flex items-center gap-3">
-                                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                                            isSelected
-                                              ? 'border-blue-600 bg-blue-600'
-                                              : 'border-gray-300'
-                                          }`}>
-                                            {isSelected && (
-                                              <CheckCircle className="w-4 h-4 text-white" />
-                                            )}
-                                          </div>
-                                          <span className="flex-1 text-gray-900">{option.text}</span>
-                                        </div>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })() : quizQuestions.filter((q: any) => q && q.question).map((question: Challenge, qIndex: number) => {
-                      if (!question || !question.question) return null;
-                      
-                      const isAnswered = selectedAnswers[qIndex] !== undefined;
-                      const selectedOption = selectedAnswers[qIndex];
-                      const isCorrect = selectedOption !== undefined && question.options[selectedOption]?.isCorrect;
-                      
-                      return (
-                        <Card key={qIndex} className="border-0 shadow-md">
-                          <CardContent className="p-6">
-                            <div className="flex items-start gap-4 mb-4">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                quizSubmitted 
-                                  ? isCorrect 
-                                    ? 'bg-green-100 text-green-700' 
-                                    : isAnswered 
-                                      ? 'bg-red-100 text-red-700'
-                                      : 'bg-gray-100 text-gray-600'
-                                  : 'bg-blue-100 text-blue-700'
-                              }`}>
-                                {qIndex + 1}
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                                  {question.question}
-                                </h4>
-                                
-                                <div className="space-y-3">
-                                  {question.options.map((option: any, oIndex: number) => {
-                                    const isSelected = selectedOption === oIndex;
-                                    const isCorrectOption = option.isCorrect;
-                                    
-                                    let optionStyle = 'border-gray-200 hover:border-blue-300 hover:bg-blue-50';
-                                    
-                                    if (quizSubmitted) {
-                                      if (isCorrectOption) {
-                                        optionStyle = 'border-green-500 bg-green-50';
-                                      } else if (isSelected && !isCorrect) {
-                                        optionStyle = 'border-red-500 bg-red-50';
-                                      } else {
-                                        optionStyle = 'border-gray-200 bg-gray-50';
-                                      }
-                                    } else if (isSelected) {
-                                      optionStyle = 'border-blue-500 bg-blue-50';
-                                    }
-                                    
-                                    return (
-                                      <button
-                                        key={oIndex}
-                                        onClick={() => handleAnswerSelect(qIndex, oIndex)}
-                                        disabled={quizSubmitted}
-                                        className={`w-full text-left p-4 rounded-lg border-2 transition-all ${optionStyle} ${
-                                          quizSubmitted ? 'cursor-default' : 'cursor-pointer'
-                                        }`}
-                                      >
-                                        <div className="flex items-center gap-3">
-                                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                                            quizSubmitted
-                                              ? isCorrectOption
-                                                ? 'border-green-600 bg-green-600'
-                                                : isSelected && !isCorrect
-                                                  ? 'border-red-600 bg-red-600'
-                                                  : 'border-gray-300'
-                                              : isSelected
-                                                ? 'border-blue-600 bg-blue-600'
-                                                : 'border-gray-300'
-                                          }`}>
-                                            {(quizSubmitted && isCorrectOption) || (isSelected && (!quizSubmitted || isCorrect)) ? (
-                                              <CheckCircle className="w-4 h-4 text-white" />
-                                            ) : quizSubmitted && isSelected && !isCorrect ? (
-                                              <XCircle className="w-4 h-4 text-white" />
-                                            ) : null}
-                                          </div>
-                                          <span className="flex-1 text-gray-900">{option.text}</span>
-                                          {quizSubmitted && isCorrectOption && (
-                                            <Badge className="bg-green-100 text-green-700 border-green-300">Correct</Badge>
-                                          )}
-                                        </div>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                                
-                                {quizSubmitted && (() => {
-                                  const correctOption = question.options.find((opt: any) => opt.isCorrect);
-                                  return correctOption?.explanation ? (
-                                    <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
-                                      <p className="text-sm font-semibold text-blue-900 mb-1">Explanation:</p>
-                                      <p className="text-sm text-blue-800">{correctOption.explanation}</p>
-                                    </div>
-                                  ) : null;
-                                })()}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-
-                    {/* Quiz Actions */}
-                    <Card className="border-0 shadow-md bg-gray-50">
-                      <CardContent className="p-6">
-                        {!quizSubmitted ? (
-                          <div className="flex items-center justify-between gap-4">
-                            <Button
-                              onClick={() => setCurrentQuizQuestion(prev => Math.max(0, prev - 1))}
-                              disabled={currentQuizQuestion === 0}
-                              variant="outline"
-                            >
-                              <ChevronLeft className="w-4 h-4 mr-1" />
-                              Previous
-                            </Button>
-                            
-                            <div className="text-sm text-gray-600 text-center">
-                              {selectedAnswers[currentQuizQuestion] !== undefined ? (
-                                <span className="text-green-600 font-medium">✓ Answered</span>
-                              ) : (
-                                <span className="text-orange-600 font-medium">Not answered yet</span>
-                              )}
-                            </div>
-
-                            {currentQuizQuestion < quizQuestions.length - 1 ? (
-                              <Button
-                                onClick={() => setCurrentQuizQuestion(prev => Math.min(quizQuestions.length - 1, prev + 1))}
-                                className="bg-blue-600 hover:bg-blue-700"
-                              >
-                                Next
-                                <ChevronRight className="w-4 h-4 ml-1" />
-                              </Button>
-                            ) : (
-                              <Button 
-                                onClick={handleQuizSubmit}
-                                disabled={Object.keys(selectedAnswers).length !== quizQuestions.length}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Submit Quiz
-                              </Button>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600">
-                              {quizScore >= quizQuestions.length * 0.7 
-                                ? '✅ Great job! You passed the quiz.' 
-                                : '❌ You need 70% to pass. Try again!'}
-                            </div>
-                            <Button onClick={handleQuizReset} variant="outline">
-                              Retry Quiz
-                            </Button>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                );
-              })()}
 
               {/* Section 6: Summary & Next Steps */}
               {learningSections[currentSection].type === 'summary' && (

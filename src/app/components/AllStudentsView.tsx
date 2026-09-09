@@ -233,7 +233,11 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
           student.studentId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           student.email.toLowerCase().includes(searchQuery.toLowerCase());
         
-        const matchesStatus = filterSection === 'all' || student.status === filterSection;
+        const scoreCategory =
+          student.averageScore >= 90 ? 'excellent' :
+          student.averageScore >= 70 ? 'good' :
+          'needs-attention';
+        const matchesStatus = filterSection === 'all' || scoreCategory === filterSection;
         
         return matchesSearch && matchesStatus;
       })
@@ -568,7 +572,7 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                           onClick={() => toast.info(`Sending intervention to ${student.name}`)}
                         >
                           <AlertCircle className="w-4 h-4 mr-1" />
-                          Intervene
+                          Send Intervention
                         </Button>
                       )}
                     </div>

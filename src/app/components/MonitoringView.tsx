@@ -240,8 +240,8 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
 
   const handleMakeAdjustment = (student: StudentData) => {
     setSelectedStudent(student);
-    setAdjustmentType(student.level === 'LOW' ? 'supplemental-material' : student.level === 'MEDIUM' ? 'practice-exercises' : 'encourage-leadership');
-    setAdjustmentMessage(`Student: ${student.name}\nCurrent average score: ${student.avgScore}%\nQuizzes completed: ${student.quizCount}\n\nRecommended action:\n- `);
+    setAdjustmentType(student.level === 'LOW' ? 'supplemental-material' : student.level === 'MEDIUM' ? 'practice-exercises' : 'modify-pacing');
+    setAdjustmentMessage('');
     setAdjustmentDialogOpen(true);
   };
 
@@ -431,91 +431,62 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
                   <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem' }} className="mt-1">Students will appear here after they create accounts.</p>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {/* HIGH */}
-                  {highStudents.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: '2px solid #86efac' }}>
-                        <CheckCircle2 className="w-5 h-5 text-green-600" />
-                        <h3 className="font-bold text-green-800">HIGH PERFORMANCE (≥80%) — {highStudents.length} Students</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {highStudents.map(s => (
-                          <StudentCard key={s.id} student={s} borderColor="border-green-500" bg="bg-green-50" scoreColor="bg-green-600" icon={<Award className="w-5 h-5 text-green-600" />} onAdjust={handleMakeAdjustment} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* MODERATE */}
-                  {mediumStudents.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: '2px solid #fdba74' }}>
-                        <Activity className="w-5 h-5 text-orange-600" />
-                        <h3 className="font-bold text-orange-800">MODERATE PERFORMANCE (60-79%) — {mediumStudents.length} Students</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {mediumStudents.map(s => (
-                          <StudentCard key={s.id} student={s} borderColor="border-orange-500" bg="bg-orange-50" scoreColor="bg-orange-600" icon={<Target className="w-5 h-5 text-orange-600" />} onAdjust={handleMakeAdjustment} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* LOW */}
-                  {lowStudents.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: '2px solid #fca5a5' }}>
-                        <AlertCircle className="w-5 h-5 text-red-600" />
-                        <h3 className="font-bold text-red-800">LOW PERFORMANCE (&lt;60%) — {lowStudents.length} Students — NEEDS INTERVENTION</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {lowStudents.map(s => (
-                          <StudentCard key={s.id} student={s} borderColor="border-red-500" bg="bg-red-50" scoreColor="bg-red-600" icon={<XCircle className="w-5 h-5 text-red-600" />} onAdjust={handleMakeAdjustment} urgent />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* NEW / No activity */}
-                  {newStudents.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: '2px solid var(--border)' }}>
-                        <BookOpen className="w-5 h-5" style={{ color: 'var(--muted-foreground)' }} />
-                        <h3 className="font-bold" style={{ color: 'var(--muted-foreground)' }}>NEW — {newStudents.length} Students (No quizzes yet)</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {newStudents.map(s => (
-                          <StudentCard key={s.id} student={s} borderColor="border-gray-300" bg="bg-gray-50" scoreColor="bg-gray-400" icon={<User className="w-5 h-5 text-gray-400" />} onAdjust={handleMakeAdjustment} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Distribution Summary */}
-                  <div className="mt-4 p-4 rounded-lg" style={{ background: 'var(--accent)', border: '1px solid var(--border)' }}>
-                    <h4 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
-                      <BarChart3 className="w-5 h-5" style={{ color: 'var(--primary)' }} />
-                      Performance Distribution
-                    </h4>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      {[
-                        { label: 'High', count: highStudents.length, color: '#16a34a' },
-                        { label: 'Moderate', count: mediumStudents.length, color: '#d97706' },
-                        { label: 'Low', count: lowStudents.length, color: '#dc2626' },
-                      ].map(({ label, count, color }) => (
-                        <div key={label}>
-                          <p className="text-2xl font-bold" style={{ color }}>{count}</p>
-                          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem' }}>
-                            {label} ({students.length > 0 ? Math.round((count / students.length) * 100) : 0}%)
-                          </p>
-                          <div className="mt-2 w-full rounded-full h-2" style={{ background: 'var(--border)' }}>
-                            <div className="h-2 rounded-full" style={{ width: `${students.length > 0 ? (count / students.length) * 100 : 0}%`, background: color }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--accent)', borderBottom: '2px solid var(--border)' }}>
+                        <th className="text-left px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>#</th>
+                        <th className="text-left px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Student</th>
+                        <th className="text-left px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Email</th>
+                        <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Level</th>
+                        <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Avg Score</th>
+                        <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Quizzes</th>
+                        <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...highStudents, ...mediumStudents, ...lowStudents, ...newStudents].map((s, idx) => {
+                        const levelColor =
+                          s.level === 'HIGH' ? { bg: '#dcfce7', text: '#15803d', label: 'High' } :
+                          s.level === 'MEDIUM' ? { bg: '#ffedd5', text: '#c2410c', label: 'Moderate' } :
+                          s.level === 'LOW' ? { bg: '#fee2e2', text: '#b91c1c', label: 'Low' } :
+                          { bg: 'var(--accent)', text: 'var(--muted-foreground)', label: 'New' };
+                        const scoreColor =
+                          s.level === 'HIGH' ? '#15803d' :
+                          s.level === 'MEDIUM' ? '#c2410c' :
+                          s.level === 'LOW' ? '#b91c1c' :
+                          'var(--muted-foreground)';
+                        return (
+                          <tr
+                            key={s.id}
+                            style={{ borderBottom: '1px solid var(--border)', background: idx % 2 === 0 ? 'var(--card)' : 'var(--accent)' }}
+                          >
+                            <td className="px-4 py-3" style={{ color: 'var(--muted-foreground)' }}>{idx + 1}</td>
+                            <td className="px-4 py-3 font-medium" style={{ color: 'var(--foreground)' }}>{s.name}</td>
+                            <td className="px-4 py-3" style={{ color: 'var(--muted-foreground)' }}>{s.email}</td>
+                            <td className="px-4 py-3 text-center">
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: levelColor.bg, color: levelColor.text }}>
+                                {levelColor.label}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-center font-bold" style={{ color: scoreColor }}>
+                              {s.quizCount > 0 ? `${s.avgScore}%` : '—'}
+                            </td>
+                            <td className="px-4 py-3 text-center" style={{ color: 'var(--muted-foreground)' }}>{s.quizCount}</td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handleMakeAdjustment(s)}
+                                className="px-3 py-1 rounded text-xs font-semibold"
+                                style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', border: 'none', cursor: 'pointer' }}
+                              >
+                                Adjust
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </CardContent>
@@ -602,16 +573,6 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {selectedStudent && (
-              <div className="p-4 rounded-lg" style={{ background: 'var(--accent)', border: '1px solid var(--border)' }}>
-                <p className="font-semibold" style={{ color: 'var(--foreground)' }}>{selectedStudent.name}</p>
-                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.8rem' }}>{selectedStudent.email}</p>
-                <div className="flex gap-2 mt-2">
-                  <Badge style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>Avg: {selectedStudent.avgScore}%</Badge>
-                  <Badge variant="outline">Quizzes: {selectedStudent.quizCount}</Badge>
-                </div>
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="adj-type">Adjustment Type</Label>
               <Select value={adjustmentType} onValueChange={setAdjustmentType}>
@@ -620,8 +581,6 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
                   <SelectItem value="supplemental-material">Provide Supplemental Material</SelectItem>
                   <SelectItem value="one-on-one">Schedule One-on-One Session</SelectItem>
                   <SelectItem value="practice-exercises">Assign Practice Exercises</SelectItem>
-                  <SelectItem value="peer-review">Encourage Peer Code Review</SelectItem>
-                  <SelectItem value="encourage-leadership">Encourage Leadership Role</SelectItem>
                   <SelectItem value="modify-pacing">Modify Learning Pacing</SelectItem>
                 </SelectContent>
               </Select>

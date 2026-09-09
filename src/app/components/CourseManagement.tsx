@@ -33,6 +33,8 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
   const [activityDueDate, setActivityDueDate] = useState('');
   const [announcementTitle, setAnnouncementTitle] = useState('');
   const [announcementMessage, setAnnouncementMessage] = useState('');
+  const [perfFilter, setPerfFilter] = useState<'all' | 'excellent' | 'good' | 'needs-attention'>('all');
+  const [showAllPatterns, setShowAllPatterns] = useState(false);
 
   // Learning Analytics Data
   const weeklyProgressData = [
@@ -621,11 +623,33 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
               <CardDescription>Comprehensive performance tracking and insights</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const cycle: Array<typeof perfFilter> = ['all', 'excellent', 'good', 'needs-attention'];
+                  const next = cycle[(cycle.indexOf(perfFilter) + 1) % cycle.length];
+                  setPerfFilter(next);
+                  toast.info(next === 'all' ? 'Showing all students' : `Filtered: ${next.replace('-', ' ')}`);
+                }}
+              >
                 <Filter className="w-4 h-4 mr-2" />
-                Filter
+                {perfFilter === 'all' ? 'Filter' : perfFilter.replace('-', ' ')}
               </Button>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const filtered = studentAnalytics.filter(s => perfFilter === 'all' || s.status === perfFilter);
+                  const header = 'Student Name,Avg Score,Modules,Submissions,Status\n';
+                  const rows = filtered.map(s => `${s.name},${s.score}%,${s.modules},${s.submissions},${s.status}`).join('\n');
+                  const blob = new Blob([header + rows], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a'); a.href = url; a.download = 'student_performance.csv'; a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success('Exported student performance data');
+                }}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
@@ -649,7 +673,7 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                     </tr>
                   </thead>
                   <tbody>
-                    {studentAnalytics.map((student) => (
+                    {studentAnalytics.filter(s => perfFilter === 'all' || s.status === perfFilter).map((student) => (
                       <tr key={student.id} className="border-b hover:bg-gray-50 transition-colors">
                         <td className="p-3 text-sm text-gray-900 font-medium">{student.name}</td>
                         <td className="p-3 text-sm">
@@ -802,14 +826,14 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
               </CardTitle>
               <CardDescription>Neural network analysis of student coding behavior</CardDescription>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowAllPatterns(p => !p)}>
               <Eye className="w-4 h-4 mr-2" />
-              View All
+              {showAllPatterns ? 'Collapse' : 'View All'}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {learningPatterns.map((pattern) => {
+          {(showAllPatterns ? learningPatterns : learningPatterns.slice(0, 2)).map((pattern) => {
             const Icon = pattern.icon;
             return (
               <div 

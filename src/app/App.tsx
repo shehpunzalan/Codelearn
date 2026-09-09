@@ -913,10 +913,13 @@ function AppContent() {
           <FeedbackPage
             onBack={() => setCurrentView(previewFeedbackView.current)}
             onReturnToLesson={() => {
-              // Always land inside the lesson panel (LessonViewer), never the code editor.
-              // previewFeedbackLessonId.current carries the lesson ID so LessonViewer
-              // mounts with initialLessonId set and opens the right lesson immediately.
-              setCurrentView("module");
+              // If there's an active module, return to the lesson panel; otherwise fall
+              // back to the modules list (user arrived from the dashboard, not a lesson).
+              if (selectedModuleId) {
+                setCurrentView("module");
+              } else {
+                setCurrentView("modules");
+              }
             }}
           />
         )}

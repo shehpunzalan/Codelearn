@@ -130,7 +130,13 @@ export function ReferencesView({ modules, onBack }: ReferencesViewProps) {
             <h1 className="text-3xl font-bold text-gray-900">Module References & Sources</h1>
             <p className="text-gray-600 mt-1">Complete IEEE-formatted bibliography of all course materials</p>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => {
+            const lines = filteredReferences.map(ref => formatIEEECitation(ref));
+            const blob = new Blob([lines.join('\n\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'CCS108_Bibliography.txt'; a.click();
+            URL.revokeObjectURL(url);
+          }}>
             <Download className="w-4 h-4 mr-2" />
             Export Bibliography
           </Button>
@@ -261,41 +267,38 @@ export function ReferencesView({ modules, onBack }: ReferencesViewProps) {
             Complete References List
           </CardTitle>
           <CardDescription>
-            {filteredReferences.length} references across {referencesByModule.length} modules
+            {filteredReferences.length} reference{filteredReferences.length !== 1 ? 's' : ''}{filterType !== 'all' ? ` (filtered by: ${filterType})` : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[600px] pr-4">
+            {filteredReferences.length === 0 ? (
+              <div className="py-16 text-center">
+                <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p className="text-gray-500">No references found{filterType !== 'all' ? ` of type "${filterType}"` : ''}.</p>
+              </div>
+            ) : (
             <div className="space-y-6">
-              {referencesByModule.map((group) => (
-                <div key={group.module.id} className="border-b border-gray-200 pb-6 last:border-b-0">
+              {/* Group filtered references by module */}
+              {modules.map(module => {
+                const moduleRefs = filteredReferences.filter(r => r.moduleId === module.id);
+                if (moduleRefs.length === 0) return null;
+                return (
+                <div key={module.id} className="border-b border-gray-200 pb-6 last:border-b-0">
                   {/* Module Header */}
                   <div className="mb-4 pb-3 border-b-2 border-purple-200">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-bold text-gray-900">{group.module.title}</h3>
+                      <h3 className="text-lg font-bold text-gray-900">{module.title}</h3>
                       <Badge variant="outline" className="capitalize">
-                        {group.module.difficulty}
+                        {module.difficulty}
                       </Badge>
-                      {group.module.source?.type && (
-                        <Badge className={
-                          group.module.source.type === 'neural-network' ? 'bg-purple-100 text-purple-800 border-purple-300' :
-                          group.module.source.type === 'instructor' ? 'bg-blue-100 text-blue-800 border-blue-300' :
-                          group.module.source.type === 'curriculum' ? 'bg-green-100 text-green-800 border-green-300' :
-                          'bg-orange-100 text-orange-800 border-orange-300'
-                        } variant="outline">
-                          {group.module.source.type === 'neural-network' ? 'AI Neural Network' :
-                           group.module.source.type === 'instructor' ? 'Instructor' :
-                           group.module.source.type === 'curriculum' ? 'Curriculum' :
-                           'AI Generated'}
-                        </Badge>
-                      )}
                     </div>
-                    <p className="text-sm text-gray-600">{group.references.length} references</p>
+                    <p className="text-sm text-gray-600">{moduleRefs.length} reference{moduleRefs.length !== 1 ? 's' : ''}</p>
                   </div>
 
                   {/* References List */}
                   <div className="space-y-4">
-                    {group.references.map((ref) => (
+                    {moduleRefs.map((ref) => (
                       <div 
                         key={`${ref.moduleId}-${ref.ieeeIndex}`}
                         className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all"
@@ -350,8 +353,10 @@ export function ReferencesView({ modules, onBack }: ReferencesViewProps) {
                     ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
+            )}
           </ScrollArea>
         </CardContent>
       </Card>

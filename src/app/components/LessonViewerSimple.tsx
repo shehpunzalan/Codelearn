@@ -161,6 +161,7 @@ export function LessonViewer({
   };
 
   const handleContinue = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const idx = module.lessons.findIndex(l => l.id === activeLessonId);
     if (idx < module.lessons.length - 1) {
       const next = module.lessons[idx + 1];
@@ -250,6 +251,7 @@ export function LessonViewer({
           onComplete={handleQuizComplete}
           onClose={() => setScreen('content')}
           lessonTitle={activeLesson?.title}
+          attemptKey={`quiz_attempts_${userId ?? 'guest'}_${module.id}_${activeLessonId}`}
         />
       </div>
     );

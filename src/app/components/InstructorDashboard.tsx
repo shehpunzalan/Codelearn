@@ -31,6 +31,7 @@ interface StudentSummary {
   completedModules: number;
   issues: string[];
   lastActive: string;
+  hasFailedFirst?: boolean;
 }
 
 export function InstructorDashboard({ user, modules, onSelectModule, onNavigate }: InstructorDashboardProps) {
@@ -143,7 +144,15 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
           if (modAvg < 60 && modAvg > 0) weakTopics.push(m.title);
         });
 
-        summaries.push({ id: s.id, name: s.name, avgScore, completedModules: Math.floor(completedLessons / 5), issues: weakTopics, lastActive: lastActiveLabel });
+        // Detect students who failed their first quiz attempt
+        let hasFailedFirst = false;
+        for (let ki = 0; ki < localStorage.length; ki++) {
+          const lk = localStorage.key(ki) || '';
+          if (!lk.startsWith(`quiz_attempts_${s.id}_`)) continue;
+          try { if (parseInt(localStorage.getItem(lk) || '0', 10) >= 1) { hasFailedFirst = true; break; } } catch {}
+        }
+
+        summaries.push({ id: s.id, name: s.name, avgScore, completedModules: Math.floor(completedLessons / 5), issues: weakTopics, lastActive: lastActiveLabel, hasFailedFirst });
       }
 
       setActiveStudents(activeCount);
@@ -151,7 +160,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
 
       const sorted = [...summaries].sort((a, b) => b.avgScore - a.avgScore);
       setTopStudents(sorted.filter(s => s.avgScore >= 70).slice(0, 3));
-      setNeedsAttention(sorted.filter(s => s.avgScore < 60).slice(0, 5));
+      setNeedsAttention(sorted.filter(s => s.avgScore < 70 || s.hasFailedFirst).slice(0, 5));
     } catch (err) {
       console.error('InstructorDashboard load error:', err);
     }
@@ -618,19 +627,6 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
               <Download className="w-4 h-4 mr-2" />
               Export Analytics
             </Button>
-            <div style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
-              <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 500 }}>Demo Feature</p>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-white border-0"
-                size="sm"
-                style={{ background: 'linear-gradient(90deg, var(--primary), var(--secondary))' }}
-                onClick={handleSendDemoNotifications}
-              >
-                <Bell className="w-4 h-4 mr-2" />
-                Send Test Notifications
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
