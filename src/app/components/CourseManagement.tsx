@@ -627,8 +627,9 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const cycle: Array<typeof perfFilter> = ['all', 'excellent', 'good', 'needs-attention'];
-                  const next = cycle[(cycle.indexOf(perfFilter) + 1) % cycle.length];
+                  const filters = ['all', 'excellent', 'good', 'needs-attention'];
+                  const idx = filters.indexOf(perfFilter);
+                  const next = filters[(idx + 1) % filters.length] as 'all' | 'excellent' | 'good' | 'needs-attention';
                   setPerfFilter(next);
                   toast.info(next === 'all' ? 'Showing all students' : `Filtered: ${next.replace('-', ' ')}`);
                 }}

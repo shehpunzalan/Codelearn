@@ -75,7 +75,9 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
       const usersData = localStorage.getItem('registeredUsers');
       // refreshTick dependency ensures this re-runs when new users arrive
       const registeredUsers: any[] = usersData ? JSON.parse(usersData) : [];
-      const students = registeredUsers.filter((u: any) => u.role === 'student');
+      const students = registeredUsers.filter((u: any) =>
+        u.role === 'student' && u.id !== 'demo-instructor' && u.id !== 'demo-student'
+      );
 
       setTotalStudents(students.length);
 

@@ -11,70 +11,33 @@ export interface CodeAnalysis {
   feedback: string;
 }
 
-// Analyze class structure in complex multi-class programs
+// Validate brace closure for each class/interface in a multi-class program.
 const detectClassStructureErrors = (code: string): string[] => {
   const issues: string[] = [];
-  const lines = code.split('\n');
 
-  // Find all class/interface/enum declarations
-  const classDecls: Array<{ name: string; line: number; type: string }> = [];
-  const classPattern = /(?:public\s+|private\s+|protected\s+|abstract\s+|final\s+)*(?:class|interface|enum|record)\s+(\w+)/g;
-  let m: RegExpExecArray | null;
-  while ((m = classPattern.exec(code)) !== null) {
-    const before = code.slice(0, m.index);
-    const lineNum = before.split('\n').length;
-    const keyword = m[0].match(/\b(class|interface|enum|record)\b/)?.[1] ?? 'class';
-    classDecls.push({ name: m[1], line: lineNum, type: keyword });
-  }
-
-  if (classDecls.length === 0) return issues;
-
-  // Per-class brace balance: find the opening { for each class and count depth
-  for (const decl of classDecls) {
-    const startIdx = code.indexOf(`${decl.type}`, code.split('\n').slice(0, decl.line - 1).join('\n').length);
-    const openIdx = code.indexOf('{', startIdx);
+  const classPattern = /(?:(?:public|private|protected|abstract|final|static)\s+)*(?:class|interface|enum|record)\s+(\w+)/g;
+  let match = classPattern.exec(code);
+  while (match !== null) {
+    const className = match[1];
+    const keyword = (match[0].match(/\b(class|interface|enum|record)\b/) || ['class'])[0];
+    const lineNum = code.slice(0, match.index).split('\n').length;
+    const openIdx = code.indexOf('{', match.index + match[0].length);
     if (openIdx === -1) {
-      issues.push(`Line ${decl.line}: Class "${decl.name}" has no opening brace {`);
-      continue;
-    }
-    let depth = 1;
-    let pos = openIdx + 1;
-    let closed = false;
-    while (pos < code.length && depth > 0) {
-      if (code[pos] === '{') depth++;
-      else if (code[pos] === '}') { depth--; if (depth === 0) { closed = true; break; } }
-      pos++;
-    }
-    if (!closed) {
-      issues.push(`Line ${decl.line}: Class "${decl.name}" is missing its closing brace }`);
-    }
-  }
-
-  // Abstract method without body (must end with ;)
-  const abstractMethodPattern = /abstract\s+[\w<>\[\]]+\s+\w+\s*\([^)]*\)\s*(?:throws\s+[\w,\s]+)?\s*(?![\{;])/g;
-  while ((m = abstractMethodPattern.exec(code)) !== null) {
-    const before = code.slice(0, m.index);
-    const lineNum = before.split('\n').length;
-    issues.push(`Line ${lineNum}: Abstract method "${m[0].trim().slice(0, 40)}…" must end with ; not {}`);
-  }
-
-  // Constructor name must match class name
-  for (const decl of classDecls) {
-    if (decl.type !== 'class') continue;
-    const ctorPattern = new RegExp(`\\b(?:public|private|protected)\\s+(\\w+)\\s*\\(`, 'g');
-    while ((m = ctorPattern.exec(code)) !== null) {
-      const ctorName = m[1];
-      // skip if it's a known method keyword
-      if (['void', 'int', 'String', 'boolean', 'double', 'float', 'char', 'long', 'byte', 'short'].includes(ctorName)) continue;
-      if (classDecls.some(c => c.name === ctorName)) continue; // valid constructor
-      // Check if this looks like a constructor (no return type before it)
-      const before = code.slice(0, m.index).trim();
-      const lastNewline = before.lastIndexOf('\n');
-      const prevLine = before.slice(lastNewline + 1).trim();
-      if (!prevLine && ctorName !== decl.name) {
-        // potential misnamed constructor — skip for now to avoid false positives
+      issues.push(`Line ${lineNum}: ${keyword} "${className}" is missing its opening brace {`);
+    } else {
+      let depth = 1;
+      let pos = openIdx + 1;
+      let closed = false;
+      while (pos < code.length && depth > 0) {
+        if (code[pos] === '{') depth++;
+        else if (code[pos] === '}') { depth--; if (depth === 0) { closed = true; break; } }
+        pos++;
+      }
+      if (!closed) {
+        issues.push(`Line ${lineNum}: ${keyword} "${className}" is missing its closing brace }`);
       }
     }
+    match = classPattern.exec(code);
   }
 
   return issues;

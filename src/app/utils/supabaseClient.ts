@@ -23,6 +23,7 @@ export async function upsertUserProfile(user: {
   role: 'student' | 'instructor';
   studentId?: string;
   section?: string;
+  classSchedule?: string;
 }): Promise<void> {
   try {
     await fetch(`${SUPABASE_REST}/user_profiles`, {
@@ -35,6 +36,7 @@ export async function upsertUserProfile(user: {
         role: user.role,
         student_id: user.studentId || null,
         section: user.section || null,
+        class_schedule: user.classSchedule || user.section || null,
         updated_at: new Date().toISOString(),
       }),
     });
@@ -46,12 +48,14 @@ export async function upsertUserProfile(user: {
 // Fetch all user profiles from Supabase (for cross-device instructor sync).
 export async function fetchAllUserProfiles(): Promise<any[]> {
   try {
+    // Filter to students only so instructors are never counted in student totals.
     const res = await fetch(
-      `${SUPABASE_REST}/user_profiles?select=user_id,name,email,role,student_id,section,year_level,created_at`,
+      `${SUPABASE_REST}/user_profiles?select=user_id,name,email,role,student_id,section,year_level,class_schedule,created_at&role=eq.student`,
       { headers: restHeaders() }
     );
     if (!res.ok) return [];
-    return await res.json();
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   } catch (e) {
     console.debug('[supabase] fetchAllUserProfiles failed:', e);
     return [];

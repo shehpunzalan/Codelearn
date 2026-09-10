@@ -8,6 +8,7 @@ import { Checkbox } from './ui/checkbox';
 import { Brain, Mail, Lock, UserCircle as UserIcon, GraduationCap, Shield, FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle, CheckCircle, MailCheck, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import * as backendApi from '../services/backendApi';
+import { upsertUserProfile } from '../utils/supabaseClient';
 
 interface RegisterProps {
   onRegister: (user: User) => void;
@@ -265,6 +266,16 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
     existingUsers.push(newUser);
     localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
     localStorage.setItem(`userCreds_${trimmedEmail}`, JSON.stringify({ password, id: userId }));
+
+    // Push profile to Supabase so instructor dashboards on other PCs can sync it.
+    upsertUserProfile({
+      id: userId,
+      name: trimmedName,
+      email: trimmedEmail,
+      role,
+      studentId: role === 'student' ? studentId : undefined,
+      section: role === 'student' ? (classSchedule || section) : undefined,
+    }).catch(() => { /* non-blocking — local save already succeeded */ });
 
     // Notify instructor dashboards on any open tabs to refresh student list
     window.dispatchEvent(new CustomEvent('codelearn:userRegistered', { detail: newUser }));

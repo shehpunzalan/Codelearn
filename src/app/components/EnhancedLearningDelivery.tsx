@@ -66,7 +66,9 @@ export function EnhancedLearningDelivery({
   const [currentSection, setCurrentSection] = useState(() => {
     try {
       const saved = localStorage.getItem(`currentSection_${moduleId}_${lessonId}`);
-      return saved ? parseInt(saved, 10) : 0;
+      const parsed = saved ? parseInt(saved, 10) : 0;
+      // Clamp to 0–4 (5 sections after Knowledge Check removal) to avoid undefined access
+      return Math.min(Math.max(0, parsed), 4);
     } catch { return 0; }
   });
   const [quizAnswers, setQuizAnswers] = useState<{[key: number]: string}>({});
@@ -1247,7 +1249,7 @@ export function EnhancedLearningDelivery({
             </div>
             <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
               <Target className="w-5 h-5 text-blue-600 mb-2" />
-              <p className="text-2xl font-bold text-gray-900">{completedSections.size}/6</p>
+              <p className="text-2xl font-bold text-gray-900">{completedSections.size}/{learningSections.length}</p>
               <p className="text-sm text-gray-600">Sections Completed</p>
             </div>
           </div>
