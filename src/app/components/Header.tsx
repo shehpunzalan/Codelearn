@@ -18,7 +18,6 @@ import {
   PopoverTrigger,
 } from './ui/popover';
 import { getAllNotifications, markNotificationAsRead, deleteNotification, saveNotification, clearAllNotifications } from '../utils/storage';
-import { createSampleNotifications } from '../utils/notifications';
 import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
 import * as backendApi from '../services/backendApi';
@@ -39,10 +38,9 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
   const [notifications, setNotifications] = React.useState<any[]>([]);
   const [notificationOpen, setNotificationOpen] = React.useState(false);
 
-  // Load notifications on mount and when popover opens
+  // Load notifications on mount
   React.useEffect(() => {
     if (user.role === 'student') {
-      createSampleNotifications(user.id);
       setNotifications(getAllNotifications(user.id));
     }
   }, [user.id, user.role]);
@@ -130,8 +128,18 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
 
   const handleNotificationClick = (notification: any) => {
     handleMarkAsRead(notification.id);
-    if (notification.moduleId) {
-      setNotificationOpen(false);
+    setNotificationOpen(false);
+
+    const type = notification.type || '';
+    if (type === 'intervention' || type === 'remedial') {
+      onNavigate('code-editor');
+    } else if (type === 'adjustment') {
+      onNavigate('modules');
+    } else if (type === 'activity' && notification.moduleId) {
+      onNavigate('modules');
+    } else if (type === 'module' && notification.moduleId) {
+      onNavigate('modules');
+    } else if (notification.moduleId || notification.lessonId) {
       onNavigate('modules');
     }
   };

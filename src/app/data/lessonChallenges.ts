@@ -1,5 +1,6 @@
-// Interactive Challenges for All 111 Lessons
-// Comprehensive gamified learning challenges with XP rewards
+// Interactive Challenges for All Lessons
+// High-quality gamified learning challenges with XP rewards
+// Questions include code tracing, debugging, analysis, and higher-order thinking
 
 export interface ChallengeOption {
   id: string;
@@ -20,7 +21,6 @@ export interface Challenge {
 
 // MODULE 1: Introduction to Java and OOP
 export const module1Challenges: Record<string, Challenge[]> = {
-  // Lesson 1.1: Introduction to Programming
   'mod1-lesson1': [
     {
       id: 'mod1-l1-c1',
@@ -28,164 +28,64 @@ export const module1Challenges: Record<string, Challenge[]> = {
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'To organize code into reusable objects that model real-world entities',
-          isCorrect: true,
-          explanation: 'Correct! OOP helps organize code by modeling real-world entities as objects with properties and behaviors.'
-        },
-        {
-          id: 'b',
-          text: 'To make programs run faster',
-          isCorrect: false,
-          explanation: 'Incorrect. While OOP can improve efficiency, its main purpose is code organization and reusability.'
-        },
-        {
-          id: 'c',
-          text: 'To reduce the number of lines of code',
-          isCorrect: false,
-          explanation: 'Incorrect. OOP focuses on code organization, not necessarily reducing lines of code.'
-        },
-        {
-          id: 'd',
-          text: 'To eliminate all bugs in programs',
-          isCorrect: false,
-          explanation: 'Incorrect. No programming paradigm can eliminate all bugs, though OOP can make debugging easier.'
-        }
+        { id: 'a', text: 'To reduce the total number of lines of code written', isCorrect: false, explanation: 'Incorrect. OOP focuses on organization and reuse, not necessarily reducing line count.' },
+        { id: 'b', text: 'To make programs execute as fast as possible', isCorrect: false, explanation: 'Incorrect. While OOP can help with maintainability, its main purpose is code organization and reusability.' },
+        { id: 'c', text: 'To eliminate all bugs from programs automatically', isCorrect: false, explanation: 'Incorrect. No paradigm eliminates bugs, though OOP can make debugging more manageable.' },
+        { id: 'd', text: 'To organize code into reusable objects that model real-world entities', isCorrect: true, explanation: 'Correct! OOP organizes code by modeling real-world entities as objects with properties and behaviors.' },
       ],
-      hint: 'Think about how OOP models real-world concepts in code.'
+      hint: 'Think about how OOP models real-world concepts in code.',
     },
     {
       id: 'mod1-l1-c2',
-      question: 'Which of the following is NOT a principle of Object-Oriented Programming?',
+      question: 'Which of the following is NOT one of the four core OOP principles?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'Compilation',
-          isCorrect: true,
-          explanation: 'Correct! Compilation is a process, not an OOP principle. The four main OOP principles are Encapsulation, Inheritance, Polymorphism, and Abstraction.'
-        },
-        {
-          id: 'b',
-          text: 'Encapsulation',
-          isCorrect: false,
-          explanation: 'Incorrect. Encapsulation is one of the core OOP principles.'
-        },
-        {
-          id: 'c',
-          text: 'Inheritance',
-          isCorrect: false,
-          explanation: 'Incorrect. Inheritance is one of the core OOP principles.'
-        },
-        {
-          id: 'd',
-          text: 'Polymorphism',
-          isCorrect: false,
-          explanation: 'Incorrect. Polymorphism is one of the core OOP principles.'
-        }
+        { id: 'a', text: 'Polymorphism', isCorrect: false, explanation: 'Incorrect. Polymorphism is one of the four core OOP principles.' },
+        { id: 'b', text: 'Inheritance', isCorrect: false, explanation: 'Incorrect. Inheritance is one of the four core OOP principles.' },
+        { id: 'c', text: 'Encapsulation', isCorrect: false, explanation: 'Incorrect. Encapsulation is one of the four core OOP principles.' },
+        { id: 'd', text: 'Compilation', isCorrect: true, explanation: 'Correct! Compilation is a process, not an OOP principle. The four are Encapsulation, Inheritance, Polymorphism, and Abstraction.' },
       ],
-      hint: 'Think about the four pillars of OOP.'
+      hint: 'Think about the four pillars of OOP.',
     },
     {
       id: 'mod1-l1-c3',
-      question: 'What does encapsulation mean in OOP?',
-      difficulty: 'medium',
-      xpReward: 15,
-      options: [
-        {
-          id: 'a',
-          text: 'Hiding internal details and exposing only necessary information',
-          isCorrect: true,
-          explanation: 'Correct! Encapsulation bundles data and methods together while hiding internal implementation details.'
-        },
-        {
-          id: 'b',
-          text: 'Creating multiple copies of an object',
-          isCorrect: false,
-          explanation: 'Incorrect. This is not related to encapsulation.'
-        },
-        {
-          id: 'c',
-          text: 'Inheriting properties from parent classes',
-          isCorrect: false,
-          explanation: 'Incorrect. This describes inheritance, not encapsulation.'
-        },
-        {
-          id: 'd',
-          text: 'Writing code in a capsule format',
-          isCorrect: false,
-          explanation: 'Incorrect. Encapsulation is about data hiding and access control.'
-        }
-      ],
-      hint: 'Think about protecting data within a class.'
-    },
-    {
-      id: 'mod1-l1-c4',
       question: 'What is an object in OOP?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'An instance of a class with its own state and behavior',
-          isCorrect: true,
-          explanation: 'Correct! An object is a concrete instance created from a class blueprint.'
-        },
-        {
-          id: 'b',
-          text: 'A function that performs operations',
-          isCorrect: false,
-          explanation: 'Incorrect. That describes a method, not an object.'
-        },
-        {
-          id: 'c',
-          text: 'A keyword in Java',
-          isCorrect: false,
-          explanation: 'Incorrect. An object is an instance, not a keyword.'
-        },
-        {
-          id: 'd',
-          text: 'A data type like int or String',
-          isCorrect: false,
-          explanation: 'Incorrect. Objects are instances of classes, not primitive data types.'
-        }
+        { id: 'a', text: 'A reserved keyword used in Java syntax', isCorrect: false, explanation: 'Incorrect. An object is an instance of a class, not a keyword.' },
+        { id: 'b', text: 'A primitive data type like int or double', isCorrect: false, explanation: 'Incorrect. Objects are reference types created from classes, not primitives.' },
+        { id: 'c', text: 'An instance of a class with its own state and behavior', isCorrect: true, explanation: 'Correct! An object is a concrete instance created from a class blueprint with its own field values.' },
+        { id: 'd', text: 'A function that performs a set of operations', isCorrect: false, explanation: 'Incorrect. That describes a method or function, not an object.' },
       ],
-      hint: 'Think about what you create from a class.'
+      hint: 'Think about what you create when you use the new keyword.',
     },
     {
-      id: 'mod1-l1-c5',
+      id: 'mod1-l1-c4',
       question: 'What is a class in Java?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'A blueprint or template for creating objects',
-          isCorrect: true,
-          explanation: 'Correct! A class defines the structure and behavior that objects created from it will have.'
-        },
-        {
-          id: 'b',
-          text: 'A collection of variables',
-          isCorrect: false,
-          explanation: 'Incorrect. A class is more than just variables; it includes methods and defines object behavior.'
-        },
-        {
-          id: 'c',
-          text: 'A type of loop',
-          isCorrect: false,
-          explanation: 'Incorrect. Loops are control structures, not classes.'
-        },
-        {
-          id: 'd',
-          text: 'A special kind of array',
-          isCorrect: false,
-          explanation: 'Incorrect. Classes and arrays are different concepts.'
-        }
+        { id: 'a', text: 'A special kind of array that holds objects', isCorrect: false, explanation: 'Incorrect. Classes and arrays are fundamentally different concepts.' },
+        { id: 'b', text: 'A type of loop used to iterate over data', isCorrect: false, explanation: 'Incorrect. Loops are control structures; classes define types.' },
+        { id: 'c', text: 'A collection of related variables stored together', isCorrect: false, explanation: 'Incorrect. A class is more than just variables — it includes methods and defines a type.' },
+        { id: 'd', text: 'A blueprint or template for creating objects', isCorrect: true, explanation: 'Correct! A class defines the structure and behavior that objects created from it will share.' },
       ],
-      hint: 'Think about what defines the structure of objects.'
+      hint: 'Think about what defines the structure of objects.',
+    },
+    {
+      id: 'mod1-l1-c5',
+      question: 'What does encapsulation mean in OOP?',
+      difficulty: 'medium',
+      xpReward: 15,
+      options: [
+        { id: 'a', text: 'Creating multiple copies of an object to improve performance', isCorrect: false, explanation: 'Incorrect. This is unrelated to encapsulation.' },
+        { id: 'b', text: 'Inheriting properties and behaviors from a parent class', isCorrect: false, explanation: 'Incorrect. That describes inheritance, not encapsulation.' },
+        { id: 'c', text: 'Writing code that can run on multiple platforms', isCorrect: false, explanation: 'Incorrect. Platform independence relates to Java bytecode and the JVM, not encapsulation.' },
+        { id: 'd', text: 'Bundling data with methods and hiding internal details from the outside', isCorrect: true, explanation: 'Correct! Encapsulation restricts direct access to internal state and exposes it through a controlled interface.' },
+      ],
+      hint: 'Think about protecting data inside a class.',
     },
     {
       id: 'mod1-l1-c6',
@@ -193,32 +93,12 @@ export const module1Challenges: Record<string, Challenge[]> = {
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: 'A mechanism where a class acquires properties and behaviors from another class',
-          isCorrect: true,
-          explanation: 'Correct! Inheritance allows child classes to inherit features from parent classes, promoting code reuse.'
-        },
-        {
-          id: 'b',
-          text: 'A way to store data permanently',
-          isCorrect: false,
-          explanation: 'Incorrect. This describes persistence, not inheritance.'
-        },
-        {
-          id: 'c',
-          text: 'A method to hide implementation details',
-          isCorrect: false,
-          explanation: 'Incorrect. This describes encapsulation, not inheritance.'
-        },
-        {
-          id: 'd',
-          text: 'A technique to compile code faster',
-          isCorrect: false,
-          explanation: 'Incorrect. Inheritance is about code reuse, not compilation speed.'
-        }
+        { id: 'a', text: 'A mechanism where a subclass acquires fields and methods from a superclass', isCorrect: true, explanation: 'Correct! Inheritance lets child classes reuse and extend the behavior of parent classes.' },
+        { id: 'b', text: 'A way to make Java programs compile more quickly', isCorrect: false, explanation: 'Incorrect. Inheritance is about code reuse, not compilation speed.' },
+        { id: 'c', text: 'A technique for hiding implementation details behind an interface', isCorrect: false, explanation: 'Incorrect. That describes encapsulation or abstraction.' },
+        { id: 'd', text: 'A method to permanently store object data', isCorrect: false, explanation: 'Incorrect. Data persistence is unrelated to inheritance.' },
       ],
-      hint: 'Think about parent and child relationships.'
+      hint: 'Think about parent-child class relationships.',
     },
     {
       id: 'mod1-l1-c7',
@@ -226,32 +106,12 @@ export const module1Challenges: Record<string, Challenge[]> = {
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: 'The ability of objects to take multiple forms',
-          isCorrect: true,
-          explanation: 'Correct! Polymorphism allows objects to be treated as instances of their parent class, enabling one interface to represent different underlying forms.'
-        },
-        {
-          id: 'b',
-          text: 'Creating many objects at once',
-          isCorrect: false,
-          explanation: 'Incorrect. Polymorphism is about flexibility in object behavior, not quantity.'
-        },
-        {
-          id: 'c',
-          text: 'Using multiple programming languages',
-          isCorrect: false,
-          explanation: 'Incorrect. Polymorphism is a concept within a single language.'
-        },
-        {
-          id: 'd',
-          text: 'Storing multiple data types in one variable',
-          isCorrect: false,
-          explanation: 'Incorrect. This partially relates but doesn\'t capture the essence of polymorphism.'
-        }
+        { id: 'a', text: 'The ability of objects of different types to be treated as a common supertype', isCorrect: true, explanation: 'Correct! Polymorphism lets one interface represent different underlying types, and the correct behavior is selected at runtime.' },
+        { id: 'b', text: 'Using multiple programming languages in one project', isCorrect: false, explanation: 'Incorrect. Polymorphism is a single-language OOP concept.' },
+        { id: 'c', text: 'Creating many separate copies of an object at once', isCorrect: false, explanation: 'Incorrect. Polymorphism is about flexibility in type and behavior, not quantity.' },
+        { id: 'd', text: 'Storing multiple primitive values inside one variable', isCorrect: false, explanation: 'Incorrect. That is not what polymorphism means.' },
       ],
-      hint: 'Think about method overriding and overloading.'
+      hint: 'Think about method overriding and dynamic dispatch.',
     },
     {
       id: 'mod1-l1-c8',
@@ -259,1610 +119,1138 @@ export const module1Challenges: Record<string, Challenge[]> = {
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: 'Hiding complex implementation and showing only essential features',
-          isCorrect: true,
-          explanation: 'Correct! Abstraction focuses on what an object does rather than how it does it.'
-        },
-        {
-          id: 'b',
-          text: 'Making code run faster',
-          isCorrect: false,
-          explanation: 'Incorrect. Abstraction is about simplifying complexity, not performance.'
-        },
-        {
-          id: 'c',
-          text: 'Creating abstract art with code',
-          isCorrect: false,
-          explanation: 'Incorrect. Abstraction is a programming concept, not art-related.'
-        },
-        {
-          id: 'd',
-          text: 'Removing all methods from a class',
-          isCorrect: false,
-          explanation: 'Incorrect. Abstraction involves hiding complexity, not removing functionality.'
-        }
+        { id: 'a', text: 'Automatically making programs run faster at compile time', isCorrect: false, explanation: 'Incorrect. Abstraction is about managing complexity, not performance.' },
+        { id: 'b', text: 'Converting one data type to another automatically', isCorrect: false, explanation: 'Incorrect. That describes type conversion, not abstraction.' },
+        { id: 'c', text: 'Hiding complex implementation details and exposing only what is essential', isCorrect: true, explanation: 'Correct! Abstraction focuses on what an object does rather than how it does it.' },
+        { id: 'd', text: 'Removing all methods from a class to reduce its size', isCorrect: false, explanation: 'Incorrect. Abstraction is about hiding complexity, not removing functionality.' },
       ],
-      hint: 'Think about interfaces and abstract classes.'
+      hint: 'Think about abstract classes and interfaces.',
     },
     {
       id: 'mod1-l1-c9',
-      question: 'Which real-world analogy best represents a class and object relationship?',
+      question: 'Which real-world analogy best represents the class–object relationship?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'Blueprint (class) and House (object)',
-          isCorrect: true,
-          explanation: 'Correct! Just as a blueprint defines how to build a house, a class defines how to create objects.'
-        },
-        {
-          id: 'b',
-          text: 'Car (class) and Engine (object)',
-          isCorrect: false,
-          explanation: 'Incorrect. This represents composition, not the class-object relationship.'
-        },
-        {
-          id: 'c',
-          text: 'Teacher (class) and Student (object)',
-          isCorrect: false,
-          explanation: 'Incorrect. Both would be separate classes, not class-object relationship.'
-        },
-        {
-          id: 'd',
-          text: 'Book (class) and Page (object)',
-          isCorrect: false,
-          explanation: 'Incorrect. This represents composition, not the class-object relationship.'
-        }
+        { id: 'a', text: 'A car (class) and its engine (object)', isCorrect: false, explanation: 'Incorrect. A car HAS an engine — that represents composition, not class and instance.' },
+        { id: 'b', text: 'A book (class) and its pages (objects)', isCorrect: false, explanation: 'Incorrect. That represents a part-whole composition relationship.' },
+        { id: 'c', text: 'A teacher (class) and a student (object)', isCorrect: false, explanation: 'Incorrect. Both teacher and student would each be separate classes.' },
+        { id: 'd', text: 'A blueprint (class) and a house built from it (object)', isCorrect: true, explanation: 'Correct! A blueprint defines how to build a house; a class defines how to create an object.' },
       ],
-      hint: 'Think about a template and what is created from it.'
+      hint: 'Think about a template and what is made from it.',
     },
     {
       id: 'mod1-l1-c10',
-      question: 'Why is OOP considered beneficial for large projects?',
+      question: 'Why is OOP considered beneficial for large software projects?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: 'It promotes code reusability, modularity, and easier maintenance',
-          isCorrect: true,
-          explanation: 'Correct! OOP principles make it easier to manage complexity in large codebases through better organization and reusability.'
-        },
-        {
-          id: 'b',
-          text: 'It makes programs run 10x faster',
-          isCorrect: false,
-          explanation: 'Incorrect. OOP is about organization and maintainability, not necessarily speed.'
-        },
-        {
-          id: 'c',
-          text: 'It requires less memory',
-          isCorrect: false,
-          explanation: 'Incorrect. OOP can actually use more memory due to object overhead.'
-        },
-        {
-          id: 'd',
-          text: 'It eliminates the need for testing',
-          isCorrect: false,
-          explanation: 'Incorrect. Testing is always necessary regardless of programming paradigm.'
-        }
+        { id: 'a', text: 'It guarantees that programs use less memory than procedural code', isCorrect: false, explanation: 'Incorrect. OOP can actually add memory overhead from object instances.' },
+        { id: 'b', text: 'It automatically tests and verifies program correctness', isCorrect: false, explanation: 'Incorrect. Testing is always required; OOP does not automate it.' },
+        { id: 'c', text: 'It makes programs execute at least 10 times faster', isCorrect: false, explanation: 'Incorrect. OOP is about organization and maintainability, not raw execution speed.' },
+        { id: 'd', text: 'It promotes code reusability, modularity, and easier long-term maintenance', isCorrect: true, explanation: 'Correct! OOP principles make it easier to manage complexity in large codebases.' },
       ],
-      hint: 'Think about managing complex, large-scale applications.'
-    }
+      hint: 'Think about managing complex, large-scale applications.',
+    },
   ],
-
-  // Lesson 1.2: Setting up Java
   'mod1-lesson2': [
     {
       id: 'mod1-l2-c1',
-      question: 'Which command is used to compile a Java program?',
-      code: '// MyProgram.java\npublic class MyProgram {\n    public static void main(String[] args) {\n        System.out.println("Hello");\n    }\n}',
+      question: 'What is the correct signature for the main method in Java?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'javac MyProgram.java',
-          isCorrect: true,
-          explanation: 'Correct! javac is the Java compiler that converts .java files to .class bytecode files.'
-        },
-        {
-          id: 'b',
-          text: 'java MyProgram.java',
-          isCorrect: false,
-          explanation: 'Incorrect. This attempts to run the program, not compile it.'
-        },
-        {
-          id: 'c',
-          text: 'compile MyProgram.java',
-          isCorrect: false,
-          explanation: 'Incorrect. There is no "compile" command in Java.'
-        },
-        {
-          id: 'd',
-          text: 'run MyProgram.java',
-          isCorrect: false,
-          explanation: 'Incorrect. This is not a valid Java command.'
-        }
+        { id: 'a', text: 'public void main(String args)', isCorrect: false, explanation: 'Incorrect. The main method must be static and the parameter must be String[] (array), not String.' },
+        { id: 'b', text: 'public static void main(String[] args)', isCorrect: true, explanation: 'Correct! The main method must be public, static, void, named main, and take a String array parameter.' },
+        { id: 'c', text: 'static public main(String[] args)', isCorrect: false, explanation: 'Incorrect. While static public is syntactically valid for modifiers, the return type void is required.' },
+        { id: 'd', text: 'void main(String[] args)', isCorrect: false, explanation: 'Incorrect. Missing static. Without static, the JVM cannot call main without creating an instance.' },
       ],
-      hint: 'The Java compiler tool starts with "javac".'
+      hint: 'Remember: public static void main(String[] args)',
     },
     {
       id: 'mod1-l2-c2',
-      question: 'What does JDK stand for?',
+      question: 'What does System.out.println() do?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'Java Development Kit',
-          isCorrect: true,
-          explanation: 'Correct! JDK stands for Java Development Kit and includes tools for developing Java applications.'
-        },
-        {
-          id: 'b',
-          text: 'Java Deployment Kit',
-          isCorrect: false,
-          explanation: 'Incorrect. The D stands for Development, not Deployment.'
-        },
-        {
-          id: 'c',
-          text: 'Java Design Kit',
-          isCorrect: false,
-          explanation: 'Incorrect. JDK stands for Java Development Kit.'
-        },
-        {
-          id: 'd',
-          text: 'Java Distribution Kit',
-          isCorrect: false,
-          explanation: 'Incorrect. JDK stands for Java Development Kit.'
-        }
+        { id: 'a', text: 'Prints text followed by a newline to standard output', isCorrect: true, explanation: 'Correct! println (print line) outputs the value and then moves to the next line.' },
+        { id: 'b', text: 'Compiles and runs the Java program', isCorrect: false, explanation: 'Incorrect. Compilation is done by javac, not by println.' },
+        { id: 'c', text: 'Declares and initializes a String variable', isCorrect: false, explanation: 'Incorrect. println outputs data; it does not declare variables.' },
+        { id: 'd', text: 'Reads a line of input from the user', isCorrect: false, explanation: 'Incorrect. Reading input uses Scanner or System.in, not System.out.' },
       ],
-      hint: 'Think about what developers use to create Java applications.'
+      hint: 'println = print + newline.',
     },
     {
       id: 'mod1-l2-c3',
-      question: 'Which command runs a compiled Java program?',
-      code: '// After compiling MyProgram.java to MyProgram.class',
+      question: 'What is the output of this code?',
+      code: 'System.out.println("Hello");\nSystem.out.print("World");',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'java MyProgram',
-          isCorrect: true,
-          explanation: 'Correct! The java command runs the compiled .class file. Note: you don\'t include the .class extension.'
-        },
-        {
-          id: 'b',
-          text: 'run MyProgram.class',
-          isCorrect: false,
-          explanation: 'Incorrect. Java uses the "java" command, not "run".'
-        },
-        {
-          id: 'c',
-          text: 'execute MyProgram',
-          isCorrect: false,
-          explanation: 'Incorrect. The correct command is "java".'
-        },
-        {
-          id: 'd',
-          text: 'javac MyProgram',
-          isCorrect: false,
-          explanation: 'Incorrect. javac is for compiling, not running programs.'
-        }
+        { id: 'a', text: 'World on line 1, Hello on line 2', isCorrect: false, explanation: 'Incorrect. Statements execute top to bottom; Hello is printed first.' },
+        { id: 'b', text: 'Hello on line 1, World on line 2 with a trailing newline', isCorrect: false, explanation: 'Incorrect. System.out.print does NOT add a newline after World.' },
+        { id: 'c', text: 'Hello on line 1, World on line 2 (no trailing newline)', isCorrect: true, explanation: 'Correct! println("Hello") prints Hello then a newline. print("World") prints World with no trailing newline.' },
+        { id: 'd', text: 'HelloWorld on a single line', isCorrect: false, explanation: 'Incorrect. println adds a newline after Hello, so World starts on the next line.' },
       ],
-      hint: 'You need to execute the compiled bytecode.'
+      hint: 'println adds newline; print does not.',
     },
     {
       id: 'mod1-l2-c4',
-      question: 'What is the JVM?',
-      difficulty: 'medium',
-      xpReward: 15,
-      options: [
-        {
-          id: 'a',
-          text: 'Java Virtual Machine - executes Java bytecode',
-          isCorrect: true,
-          explanation: 'Correct! The JVM is a virtual machine that executes Java bytecode, making Java platform-independent.'
-        },
-        {
-          id: 'b',
-          text: 'Java Variable Manager - manages variables',
-          isCorrect: false,
-          explanation: 'Incorrect. JVM stands for Java Virtual Machine.'
-        },
-        {
-          id: 'c',
-          text: 'Java Version Manager - manages Java versions',
-          isCorrect: false,
-          explanation: 'Incorrect. JVM stands for Java Virtual Machine.'
-        },
-        {
-          id: 'd',
-          text: 'Java Verification Module - checks code syntax',
-          isCorrect: false,
-          explanation: 'Incorrect. JVM stands for Java Virtual Machine.'
-        }
-      ],
-      hint: 'Think about what makes Java "Write Once, Run Anywhere".'
-    },
-    {
-      id: 'mod1-l2-c5',
-      question: 'What file extension do Java source files have?',
+      question: 'What command compiles a Java file named Hello.java?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: '.java',
-          isCorrect: true,
-          explanation: 'Correct! Java source code files always end with the .java extension.'
-        },
-        {
-          id: 'b',
-          text: '.class',
-          isCorrect: false,
-          explanation: 'Incorrect. .class files are compiled bytecode, not source files.'
-        },
-        {
-          id: 'c',
-          text: '.jav',
-          isCorrect: false,
-          explanation: 'Incorrect. The correct extension is .java, not .jav.'
-        },
-        {
-          id: 'd',
-          text: '.js',
-          isCorrect: false,
-          explanation: 'Incorrect. .js is for JavaScript, not Java.'
-        }
+        { id: 'a', text: 'javac Hello.java', isCorrect: true, explanation: 'Correct! javac is the Java compiler that converts .java source files to .class bytecode files.' },
+        { id: 'b', text: 'run Hello.java', isCorrect: false, explanation: 'Incorrect. "run" is not a Java command.' },
+        { id: 'c', text: 'java Hello', isCorrect: false, explanation: 'Incorrect. "java" runs compiled bytecode. It does not compile source files.' },
+        { id: 'd', text: 'compile Hello.java', isCorrect: false, explanation: 'Incorrect. "compile" is not a Java command.' },
       ],
-      hint: 'Think about the file type you write your Java code in.'
+      hint: 'The Java compiler tool starts with "javac".',
+    },
+    {
+      id: 'mod1-l2-c5',
+      question: 'Which statement about Java identifiers is correct?',
+      difficulty: 'medium',
+      xpReward: 15,
+      options: [
+        { id: 'a', text: 'Identifiers can start with a digit if followed by letters', isCorrect: false, explanation: 'Incorrect. Identifiers cannot start with a digit. 3name is invalid.' },
+        { id: 'b', text: 'Reserved words like "class" or "int" can be used as identifiers', isCorrect: false, explanation: 'Incorrect. Reserved keywords cannot be used as identifiers.' },
+        { id: 'c', text: 'Identifiers are case-insensitive and must start with a letter only', isCorrect: false, explanation: 'Incorrect. Java IS case-sensitive. Also, $ and _ are valid starting characters.' },
+        { id: 'd', text: 'Identifiers are case-sensitive and can start with a letter, $, or _', isCorrect: true, explanation: 'Correct! Java is case-sensitive (myVar ≠ MyVar) and identifiers must begin with a letter, dollar sign, or underscore.' },
+      ],
+      hint: 'Java is case-sensitive; identifiers start with a letter, $, or _.',
     },
     {
       id: 'mod1-l2-c6',
+      question: 'What does JDK stand for, and what does it include?',
+      difficulty: 'easy',
+      xpReward: 10,
+      options: [
+        { id: 'a', text: 'Java Deployment Kit — packages compiled Java apps for distribution', isCorrect: false, explanation: 'Incorrect. JDK stands for Java Development Kit.' },
+        { id: 'b', text: 'Java Design Kit — provides UI design tools for Java apps', isCorrect: false, explanation: 'Incorrect. JDK stands for Java Development Kit; it has nothing to do with UI design.' },
+        { id: 'c', text: 'Java Distribution Kit — distributes bytecode across networked machines', isCorrect: false, explanation: 'Incorrect. JDK stands for Java Development Kit.' },
+        { id: 'd', text: 'Java Development Kit — includes the compiler (javac), JRE, and development tools', isCorrect: true, explanation: 'Correct! The JDK is the full development toolkit containing javac, the JRE, and debugging tools.' },
+      ],
+      hint: 'Think about what developers need to create Java applications.',
+    },
+    {
+      id: 'mod1-l2-c7',
       question: 'What is bytecode in Java?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: 'Platform-independent intermediate code generated by the compiler',
-          isCorrect: true,
-          explanation: 'Correct! Bytecode is the compiled form of Java code that the JVM can execute on any platform.'
-        },
-        {
-          id: 'b',
-          text: 'A type of data stored as bytes',
-          isCorrect: false,
-          explanation: 'Incorrect. Bytecode is compiled Java code, not a data type.'
-        },
-        {
-          id: 'c',
-          text: 'Machine code specific to each processor',
-          isCorrect: false,
-          explanation: 'Incorrect. Bytecode is platform-independent; the JVM converts it to machine code.'
-        },
-        {
-          id: 'd',
-          text: 'Source code written in Java',
-          isCorrect: false,
-          explanation: 'Incorrect. Source code is .java files; bytecode is the compiled .class files.'
-        }
+        { id: 'a', text: 'A special data type for storing sequences of bytes', isCorrect: false, explanation: 'Incorrect. Bytecode is compiled Java code, not a data type.' },
+        { id: 'b', text: 'Machine code compiled specifically for each processor type', isCorrect: false, explanation: 'Incorrect. Bytecode is platform-independent intermediate code, not processor-specific machine code.' },
+        { id: 'c', text: 'Java source code stored in a compressed binary format', isCorrect: false, explanation: 'Incorrect. Bytecode is compiled intermediate code, not compressed source code.' },
+        { id: 'd', text: 'Platform-independent intermediate code that the JVM executes', isCorrect: true, explanation: 'Correct! javac compiles Java source to bytecode (.class files) which any JVM can run, regardless of OS.' },
       ],
-      hint: 'Think about what the compiler produces.'
-    },
-    {
-      id: 'mod1-l2-c7',
-      question: 'Which component is required to run Java applications?',
-      difficulty: 'easy',
-      xpReward: 10,
-      options: [
-        {
-          id: 'a',
-          text: 'JRE (Java Runtime Environment)',
-          isCorrect: true,
-          explanation: 'Correct! The JRE includes the JVM and libraries needed to run Java applications.'
-        },
-        {
-          id: 'b',
-          text: 'Only a text editor',
-          isCorrect: false,
-          explanation: 'Incorrect. You need the JRE to run Java programs.'
-        },
-        {
-          id: 'c',
-          text: 'Microsoft Office',
-          isCorrect: false,
-          explanation: 'Incorrect. Java applications require the JRE.'
-        },
-        {
-          id: 'd',
-          text: 'A web browser only',
-          isCorrect: false,
-          explanation: 'Incorrect. While some Java apps run in browsers, the JRE is still needed.'
-        }
-      ],
-      hint: 'Think about the runtime environment.'
+      hint: 'Think about what the compiler produces and why Java is platform-independent.',
     },
     {
       id: 'mod1-l2-c8',
-      question: 'What is the relationship between JDK, JRE, and JVM?',
+      question: 'What is the correct hierarchy of JDK, JRE, and JVM?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: 'JDK contains JRE, which contains JVM',
-          isCorrect: true,
-          explanation: 'Correct! JDK includes development tools + JRE, and JRE includes the JVM + libraries.'
-        },
-        {
-          id: 'b',
-          text: 'JVM contains JRE, which contains JDK',
-          isCorrect: false,
-          explanation: 'Incorrect. The hierarchy is JDK → JRE → JVM.'
-        },
-        {
-          id: 'c',
-          text: 'They are three separate, unrelated components',
-          isCorrect: false,
-          explanation: 'Incorrect. They are related: JDK ⊃ JRE ⊃ JVM.'
-        },
-        {
-          id: 'd',
-          text: 'JRE and JVM are the same thing',
-          isCorrect: false,
-          explanation: 'Incorrect. JRE includes the JVM plus additional libraries.'
-        }
+        { id: 'a', text: 'JRE contains JDK, which contains JVM', isCorrect: false, explanation: 'Incorrect. JDK is the largest: JDK ⊃ JRE ⊃ JVM.' },
+        { id: 'b', text: 'JDK contains JRE, which contains JVM', isCorrect: true, explanation: 'Correct! JDK (development) wraps JRE (runtime), which wraps JVM (execution engine).' },
+        { id: 'c', text: 'They are three completely separate, unrelated components', isCorrect: false, explanation: 'Incorrect. They are nested: JDK includes JRE, which includes JVM.' },
+        { id: 'd', text: 'JVM contains JRE, which contains JDK', isCorrect: false, explanation: 'Incorrect. The hierarchy is the other way: JDK ⊃ JRE ⊃ JVM.' },
       ],
-      hint: 'Think about what each component includes.'
+      hint: 'Think about which component includes the others.',
     },
     {
       id: 'mod1-l2-c9',
-      question: 'Which IDE is commonly used for Java development?',
+      question: 'Which statement about Java single-line comments is correct?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'All of the above (Eclipse, IntelliJ IDEA, NetBeans)',
-          isCorrect: true,
-          explanation: 'Correct! Eclipse, IntelliJ IDEA, and NetBeans are all popular Java IDEs.'
-        },
-        {
-          id: 'b',
-          text: 'Only Notepad',
-          isCorrect: false,
-          explanation: 'Incorrect. While you can write Java in Notepad, IDEs offer much better features.'
-        },
-        {
-          id: 'c',
-          text: 'Microsoft Word',
-          isCorrect: false,
-          explanation: 'Incorrect. Word processors are not suitable for coding.'
-        },
-        {
-          id: 'd',
-          text: 'Adobe Photoshop',
-          isCorrect: false,
-          explanation: 'Incorrect. Photoshop is for image editing, not coding.'
-        }
+        { id: 'a', text: 'Single-line comments start with //', isCorrect: true, explanation: 'Correct! // begins a single-line comment. /* ... */ is for multi-line comments.' },
+        { id: 'b', text: 'Single-line comments start with <!--', isCorrect: false, explanation: 'Incorrect. <!-- --> is HTML comment syntax, not Java.' },
+        { id: 'c', text: 'Single-line comments start with #', isCorrect: false, explanation: 'Incorrect. # is used for comments in Python and shell scripts, not Java.' },
+        { id: 'd', text: 'Single-line comments start with --', isCorrect: false, explanation: 'Incorrect. -- is used for comments in SQL, not Java.' },
       ],
-      hint: 'Think about integrated development environments.'
+      hint: 'Double forward slash begins single-line comments.',
     },
     {
       id: 'mod1-l2-c10',
-      question: 'What does "platform independence" mean in Java?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the output of this code?',
+      code: 'int x = 5;\nSystem.out.println("Value: " + x);',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'Java bytecode can run on any system with a JVM without recompilation',
-          isCorrect: true,
-          explanation: 'Correct! This is the "Write Once, Run Anywhere" principle - compile once and run on any platform with a JVM.'
-        },
-        {
-          id: 'b',
-          text: 'Java code must be recompiled for each operating system',
-          isCorrect: false,
-          explanation: 'Incorrect. Java code is compiled once and runs on any platform with a JVM.'
-        },
-        {
-          id: 'c',
-          text: 'Java only runs on Windows',
-          isCorrect: false,
-          explanation: 'Incorrect. Java is platform-independent and runs on many operating systems.'
-        },
-        {
-          id: 'd',
-          text: 'Java requires different source code for different platforms',
-          isCorrect: false,
-          explanation: 'Incorrect. The same Java source code works on all platforms.'
-        }
+        { id: 'a', text: 'Compile error — cannot concatenate String and int', isCorrect: false, explanation: 'Incorrect. Java automatically converts int to String when concatenated with a String using +.' },
+        { id: 'b', text: 'Value: 5', isCorrect: true, explanation: 'Correct! Java concatenates the String "Value: " with the int 5, producing "Value: 5".' },
+        { id: 'c', text: '"Value: " + 5', isCorrect: false, explanation: 'Incorrect. The quotes are not printed; the expression evaluates to the string Value: 5.' },
+        { id: 'd', text: 'Value: + x', isCorrect: false, explanation: 'Incorrect. The + operator concatenates the string and the integer, it does not print literally.' },
       ],
-      hint: 'Think about "Write Once, Run Anywhere".'
-    }
+      hint: 'Java converts int to String automatically during concatenation.',
+    },
   ],
-
-  // Lesson 1.3: Operators
   'mod1-lesson3': [
     {
       id: 'mod1-l3-c1',
-      question: 'What will this code output?',
-      code: 'public class Test {\n    public static void main(String[] args) {\n        int x = 5;\n        int y = 10;\n        System.out.println(x + y);\n    }\n}',
+      question: 'What is the result of 7 % 3?',
+      code: 'int r = 7 % 3;',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: '15',
-          isCorrect: true,
-          explanation: 'Correct! The + operator adds the integers 5 and 10, resulting in 15.'
-        },
-        {
-          id: 'b',
-          text: '510',
-          isCorrect: false,
-          explanation: 'Incorrect. This would be the result if x and y were strings, not integers.'
-        },
-        {
-          id: 'c',
-          text: 'x + y',
-          isCorrect: false,
-          explanation: 'Incorrect. Java evaluates the expression before printing.'
-        },
-        {
-          id: 'd',
-          text: 'Error',
-          isCorrect: false,
-          explanation: 'Incorrect. This code is syntactically correct and will compile.'
-        }
+        { id: 'a', text: '2.33', isCorrect: false, explanation: 'Incorrect. That would be floating-point division. % returns the integer remainder.' },
+        { id: 'b', text: '1', isCorrect: true, explanation: 'Correct! 7 = 3 × 2 + 1, so the remainder is 1.' },
+        { id: 'c', text: '3', isCorrect: false, explanation: 'Incorrect. 3 is the quotient, not the remainder.' },
+        { id: 'd', text: '0', isCorrect: false, explanation: 'Incorrect. 7 is not evenly divisible by 3.' },
       ],
-      hint: 'When adding integers, Java performs arithmetic addition.'
+      hint: '7 = 3 × 2 + ? — the ? is the remainder.',
     },
     {
       id: 'mod1-l3-c2',
-      question: 'Which operator is used for the modulus (remainder) operation in Java?',
-      code: 'int result = 17 % 5;',
+      question: 'What is the output?',
+      code: 'int x = 5;\nx++;\nSystem.out.println(x);',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: '%',
-          isCorrect: true,
-          explanation: 'Correct! The % operator returns the remainder of division. 17 % 5 equals 2.'
-        },
-        {
-          id: 'b',
-          text: '//',
-          isCorrect: false,
-          explanation: 'Incorrect. // is used for comments in Java, not modulus.'
-        },
-        {
-          id: 'c',
-          text: 'mod',
-          isCorrect: false,
-          explanation: 'Incorrect. Java uses the % symbol for modulus operations.'
-        },
-        {
-          id: 'd',
-          text: '&',
-          isCorrect: false,
-          explanation: 'Incorrect. & is a bitwise AND operator, not modulus.'
-        }
+        { id: 'a', text: '5', isCorrect: false, explanation: 'Incorrect. x++ increments x AFTER the println call — but here println is after x++, so x is already 6.' },
+        { id: 'b', text: '7', isCorrect: false, explanation: 'Incorrect. x++ only adds 1, not 2.' },
+        { id: 'c', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. This code is valid Java.' },
+        { id: 'd', text: '6', isCorrect: true, explanation: 'Correct! x++ increments x from 5 to 6. The println runs after, printing 6.' },
       ],
-      hint: 'This operator gives you the remainder after division.'
+      hint: 'The ++ operator increments by 1.',
     },
     {
       id: 'mod1-l3-c3',
-      question: 'What is the result of the expression: 10 / 3 in Java?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What does this code print? (Trace each line carefully.)',
+      code: 'int x = 5;\nSystem.out.println(++x); // line 1\nSystem.out.println(x++); // line 2\nSystem.out.println(x);  // line 3',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        {
-          id: 'a',
-          text: '3',
-          isCorrect: true,
-          explanation: 'Correct! When dividing two integers, Java performs integer division and truncates the decimal part, so 10/3 = 3.'
-        },
-        {
-          id: 'b',
-          text: '3.333',
-          isCorrect: false,
-          explanation: 'Incorrect. This would be the result with floating-point division. Integer division truncates decimals.'
-        },
-        {
-          id: 'c',
-          text: '3.0',
-          isCorrect: false,
-          explanation: 'Incorrect. Integer division returns an int (3), not a double (3.0).'
-        },
-        {
-          id: 'd',
-          text: '4',
-          isCorrect: false,
-          explanation: 'Incorrect. Java truncates (doesn\'t round) in integer division.'
-        }
+        { id: 'a', text: '5 5 6', isCorrect: false, explanation: 'Incorrect. ++x is pre-increment: it increments first, then returns the new value.' },
+        { id: 'b', text: '6 7 7', isCorrect: false, explanation: 'Incorrect. x++ (post-increment) returns the CURRENT value (6) before making x 7.' },
+        { id: 'c', text: '6 6 7', isCorrect: true, explanation: 'Correct! ++x increments x to 6 and returns 6. x++ returns x (6) and then increments x to 7. Final x=7.' },
+        { id: 'd', text: '5 6 6', isCorrect: false, explanation: 'Incorrect. ++x on line 1 returns 6 (x is now 6). Line 2 uses x++ which returns 6 then makes x=7.' },
       ],
-      hint: 'Consider the data types involved in the division.'
+      hint: 'Pre-increment (++x) returns the new value; post-increment (x++) returns the old value.',
     },
     {
       id: 'mod1-l3-c4',
-      question: 'What will the value of x be after executing: int x = 5; x++;',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What is the value of result?',
+      code: 'int result = 2 + 3 * 4 - 1;',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: '6',
-          isCorrect: true,
-          explanation: 'Correct! The ++ operator increments the value by 1, so x becomes 6.'
-        },
-        {
-          id: 'b',
-          text: '5',
-          isCorrect: false,
-          explanation: 'Incorrect. The ++ operator increases the value by 1.'
-        },
-        {
-          id: 'c',
-          text: '7',
-          isCorrect: false,
-          explanation: 'Incorrect. The ++ operator only adds 1, not 2.'
-        },
-        {
-          id: 'd',
-          text: 'Error',
-          isCorrect: false,
-          explanation: 'Incorrect. This is valid Java syntax.'
-        }
+        { id: 'a', text: '15', isCorrect: false, explanation: 'Incorrect. Check step by step: 3*4=12 first, then 2+12-1=13.' },
+        { id: 'b', text: '13', isCorrect: true, explanation: 'Correct! Multiplication first: 3*4=12. Then left-to-right: 2+12=14, 14-1=13.' },
+        { id: 'c', text: '20', isCorrect: false, explanation: 'Incorrect. Review operator precedence and re-evaluate step by step.' },
+        { id: 'd', text: '19', isCorrect: false, explanation: 'Incorrect. That would be (2+3)*4-1. Remember: * has higher precedence than + and -.' },
       ],
-      hint: 'The ++ operator is the increment operator.'
+      hint: 'Multiplication (*) has higher precedence than addition (+) or subtraction (-).',
     },
     {
       id: 'mod1-l3-c5',
-      question: 'Which of the following is a logical operator in Java?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What does && (logical AND) do when the left side is false?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: '&&',
-          isCorrect: true,
-          explanation: 'Correct! && is the logical AND operator used to combine boolean conditions.'
-        },
-        {
-          id: 'b',
-          text: '+',
-          isCorrect: false,
-          explanation: 'Incorrect. + is an arithmetic operator, not a logical operator.'
-        },
-        {
-          id: 'c',
-          text: '%',
-          isCorrect: false,
-          explanation: 'Incorrect. % is the modulus operator, not a logical operator.'
-        },
-        {
-          id: 'd',
-          text: '/',
-          isCorrect: false,
-          explanation: 'Incorrect. / is the division operator, not a logical operator.'
-        }
+        { id: 'a', text: 'It throws a ShortCircuitException', isCorrect: false, explanation: 'Incorrect. Short-circuit evaluation is a silent optimization, not an exception.' },
+        { id: 'b', text: 'It skips evaluation of the right side and returns false immediately', isCorrect: true, explanation: 'Correct! && short-circuits: if the left side is false, the result is always false and the right side is never evaluated.' },
+        { id: 'c', text: 'It evaluates the right side and negates the result', isCorrect: false, explanation: 'Incorrect. && does not negate. When left is false, it short-circuits.' },
+        { id: 'd', text: 'It evaluates the right side anyway to ensure side effects run', isCorrect: false, explanation: 'Incorrect. That describes the non-short-circuit & operator, not &&.' },
       ],
-      hint: 'Logical operators work with boolean values like true and false.'
+      hint: 'Short-circuit means stopping early when the result is already known.',
     },
     {
       id: 'mod1-l3-c6',
-      question: 'What does the expression (5 > 3) && (2 < 4) evaluate to?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What does != mean in Java?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'true',
-          isCorrect: true,
-          explanation: 'Correct! Both conditions are true (5 > 3 is true and 2 < 4 is true), so the && operator returns true.'
-        },
-        {
-          id: 'b',
-          text: 'false',
-          isCorrect: false,
-          explanation: 'Incorrect. Both conditions are true, so the result is true.'
-        },
-        {
-          id: 'c',
-          text: '1',
-          isCorrect: false,
-          explanation: 'Incorrect. Java boolean expressions evaluate to true or false, not 1 or 0.'
-        },
-        {
-          id: 'd',
-          text: 'Error',
-          isCorrect: false,
-          explanation: 'Incorrect. This is valid syntax and will compile.'
-        }
+        { id: 'a', text: 'Greater than or equal to — returns true if left >= right', isCorrect: false, explanation: 'Incorrect. >= means greater than or equal. != means not equal.' },
+        { id: 'b', text: 'Assignment operator — assigns the right value to the left variable', isCorrect: false, explanation: 'Incorrect. = is assignment. != is a comparison operator.' },
+        { id: 'c', text: 'Not equal to — returns true if the two sides are different', isCorrect: true, explanation: 'Correct! != is the "not equal" relational operator, returning a boolean.' },
+        { id: 'd', text: 'Bitwise NOT followed by assignment', isCorrect: false, explanation: 'Incorrect. != is a single comparison operator meaning "not equal to".' },
       ],
-      hint: 'The && operator requires both conditions to be true.'
+      hint: 'The ! prefix means NOT, so != means "not equal".',
     },
     {
       id: 'mod1-l3-c7',
-      question: 'What is the difference between = and == operators?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What does this code print?',
+      code: 'int a = 10;\nboolean b = false;\nif (b || (a++ > 9)) {\n    System.out.println(a);\n}',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        {
-          id: 'a',
-          text: '= is assignment, == is comparison',
-          isCorrect: true,
-          explanation: 'Correct! = assigns a value to a variable, while == compares two values for equality.'
-        },
-        {
-          id: 'b',
-          text: 'They are the same',
-          isCorrect: false,
-          explanation: 'Incorrect. These operators have different purposes.'
-        },
-        {
-          id: 'c',
-          text: '= is comparison, == is assignment',
-          isCorrect: false,
-          explanation: 'Incorrect. You have them backwards.'
-        },
-        {
-          id: 'd',
-          text: '== is used for strings only',
-          isCorrect: false,
-          explanation: 'Incorrect. == can compare any primitive types, not just strings.'
-        }
+        { id: 'a', text: 'true', isCorrect: false, explanation: 'Incorrect. The if body prints a (an integer), not a boolean.' },
+        { id: 'b', text: 'Nothing is printed', isCorrect: false, explanation: 'Incorrect. The condition is true (a++ > 9), so the if body executes and prints 11.' },
+        { id: 'c', text: '10', isCorrect: false, explanation: 'Incorrect. The || operator evaluates its right side since b is false. a++ runs, making a=11.' },
+        { id: 'd', text: '11', isCorrect: true, explanation: 'Correct! b is false, so || evaluates the right side: a++ > 9 is true (a=10 > 9), then a becomes 11. The if body prints a=11.' },
       ],
-      hint: 'Think about what each operator does with values.'
+      hint: 'With ||, the right side is evaluated if the left side is false. Watch for side effects.',
     },
     {
       id: 'mod1-l3-c8',
-      question: 'What will this code print: System.out.println(10 > 5 || 3 > 7);',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'Which expression evaluates to true?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'true',
-          isCorrect: true,
-          explanation: 'Correct! The || (OR) operator returns true if at least one condition is true. 10 > 5 is true, so the result is true.'
-        },
-        {
-          id: 'b',
-          text: 'false',
-          isCorrect: false,
-          explanation: 'Incorrect. The first condition (10 > 5) is true, so the || operator returns true.'
-        },
-        {
-          id: 'c',
-          text: '10',
-          isCorrect: false,
-          explanation: 'Incorrect. Logical operators return boolean values, not numbers.'
-        },
-        {
-          id: 'd',
-          text: 'Error',
-          isCorrect: false,
-          explanation: 'Incorrect. This is valid syntax.'
-        }
+        { id: 'a', text: '(10 >= 10) && (3 != 5)', isCorrect: true, explanation: 'Correct! (10>=10) is true and (3!=5) is true. true && true = true.' },
+        { id: 'b', text: '(5 == 4) || (1 > 2)', isCorrect: false, explanation: 'Incorrect. Both sides are false. false || false = false.' },
+        { id: 'c', text: '!(true)', isCorrect: false, explanation: 'Incorrect. !(true) = false.' },
+        { id: 'd', text: '(3 > 5) && (2 < 4)', isCorrect: false, explanation: 'Incorrect. (3>5) is false. false && anything = false.' },
       ],
-      hint: 'The || operator needs only one condition to be true.'
+      hint: 'Evaluate each sub-expression individually, then apply the logical operator.',
     },
     {
       id: 'mod1-l3-c9',
-      question: 'Which operator has the highest precedence in Java?',
-      code: 'int result = 2 + 3 * 4;',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'What does this code print?',
+      code: 'int i = 1;\ni += 3;\ni *= 2;\nSystem.out.println(i);',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: '* (multiplication)',
-          isCorrect: true,
-          explanation: 'Correct! Multiplication has higher precedence than addition, so 3 * 4 is evaluated first (12), then 2 + 12 = 14.'
-        },
-        {
-          id: 'b',
-          text: '+ (addition)',
-          isCorrect: false,
-          explanation: 'Incorrect. Addition has lower precedence than multiplication.'
-        },
-        {
-          id: 'c',
-          text: 'They have equal precedence',
-          isCorrect: false,
-          explanation: 'Incorrect. Multiplication has higher precedence than addition.'
-        },
-        {
-          id: 'd',
-          text: 'Evaluated left to right',
-          isCorrect: false,
-          explanation: 'Incorrect. Operator precedence takes priority over left-to-right evaluation.'
-        }
+        { id: 'a', text: '8', isCorrect: true, explanation: 'Correct! i=1 → i+=3 → i=4 → i*=2 → i=8. println prints 8.' },
+        { id: 'b', text: '2', isCorrect: false, explanation: 'Incorrect. Re-trace: 1+3=4, 4*2=8.' },
+        { id: 'c', text: '6 8', isCorrect: false, explanation: 'Incorrect. Trace again: i starts at 1, then 1+=3 gives 4, then 4*=2 gives 8. Only one value is printed.' },
+        { id: 'd', text: '4', isCorrect: false, explanation: 'Incorrect. i*=2 runs after i+=3, so i is 4*2=8, not 4.' },
       ],
-      hint: 'Remember the order of operations from mathematics.'
+      hint: 'Trace compound assignments in order.',
     },
     {
       id: 'mod1-l3-c10',
-      question: 'What does the ! operator do in Java?',
-      code: 'boolean result = !(5 > 3);',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What is the result of (true || false) && !false?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        {
-          id: 'a',
-          text: 'Negates a boolean value',
-          isCorrect: true,
-          explanation: 'Correct! The ! operator reverses a boolean value. Since 5 > 3 is true, !(5 > 3) is false.'
-        },
-        {
-          id: 'b',
-          text: 'Multiplies by -1',
-          isCorrect: false,
-          explanation: 'Incorrect. The ! operator works with boolean values, not numbers.'
-        },
-        {
-          id: 'c',
-          text: 'Creates a comment',
-          isCorrect: false,
-          explanation: 'Incorrect. Comments use // or /* */, not !.'
-        },
-        {
-          id: 'd',
-          text: 'Throws an exception',
-          isCorrect: false,
-          explanation: 'Incorrect. ! is the logical NOT operator.'
-        }
+        { id: 'a', text: 'Compile error — boolean expressions must be single comparisons', isCorrect: false, explanation: 'Incorrect. This is valid Java; complex boolean expressions are allowed.' },
+        { id: 'b', text: 'false, because OR is always lower precedence', isCorrect: false, explanation: 'Incorrect. While && has higher precedence than ||, here || is in parentheses so it evaluates first.' },
+        { id: 'c', text: 'false', isCorrect: false, explanation: 'Incorrect. Evaluate left of &&: true||false=true. Evaluate right: !false=true. true&&true=true.' },
+        { id: 'd', text: 'true', isCorrect: true, explanation: 'Correct! (true||false)=true, !false=true, true&&true=true.' },
       ],
-      hint: 'This operator is called the NOT operator.'
-    }
+      hint: 'Evaluate inside parentheses first, then apply operators by precedence.',
+    },
   ],
-
-  // Lesson 1.4-1.10 challenges...
   'mod1-lesson4': [
     {
       id: 'mod1-l4-c1',
-      question: 'Which data type should be used to store a single character in Java?',
+      question: 'Which primitive type stores a single character in Java?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'char', isCorrect: true, explanation: 'Correct! The char data type stores a single 16-bit Unicode character.' },
-        { id: 'b', text: 'String', isCorrect: false, explanation: 'Incorrect. String stores sequences of characters, not a single character.' },
-        { id: 'c', text: 'int', isCorrect: false, explanation: 'Incorrect. int stores integer numbers, not characters.' },
-        { id: 'd', text: 'byte', isCorrect: false, explanation: 'Incorrect. byte stores small integer values.' }
+        { id: 'a', text: 'String', isCorrect: false, explanation: 'Incorrect. String is a reference type that stores sequences of characters, not a primitive.' },
+        { id: 'b', text: 'char', isCorrect: true, explanation: 'Correct! char is a 16-bit Unicode primitive that holds a single character, e.g., char c = \'A\';' },
+        { id: 'c', text: 'int', isCorrect: false, explanation: 'Incorrect. int stores integer values. chars are distinct from integers in Java.' },
+        { id: 'd', text: 'byte', isCorrect: false, explanation: 'Incorrect. byte stores small integers (-128 to 127), not characters.' },
       ],
-      hint: 'Think about the data type designed for single characters.'
+      hint: 'char is the primitive designed specifically for single characters.',
     },
     {
       id: 'mod1-l4-c2',
-      question: 'What is the default value of an int variable in Java (as a class field)?',
+      question: 'What is the default value of a boolean field in a Java class?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: '0', isCorrect: true, explanation: 'Correct! Numeric types default to 0 when declared as class fields.' },
-        { id: 'b', text: 'null', isCorrect: false, explanation: 'Incorrect. null is the default for reference types like String, not primitives.' },
-        { id: 'c', text: '-1', isCorrect: false, explanation: 'Incorrect. Java does not use -1 as a default value.' },
-        { id: 'd', text: 'undefined', isCorrect: false, explanation: 'Incorrect. "undefined" is a JavaScript concept, not Java.' }
+        { id: 'a', text: 'false', isCorrect: true, explanation: 'Correct! Primitive boolean fields default to false when declared in a class without initialization.' },
+        { id: 'b', text: 'true', isCorrect: false, explanation: 'Incorrect. Java does not default boolean fields to true.' },
+        { id: 'c', text: '0', isCorrect: false, explanation: 'Incorrect. 0 is the default for integer primitives. boolean defaults to false.' },
+        { id: 'd', text: 'null', isCorrect: false, explanation: 'Incorrect. null is the default for reference types. boolean is a primitive.' },
       ],
-      hint: 'Think about what numeric types are initialized to.'
+      hint: 'Think about what boolean defaults to in a class field.',
     },
     {
       id: 'mod1-l4-c3',
-      question: 'Which of the following correctly declares a double variable?',
-      difficulty: 'easy',
-      xpReward: 10,
-      code: 'double price = 9.99;',
+      question: 'What is the range of the byte data type in Java?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'double price = 9.99;', isCorrect: true, explanation: 'Correct! double stores 64-bit floating-point values and can hold decimals like 9.99.' },
-        { id: 'b', text: 'Double price = 9.99f;', isCorrect: false, explanation: 'Incorrect. The f suffix makes it a float literal, and Double is the wrapper class.' },
-        { id: 'c', text: 'int price = 9.99;', isCorrect: false, explanation: 'Incorrect. int cannot store decimal values; 9.99 would be a compile error.' },
-        { id: 'd', text: 'float price = 9.99;', isCorrect: false, explanation: 'Incorrect. 9.99 is a double literal by default; you need 9.99f for float.' }
+        { id: 'a', text: '-128 to 127', isCorrect: true, explanation: 'Correct! byte is 8-bit signed. 2^7 = 128, so the range is -128 to 127.' },
+        { id: 'b', text: '-2147483648 to 2147483647', isCorrect: false, explanation: 'Incorrect. That is the range of int (32-bit).' },
+        { id: 'c', text: '-32768 to 32767', isCorrect: false, explanation: 'Incorrect. That is the range of short (16-bit). byte is 8-bit.' },
+        { id: 'd', text: '0 to 255', isCorrect: false, explanation: 'Incorrect. Java byte is signed (not unsigned), so the range includes negatives: -128 to 127.' },
       ],
-      hint: 'Double literals do not need a suffix in Java.'
+      hint: 'byte is 8-bit signed. Calculate from 2^7.',
     },
     {
       id: 'mod1-l4-c4',
-      question: 'What is the range of a byte data type in Java?',
+      question: 'What happens when you write: int x = 3.14;',
+      code: 'int x = 3.14; // no cast',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: '-128 to 127', isCorrect: true, explanation: 'Correct! byte is an 8-bit signed integer ranging from -128 to 127.' },
-        { id: 'b', text: '0 to 255', isCorrect: false, explanation: 'Incorrect. Java byte is signed, so it ranges from -128 to 127.' },
-        { id: 'c', text: '-32768 to 32767', isCorrect: false, explanation: 'Incorrect. That is the range of short, not byte.' },
-        { id: 'd', text: '-2147483648 to 2147483647', isCorrect: false, explanation: 'Incorrect. That is the range of int.' }
+        { id: 'a', text: 'x gets the value 3.14 stored as an integer somehow', isCorrect: false, explanation: 'Incorrect. int cannot hold a decimal value.' },
+        { id: 'b', text: 'x gets the value 3 after silent truncation', isCorrect: false, explanation: 'Incorrect. Silent narrowing is not allowed. You need an explicit cast: (int) 3.14.' },
+        { id: 'c', text: 'Runtime exception when the value is assigned', isCorrect: false, explanation: 'Incorrect. This is caught at compile time, not runtime.' },
+        { id: 'd', text: 'Compile-time error — narrowing conversion requires explicit cast', isCorrect: true, explanation: 'Correct! Assigning a double literal to int without (int) cast is a compile-time error.' },
       ],
-      hint: 'byte is 8 bits, signed. 2^7 = 128.'
+      hint: 'Narrowing conversions require an explicit cast in Java.',
     },
     {
       id: 'mod1-l4-c5',
-      question: 'What happens when you assign a double value to an int variable without casting?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'int x = 3.14;',
+      question: 'Which is a valid widening conversion?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Compile-time error', isCorrect: true, explanation: 'Correct! Assigning a double to an int without explicit casting causes a compile-time error because it is a narrowing conversion.' },
-        { id: 'b', text: 'x becomes 3', isCorrect: false, explanation: 'Incorrect. This would require an explicit cast: int x = (int) 3.14;' },
-        { id: 'c', text: 'x becomes 3.14', isCorrect: false, explanation: 'Incorrect. int cannot hold decimal values.' },
-        { id: 'd', text: 'Runtime exception', isCorrect: false, explanation: 'Incorrect. This is caught at compile time, not runtime.' }
+        { id: 'a', text: 'double d = 3.14; int x = d;', isCorrect: false, explanation: 'Incorrect. double to int is narrowing, which requires an explicit cast.' },
+        { id: 'b', text: 'String s = 42;', isCorrect: false, explanation: 'Incorrect. You cannot assign an int directly to a String reference.' },
+        { id: 'c', text: 'int a = 5; double d = a;', isCorrect: true, explanation: 'Correct! Widening from int to double is automatic — no cast needed and no data is lost.' },
+        { id: 'd', text: 'long n = 100L; int i = n;', isCorrect: false, explanation: 'Incorrect. long to int is narrowing and requires an explicit cast.' },
       ],
-      hint: 'Narrowing conversions require an explicit cast in Java.'
+      hint: 'Widening goes from smaller to larger types and is automatic.',
     },
     {
       id: 'mod1-l4-c6',
-      question: 'Which literal suffix is required for a long value that exceeds int range?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'long bigNum = 10000000000L;',
+      question: 'What is the output?',
+      code: 'int x = 130;\nbyte b = (byte) x;\nSystem.out.println(b);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'L or l', isCorrect: true, explanation: 'Correct! The L (or l) suffix tells the compiler the literal is a long, not an int.' },
-        { id: 'b', text: 'D or d', isCorrect: false, explanation: 'Incorrect. D is the suffix for double literals, not long.' },
-        { id: 'c', text: 'F or f', isCorrect: false, explanation: 'Incorrect. F is the suffix for float literals.' },
-        { id: 'd', text: 'No suffix needed', isCorrect: false, explanation: 'Incorrect. Without L, a number exceeding int range causes a compile-time error.' }
+        { id: 'a', text: '-126', isCorrect: true, explanation: 'Correct! 130 in 8-bit two\'s complement wraps to -126. (130 - 256 = -126)' },
+        { id: 'b', text: '0', isCorrect: false, explanation: 'Incorrect. The cast does not zero out the value; it wraps around.' },
+        { id: 'c', text: '130', isCorrect: false, explanation: 'Incorrect. 130 exceeds byte range (-128 to 127), so overflow occurs on the cast.' },
+        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. The explicit (byte) cast suppresses the compile-time narrowing error.' },
       ],
-      hint: 'long literals need to tell the compiler they are not int.'
+      hint: 'byte wraps around at 256. For values > 127, subtract 256.',
     },
     {
       id: 'mod1-l4-c7',
-      question: 'What is the result of widening conversion from int to double?',
-      difficulty: 'easy',
-      xpReward: 10,
-      code: 'int a = 5;\ndouble b = a;',
+      question: 'Why should you use .equals() instead of == to compare String content?',
+      code: 'String a = new String("hi");\nString b = new String("hi");\nSystem.out.println(a == b);      // false\nSystem.out.println(a.equals(b)); // true',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'b becomes 5.0, no cast needed', isCorrect: true, explanation: 'Correct! Widening conversions (int → double) happen automatically without a cast because no data is lost.' },
-        { id: 'b', text: 'Compile error — types are incompatible', isCorrect: false, explanation: 'Incorrect. Widening conversions are implicit in Java.' },
-        { id: 'c', text: 'b becomes 5, the decimal is ignored', isCorrect: false, explanation: 'Incorrect. double always holds a decimal representation; 5 becomes 5.0.' },
-        { id: 'd', text: 'Runtime ClassCastException', isCorrect: false, explanation: 'Incorrect. No exception occurs with widening conversions.' }
+        { id: 'a', text: 'Because == compares the length of the strings', isCorrect: false, explanation: 'Incorrect. == compares object references (memory addresses), not length or content.' },
+        { id: 'b', text: 'Because == compares object references, not the actual character content', isCorrect: true, explanation: 'Correct! Two separate String objects with the same characters will have different references, so == returns false even if the content matches.' },
+        { id: 'c', text: 'Because .equals() is required only for numeric string comparison', isCorrect: false, explanation: 'Incorrect. .equals() is the standard way to compare any String content for equality.' },
+        { id: 'd', text: 'Because == throws an exception when comparing String objects', isCorrect: false, explanation: 'Incorrect. == does not throw an exception; it just compares references, not content.' },
       ],
-      hint: 'Java allows automatic widening from smaller to larger types.'
+      hint: 'Strings are objects — == checks if they are the same object in memory.',
     },
     {
       id: 'mod1-l4-c8',
-      question: 'Which statement about boolean type is correct?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What does this print?',
+      code: 'String s1 = "Java";\nString s2 = "Java";\nSystem.out.println(s1 == s2);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'boolean can only be true or false', isCorrect: true, explanation: 'Correct! boolean stores exactly two values: true or false.' },
-        { id: 'b', text: 'boolean can be 0 or 1 like in C', isCorrect: false, explanation: 'Incorrect. Java boolean is not numeric. You cannot assign 0 or 1 to it.' },
-        { id: 'c', text: 'boolean values can be cast to int', isCorrect: false, explanation: 'Incorrect. Java does not allow casting between boolean and numeric types.' },
-        { id: 'd', text: 'boolean default value is null', isCorrect: false, explanation: 'Incorrect. boolean is a primitive; its default value is false, not null.' }
+        { id: 'a', text: 'null', isCorrect: false, explanation: 'Incorrect. Neither String is null.' },
+        { id: 'b', text: 'false — Strings are always compared by reference, never content', isCorrect: false, explanation: 'Incorrect. String literals are interned (stored in a pool), so two identical literals share the same reference.' },
+        { id: 'c', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Comparing String references with == is valid syntax.' },
+        { id: 'd', text: 'true — these literals point to the same string pool entry', isCorrect: true, explanation: 'Correct! Java interns String literals. "Java" == "Java" is true because both refer to the same pooled object.' },
       ],
-      hint: 'Java boolean is strictly true or false — not 0 or 1.'
+      hint: 'String literals are interned. Two identical literals share the same pool entry.',
     },
     {
       id: 'mod1-l4-c9',
-      question: 'Which data type uses the most memory in Java?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the output?',
+      code: 'char c = \'A\';\nint i = c + 1;\nSystem.out.println(i);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'double (64 bits)', isCorrect: true, explanation: 'Correct! Among primitives, double and long both use 64 bits, making them the largest primitive types.' },
-        { id: 'b', text: 'int (32 bits)', isCorrect: false, explanation: 'Incorrect. int uses 32 bits, which is less than double or long.' },
-        { id: 'c', text: 'char (16 bits)', isCorrect: false, explanation: 'Incorrect. char is 16 bits.' },
-        { id: 'd', text: 'byte (8 bits)', isCorrect: false, explanation: 'Incorrect. byte is the smallest primitive at 8 bits.' }
+        { id: 'a', text: '\'B\'', isCorrect: false, explanation: 'Incorrect. c + 1 widens char to int. The result is an int, not a char. It prints 66, not \'B\'.' },
+        { id: 'b', text: '66', isCorrect: true, explanation: 'Correct! \'A\' has Unicode value 65. 65 + 1 = 66 (int). System.out.println prints the int 66.' },
+        { id: 'c', text: 'A1', isCorrect: false, explanation: 'Incorrect. c + 1 does not concatenate; it performs arithmetic.' },
+        { id: 'd', text: 'Compile error — cannot add char and int', isCorrect: false, explanation: 'Incorrect. char is automatically promoted (widened) to int in arithmetic expressions.' },
       ],
-      hint: 'Compare the bit sizes: byte=8, short=16, int=32, long/double=64.'
+      hint: '\'A\' = 65 in Unicode. char + int promotes char to int.',
     },
     {
       id: 'mod1-l4-c10',
-      question: 'What is the output of the following code?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'int x = 300;\nbyte b = (byte) x;\nSystem.out.println(b);',
+      question: 'Which suffix is required for a long literal that exceeds int range?',
+      code: 'long bigNum = 10000000000L;',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: '44', isCorrect: true, explanation: 'Correct! Casting 300 to byte causes overflow. 300 - 256 = 44, because byte wraps around at 256.' },
-        { id: 'b', text: '300', isCorrect: false, explanation: 'Incorrect. 300 exceeds byte range (-128 to 127), so overflow occurs.' },
-        { id: 'c', text: '-44', isCorrect: false, explanation: 'Incorrect. The overflow result for 300 cast to byte is 44, not -44.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. The explicit cast (byte) suppresses the compile error.' }
+        { id: 'a', text: 'L or l', isCorrect: true, explanation: 'Correct! The L (or l) suffix tells the compiler the literal is a long, not an int.' },
+        { id: 'b', text: 'D or d', isCorrect: false, explanation: 'Incorrect. D/d is the suffix for double literals, not long.' },
+        { id: 'c', text: 'No suffix is needed — Java detects range automatically', isCorrect: false, explanation: 'Incorrect. Without L, a literal exceeding int range causes a compile-time error.' },
+        { id: 'd', text: 'F or f', isCorrect: false, explanation: 'Incorrect. F/f is the suffix for float literals.' },
       ],
-      hint: 'byte wraps around: values > 127 overflow. 300 mod 256 = 44.'
+      hint: 'Long literals need L to distinguish them from int.',
     },
   ],
-
   'mod1-lesson5': [
     {
       id: 'mod1-l5-c1',
-      question: 'What is the correct way to declare and initialize a String variable?',
+      question: 'What is the output?',
+      code: 'int x = 10;\nif (x > 5) {\n    System.out.println("Big");\n} else {\n    System.out.println("Small");\n}',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'String name = "John";', isCorrect: true, explanation: 'Correct! This properly declares a String with a double-quoted literal.' },
-        { id: 'b', text: 'string name = "John";', isCorrect: false, explanation: 'Incorrect. Java is case-sensitive; String must be capitalized.' },
-        { id: 'c', text: 'String name = John;', isCorrect: false, explanation: 'Incorrect. String literals must be in double quotes.' },
-        { id: 'd', text: 'Str name = "John";', isCorrect: false, explanation: 'Incorrect. The correct type name is String, not Str.' }
+        { id: 'a', text: 'Nothing is printed', isCorrect: false, explanation: 'Incorrect. The if condition is true so the if block runs.' },
+        { id: 'b', text: 'Big', isCorrect: true, explanation: 'Correct! x=10 > 5 is true, so "Big" is printed.' },
+        { id: 'c', text: 'BigSmall', isCorrect: false, explanation: 'Incorrect. Only the if OR the else block executes, not both.' },
+        { id: 'd', text: 'Small', isCorrect: false, explanation: 'Incorrect. x is 10, which is greater than 5, so the if block executes.' },
       ],
-      hint: 'String literals must be enclosed in double quotes.'
+      hint: 'The if condition is true — which block runs?',
     },
     {
       id: 'mod1-l5-c2',
-      question: 'Why should you use .equals() instead of == to compare Strings in Java?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'String a = new String("hello");\nString b = new String("hello");\nSystem.out.println(a == b);      // false\nSystem.out.println(a.equals(b)); // true',
+      question: 'Which correctly uses an if-else if chain in Java?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: '== compares memory addresses; .equals() compares content', isCorrect: true, explanation: 'Correct! == checks if two references point to the same object. .equals() checks if the character content is the same.' },
-        { id: 'b', text: '.equals() is slower so should be avoided', isCorrect: false, explanation: 'Incorrect. .equals() is the correct way to compare String values and is the standard practice.' },
-        { id: 'c', text: 'Both work the same for Strings', isCorrect: false, explanation: 'Incorrect. They behave differently because Strings are objects, and == compares references.' },
-        { id: 'd', text: '== compares length; .equals() compares content', isCorrect: false, explanation: 'Incorrect. == compares object references (memory addresses), not length.' }
+        { id: 'a', text: 'if (x > 0) then { } else if (x < 0) { }', isCorrect: false, explanation: 'Incorrect. Java does not use the "then" keyword.' },
+        { id: 'b', text: 'if (x > 0) { } else if (x < 0) { } else { }', isCorrect: true, explanation: 'Correct! else if chains additional conditions; else handles the remaining cases.' },
+        { id: 'c', text: 'if (x > 0) { } if else (x < 0) { }', isCorrect: false, explanation: 'Incorrect. The correct keyword is "else if" (two words combined), not "if else".' },
+        { id: 'd', text: 'if (x > 0) { } elif (x < 0) { }', isCorrect: false, explanation: 'Incorrect. "elif" is Python syntax. Java uses "else if".' },
       ],
-      hint: 'Strings are objects. == for objects checks reference equality.'
+      hint: 'Java uses else if (two words), not elif or if else.',
     },
     {
       id: 'mod1-l5-c3',
-      question: 'What does the String.length() method return?',
-      difficulty: 'easy',
-      xpReward: 10,
-      code: 'String s = "Java";\nSystem.out.println(s.length());',
+      question: 'What is the value of result?',
+      code: 'int score = 75;\nString result;\nif (score >= 90) result = "A";\nelse if (score >= 80) result = "B";\nelse if (score >= 70) result = "C";\nelse result = "F";\nSystem.out.println(result);',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: '4', isCorrect: true, explanation: 'Correct! "Java" has 4 characters, so length() returns 4.' },
-        { id: 'b', text: '3', isCorrect: false, explanation: 'Incorrect. Count all characters: J-a-v-a = 4.' },
-        { id: 'c', text: '5', isCorrect: false, explanation: 'Incorrect. length() counts actual characters, not index positions.' },
-        { id: 'd', text: 'The last index (3)', isCorrect: false, explanation: 'Incorrect. length() returns the count of characters, not the last index.' }
+        { id: 'a', text: 'C', isCorrect: true, explanation: 'Correct! 75 >= 70 (but not >= 80), so the third branch sets result to "C".' },
+        { id: 'b', text: 'B', isCorrect: false, explanation: 'Incorrect. B requires score >= 80. Score is 75.' },
+        { id: 'c', text: 'A', isCorrect: false, explanation: 'Incorrect. A requires score >= 90. Score is 75.' },
+        { id: 'd', text: 'F', isCorrect: false, explanation: 'Incorrect. F only applies if score < 70. Score is 75.' },
       ],
-      hint: 'Count each character in "Java" carefully.'
+      hint: 'Trace through each else if condition in order.',
     },
     {
       id: 'mod1-l5-c4',
-      question: 'Strings in Java are immutable. What does this mean?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the output? (No break statements are present.)',
+      code: 'int x = 1;\nswitch (x) {\n    case 1: System.out.print("one ");\n    case 2: System.out.print("two ");\n    default: System.out.print("end");\n}',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'Once created, a String\'s value cannot be changed', isCorrect: true, explanation: 'Correct! String objects cannot be modified. Methods like toUpperCase() return a new String rather than changing the original.' },
-        { id: 'b', text: 'Strings cannot be compared', isCorrect: false, explanation: 'Incorrect. Strings can be compared using .equals() or compareTo().' },
-        { id: 'c', text: 'Strings are stored as arrays of bytes', isCorrect: false, explanation: 'Incorrect. This relates to internal storage, not immutability.' },
-        { id: 'd', text: 'Strings cannot be passed to methods', isCorrect: false, explanation: 'Incorrect. Strings can be passed to methods just like any other variable.' }
+        { id: 'a', text: 'one two end', isCorrect: true, explanation: 'Correct! Without break statements, Java falls through from case 1 to case 2 to default, printing all three.' },
+        { id: 'b', text: 'one end', isCorrect: false, explanation: 'Incorrect. Execution also falls through case 2.' },
+        { id: 'c', text: 'one two', isCorrect: false, explanation: 'Incorrect. Execution also falls through to default.' },
+        { id: 'd', text: 'one', isCorrect: false, explanation: 'Incorrect. Without break, execution falls through all subsequent cases.' },
       ],
-      hint: 'Immutable means the object\'s state cannot change after creation.'
+      hint: 'Without break, switch falls through to subsequent cases.',
     },
     {
       id: 'mod1-l5-c5',
-      question: 'What is the output of this code?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'String s = "Hello World";\nSystem.out.println(s.toUpperCase());',
+      question: 'What does the ternary operator evaluate to here?',
+      code: 'int a = 5, b = 3;\nint max = (a > b) ? a : b;\nSystem.out.println(max);',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'HELLO WORLD', isCorrect: true, explanation: 'Correct! toUpperCase() returns a new String with all letters converted to uppercase.' },
-        { id: 'b', text: 'hello world', isCorrect: false, explanation: 'Incorrect. toUpperCase() converts to uppercase, not lowercase. Use toLowerCase() for lowercase.' },
-        { id: 'c', text: 'Hello World (unchanged)', isCorrect: false, explanation: 'Incorrect. toUpperCase() does change the case of the returned String.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. toUpperCase() is a valid String method.' }
+        { id: 'a', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. The ternary operator ?: is valid Java syntax.' },
+        { id: 'b', text: '5', isCorrect: true, explanation: 'Correct! (a > b) is (5 > 3) which is true, so the ternary returns a = 5.' },
+        { id: 'c', text: 'true', isCorrect: false, explanation: 'Incorrect. The ternary returns a or b (integers), not the boolean condition result.' },
+        { id: 'd', text: '3', isCorrect: false, explanation: 'Incorrect. The condition is true, so the value before : (which is a=5) is returned.' },
       ],
-      hint: 'toUpperCase() returns a NEW String with all caps.'
+      hint: 'Ternary: condition ? valueIfTrue : valueIfFalse',
     },
     {
       id: 'mod1-l5-c6',
-      question: 'Which class should you use when you need to build a String through many concatenations in a loop?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What does this switch statement print?',
+      code: 'String grade = "B";\nswitch (grade) {\n    case "A": System.out.println("Excellent"); break;\n    case "B": System.out.println("Good"); break;\n    case "C": System.out.println("Average"); break;\n    default: System.out.println("Other");\n}',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'StringBuilder', isCorrect: true, explanation: 'Correct! StringBuilder is mutable and efficient for repeated string concatenations. Using + in a loop creates many temporary String objects.' },
-        { id: 'b', text: 'String', isCorrect: false, explanation: 'Incorrect. Concatenating Strings with + in a loop creates many temporary immutable objects and is inefficient.' },
-        { id: 'c', text: 'StringArray', isCorrect: false, explanation: 'Incorrect. StringArray is not a Java class.' },
-        { id: 'd', text: 'char[]', isCorrect: false, explanation: 'Incorrect. While char[] works, StringBuilder is the recommended approach for string building.' }
+        { id: 'a', text: 'Good', isCorrect: true, explanation: 'Correct! grade matches "B", so "Good" is printed. The break prevents fall-through.' },
+        { id: 'b', text: 'Excellent', isCorrect: false, explanation: 'Incorrect. grade is "B", not "A".' },
+        { id: 'c', text: 'Other', isCorrect: false, explanation: 'Incorrect. "B" matches case "B" before default is reached.' },
+        { id: 'd', text: 'Average', isCorrect: false, explanation: 'Incorrect. grade is "B", not "C".' },
       ],
-      hint: 'Which class is mutable and designed for building strings efficiently?'
+      hint: 'Find the matching case and check for break.',
     },
     {
       id: 'mod1-l5-c7',
-      question: 'What does String.charAt(0) return for the string "Java"?',
-      difficulty: 'easy',
-      xpReward: 10,
-      code: 'String s = "Java";\nchar c = s.charAt(0);',
+      question: 'What is the value of x?',
+      code: 'int n = 0;\nint x = (n != 0) ? (100 / n) : -1;\nSystem.out.println(x);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: '\'J\'', isCorrect: true, explanation: 'Correct! charAt(0) returns the character at index 0, which is \'J\' (String indices start at 0).' },
-        { id: 'b', text: '\'a\'', isCorrect: false, explanation: 'Incorrect. \'a\' is at index 1, not index 0.' },
-        { id: 'c', text: '\'v\'', isCorrect: false, explanation: 'Incorrect. \'v\' is at index 2.' },
-        { id: 'd', text: '1', isCorrect: false, explanation: 'Incorrect. charAt() returns a char, not an integer index.' }
+        { id: 'a', text: '-1', isCorrect: true, explanation: 'Correct! n==0 makes (n!=0) false, so the ternary returns -1 without ever computing 100/n.' },
+        { id: 'b', text: 'Throws ArithmeticException: division by zero', isCorrect: false, explanation: 'Incorrect. Because n==0, the condition is false and the division is never evaluated.' },
+        { id: 'c', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. This is valid Java syntax.' },
+        { id: 'd', text: '0', isCorrect: false, explanation: 'Incorrect. x is assigned the false-branch value of the ternary: -1.' },
       ],
-      hint: 'String indices start at 0.'
+      hint: 'Ternary short-circuits: if condition is false, the true-branch is never evaluated.',
     },
     {
       id: 'mod1-l5-c8',
-      question: 'What is the result of "Hello" + " " + "World"?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'Which statement about the switch statement is true?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: '"Hello World"', isCorrect: true, explanation: 'Correct! The + operator concatenates strings. "Hello" + " " + "World" = "Hello World".' },
-        { id: 'b', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. String concatenation with + is valid in Java.' },
-        { id: 'c', text: '"HelloWorld"', isCorrect: false, explanation: 'Incorrect. The space " " between them produces "Hello World" with a space.' },
-        { id: 'd', text: 'null', isCorrect: false, explanation: 'Incorrect. These are non-null literals and will concatenate normally.' }
+        { id: 'a', text: 'Without a break statement, execution falls through to the next case', isCorrect: true, explanation: 'Correct! Fall-through is the default behavior. break is needed to stop execution at the end of a case.' },
+        { id: 'b', text: 'Every switch statement must include a default case', isCorrect: false, explanation: 'Incorrect. The default case is optional, though recommended.' },
+        { id: 'c', text: 'switch always evaluates every case even after a match', isCorrect: false, explanation: 'Incorrect. switch stops at a break statement or at the end of the switch block.' },
+        { id: 'd', text: 'switch can only evaluate char values in Java', isCorrect: false, explanation: 'Incorrect. switch works with int, char, String, byte, short, and enum types.' },
       ],
-      hint: 'The + operator joins Strings together.'
+      hint: 'Think about what happens when break is omitted.',
     },
     {
       id: 'mod1-l5-c9',
-      question: 'What does String.substring(1, 4) return for "Hello"?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'String s = "Hello";\nSystem.out.println(s.substring(1, 4));',
+      question: 'What does this print?',
+      code: 'int x = 5;\nSystem.out.println(x > 3 ? "yes" : "no");',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: '"ell"', isCorrect: true, explanation: 'Correct! substring(1, 4) returns characters from index 1 (inclusive) to index 4 (exclusive): e, l, l → "ell".' },
-        { id: 'b', text: '"Hell"', isCorrect: false, explanation: 'Incorrect. Starting at index 0 would give "Hell". This starts at index 1.' },
-        { id: 'c', text: '"ello"', isCorrect: false, explanation: 'Incorrect. The end index 4 is exclusive, so index 4 (\'o\') is not included.' },
-        { id: 'd', text: '"Hello"', isCorrect: false, explanation: 'Incorrect. substring(1,4) does not return the full string.' }
+        { id: 'a', text: 'no', isCorrect: false, explanation: 'Incorrect. The condition is true, so "yes" is returned.' },
+        { id: 'b', text: 'true', isCorrect: false, explanation: 'Incorrect. The ternary here returns the String "yes" or "no", not the boolean result.' },
+        { id: 'c', text: 'yes', isCorrect: true, explanation: 'Correct! x=5 > 3 is true, so the ternary returns "yes".' },
+        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. This is valid Java syntax combining ternary with println.' },
       ],
-      hint: 'substring(start, end): start is inclusive, end is exclusive.'
+      hint: 'Evaluate the ternary condition first.',
     },
     {
       id: 'mod1-l5-c10',
-      question: 'What does the contains() method do for Strings?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'String s = "Java Programming";\nSystem.out.println(s.contains("Java"));',
+      question: 'What is the output? (Multiple cases share the same action.)',
+      code: 'int day = 3;\nswitch (day) {\n    case 1:\n    case 2:\n    case 3: System.out.println("Mon-Wed"); break;\n    case 4:\n    case 5: System.out.println("Thu-Fri"); break;\n}',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'Returns true if the String contains the given sequence', isCorrect: true, explanation: 'Correct! contains() returns true if the CharSequence is found within the String. "Java Programming".contains("Java") returns true.' },
-        { id: 'b', text: 'Returns the index where the sequence starts', isCorrect: false, explanation: 'Incorrect. indexOf() returns the index. contains() returns a boolean.' },
-        { id: 'c', text: 'Removes the given sequence from the String', isCorrect: false, explanation: 'Incorrect. contains() only checks, it does not modify the String.' },
-        { id: 'd', text: 'Throws an exception if sequence is not found', isCorrect: false, explanation: 'Incorrect. contains() returns false if not found — it does not throw an exception.' }
+        { id: 'a', text: 'Mon-Wed is printed three times, once per matching case', isCorrect: false, explanation: 'Incorrect. Each case is a possible entry point; only one code block executes.' },
+        { id: 'b', text: 'Compile error — empty case labels are not valid', isCorrect: false, explanation: 'Incorrect. Empty case labels (fall-through to share an action) are valid Java.' },
+        { id: 'c', text: 'Mon-Wed', isCorrect: true, explanation: 'Correct! day=3 matches case 3, but cases 1 and 2 intentionally fall through to case 3 to share its action.' },
+        { id: 'd', text: 'Nothing — empty cases produce no output', isCorrect: false, explanation: 'Incorrect. Empty cases fall through to the next case\'s code.' },
       ],
-      hint: 'contains() is a boolean check method.'
+      hint: 'Empty cases fall through to the next case with code.',
     },
   ],
-
   'mod1-lesson6': [
     {
       id: 'mod1-l6-c1',
-      question: 'What will be the result of this expression?',
-      code: 'int result = 10 + 5 * 2;',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'How many times does the loop body execute?',
+      code: 'for (int i = 0; i < 5; i++) {\n    System.out.println(i);\n}',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: '20', isCorrect: true, explanation: 'Correct! Multiplication is evaluated first: 5*2=10, then 10+10=20.' },
-        { id: 'b', text: '30', isCorrect: false, explanation: 'Incorrect. This would be the result if left-to-right order was followed without precedence.' },
-        { id: 'c', text: '15', isCorrect: false, explanation: 'Incorrect. Check operator precedence — * is higher than +.' },
-        { id: 'd', text: '100', isCorrect: false, explanation: 'Incorrect. Review the arithmetic operations step by step.' }
+        { id: 'a', text: '6 times (i goes 0 through 5)', isCorrect: false, explanation: 'Incorrect. The loop stops when i reaches 5 (condition i < 5 becomes false).' },
+        { id: 'b', text: '5 times (i goes 0,1,2,3,4)', isCorrect: true, explanation: 'Correct! i starts at 0 and increments to 4. When i=5, the condition is false and the loop ends.' },
+        { id: 'c', text: 'Infinite times', isCorrect: false, explanation: 'Incorrect. i++ ensures the condition eventually becomes false.' },
+        { id: 'd', text: '4 times (i goes 0,1,2,3)', isCorrect: false, explanation: 'Incorrect. The condition is i < 5, so i runs through 0,1,2,3,4 — that is 5 iterations.' },
       ],
-      hint: 'Multiplication (*) has higher precedence than addition (+).'
+      hint: 'Count the iterations: i = 0, 1, 2, 3, 4.',
     },
     {
       id: 'mod1-l6-c2',
-      question: 'What does the modulus operator (%) return?',
+      question: 'What is the output?',
+      code: 'int i = 0;\nwhile (i < 3) {\n    System.out.print(i + " ");\n    i++;\n}',
       difficulty: 'easy',
       xpReward: 10,
-      code: 'int r = 17 % 5;',
       options: [
-        { id: 'a', text: '2', isCorrect: true, explanation: 'Correct! 17 divided by 5 is 3 remainder 2. The % operator returns the remainder.' },
-        { id: 'b', text: '3', isCorrect: false, explanation: 'Incorrect. 3 is the quotient, not the remainder. % returns the remainder.' },
-        { id: 'c', text: '5', isCorrect: false, explanation: 'Incorrect. % returns the remainder of the division, not the divisor.' },
-        { id: 'd', text: '0', isCorrect: false, explanation: 'Incorrect. 17 is not evenly divisible by 5.' }
+        { id: 'a', text: 'Nothing is printed', isCorrect: false, explanation: 'Incorrect. i=0 satisfies i<3, so the loop runs.' },
+        { id: 'b', text: '1 2 3', isCorrect: false, explanation: 'Incorrect. i starts at 0, not 1.' },
+        { id: 'c', text: '0 1 2 3', isCorrect: false, explanation: 'Incorrect. The loop stops when i=3 because i<3 is false.' },
+        { id: 'd', text: '0 1 2', isCorrect: true, explanation: 'Correct! i starts at 0, prints 0, 1, 2. When i=3, condition i<3 is false and loop ends.' },
       ],
-      hint: '17 = 5 × 3 + ?'
+      hint: 'Trace i: 0, 1, 2. Loop stops at i=3.',
     },
     {
       id: 'mod1-l6-c3',
-      question: 'What is the result of the following comparison?',
+      question: 'What is guaranteed about a do-while loop?',
       difficulty: 'easy',
       xpReward: 10,
-      code: 'System.out.println(10 != 5);',
       options: [
-        { id: 'a', text: 'true', isCorrect: true, explanation: 'Correct! != means "not equal". 10 is not equal to 5, so the result is true.' },
-        { id: 'b', text: 'false', isCorrect: false, explanation: 'Incorrect. != returns true when values are different.' },
-        { id: 'c', text: '10', isCorrect: false, explanation: 'Incorrect. Comparison operators return boolean (true/false), not numbers.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. != is a valid comparison operator in Java.' }
+        { id: 'a', text: 'The body executes exactly one time always', isCorrect: false, explanation: 'Incorrect. The body can repeat if the condition remains true.' },
+        { id: 'b', text: 'The body executes at least once, regardless of the initial condition', isCorrect: true, explanation: 'Correct! In a do-while loop, the body runs before the condition is ever checked.' },
+        { id: 'c', text: 'The condition is evaluated before the first iteration', isCorrect: false, explanation: 'Incorrect. do-while checks the condition AFTER the first iteration.' },
+        { id: 'd', text: 'The body never executes if the condition is false initially', isCorrect: false, explanation: 'Incorrect. That describes a while loop. do-while always runs the body at least once.' },
       ],
-      hint: '!= means "not equal to".'
+      hint: 'do-while: run first, check condition after.',
     },
     {
       id: 'mod1-l6-c4',
-      question: 'What does the compound assignment operator += do?',
+      question: 'What does break do inside a for loop?',
       difficulty: 'easy',
       xpReward: 10,
-      code: 'int x = 10;\nx += 5;',
       options: [
-        { id: 'a', text: 'x becomes 15', isCorrect: true, explanation: 'Correct! x += 5 is shorthand for x = x + 5. So 10 + 5 = 15.' },
-        { id: 'b', text: 'x becomes 5', isCorrect: false, explanation: 'Incorrect. += adds the right value to x, it does not replace it.' },
-        { id: 'c', text: 'x becomes 50', isCorrect: false, explanation: 'Incorrect. += adds, not multiplies.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. += is a valid compound assignment operator.' }
+        { id: 'a', text: 'Skips the current iteration and continues to the next one', isCorrect: false, explanation: 'Incorrect. That is what continue does. break exits the loop entirely.' },
+        { id: 'b', text: 'Jumps to the else block of the loop', isCorrect: false, explanation: 'Incorrect. Java loops do not have an else block like Python.' },
+        { id: 'c', text: 'Restarts the loop from the beginning with i=0', isCorrect: false, explanation: 'Incorrect. break exits; it does not reset the loop.' },
+        { id: 'd', text: 'Immediately exits the loop entirely', isCorrect: true, explanation: 'Correct! break terminates the loop and execution continues after the closing brace.' },
       ],
-      hint: '+= is short for x = x + something.'
+      hint: 'break = exit loop; continue = skip current iteration.',
     },
     {
       id: 'mod1-l6-c5',
-      question: 'What does the && operator do in Java?',
+      question: 'What does this code print?',
+      code: 'for (int i = 0; i < 5; i++) {\n    if (i == 2) continue;\n    System.out.print(i + " ");\n}',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'boolean result = (5 > 3) && (10 < 20);',
       options: [
-        { id: 'a', text: 'Returns true only if BOTH conditions are true', isCorrect: true, explanation: 'Correct! && is the logical AND operator. Both (5>3) and (10<20) are true, so result is true.' },
-        { id: 'b', text: 'Returns true if EITHER condition is true', isCorrect: false, explanation: 'Incorrect. That describes ||, the OR operator. && requires both to be true.' },
-        { id: 'c', text: 'Compares memory addresses', isCorrect: false, explanation: 'Incorrect. == compares values/references. && is the logical AND operator.' },
-        { id: 'd', text: 'Increments both variables', isCorrect: false, explanation: 'Incorrect. && is not an increment operator — that is ++.' }
+        { id: 'a', text: '0 1 3 4', isCorrect: true, explanation: 'Correct! When i=2, continue skips the println for that iteration. i=0,1,3,4 are printed.' },
+        { id: 'b', text: '0 1 2 3 4', isCorrect: false, explanation: 'Incorrect. i=2 is skipped by continue.' },
+        { id: 'c', text: '2 3 4', isCorrect: false, explanation: 'Incorrect. continue skips i=2, not values before it.' },
+        { id: 'd', text: '0 1', isCorrect: false, explanation: 'Incorrect. continue skips only i=2; the loop continues with i=3 and i=4.' },
       ],
-      hint: 'AND requires all conditions to be true.'
+      hint: 'continue skips the rest of the loop body for that iteration only.',
     },
     {
       id: 'mod1-l6-c6',
-      question: 'What is the value of x after this code runs?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'int x = 5;\nint y = x++;',
+      question: 'What is the output of these nested loops?',
+      code: 'for (int i = 1; i <= 2; i++) {\n    for (int j = 1; j <= 3; j++) {\n        System.out.print(i * j + " ");\n    }\n}',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'x=6, y=5', isCorrect: true, explanation: 'Correct! x++ is post-increment: y gets the current value of x (5), then x is incremented to 6.' },
-        { id: 'b', text: 'x=5, y=6', isCorrect: false, explanation: 'Incorrect. With post-increment (x++), the increment happens AFTER y is assigned.' },
-        { id: 'c', text: 'x=6, y=6', isCorrect: false, explanation: 'Incorrect. y gets the value of x before the increment happens.' },
-        { id: 'd', text: 'x=5, y=5', isCorrect: false, explanation: 'Incorrect. x does get incremented to 6 after the assignment.' }
+        { id: 'a', text: '1 2 3 4 6 8', isCorrect: false, explanation: 'Incorrect. The second row products are 2, 4, 6 — not 4, 6, 8.' },
+        { id: 'b', text: '1 2 3 4 5 6', isCorrect: false, explanation: 'Incorrect. The products are i*j, not sequential integers.' },
+        { id: 'c', text: '1 2 3 2 4 6', isCorrect: true, explanation: 'Correct! i=1: 1*1=1, 1*2=2, 1*3=3. i=2: 2*1=2, 2*2=4, 2*3=6.' },
+        { id: 'd', text: '2 4 6', isCorrect: false, explanation: 'Incorrect. That is only the second row (i=2).' },
       ],
-      hint: 'Post-increment (x++) returns the value THEN increments.'
+      hint: 'Trace outer loop (i) then inner loop (j) for each combination.',
     },
     {
       id: 'mod1-l6-c7',
-      question: 'What is the ternary operator and what does it return here?',
+      question: 'What is wrong with this while loop?',
+      code: 'int i = 0;\nwhile (i < 5) {\n    System.out.println(i);\n    // missing i++\n}',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'int a = 10, b = 20;\nint max = (a > b) ? a : b;',
       options: [
-        { id: 'a', text: '20', isCorrect: true, explanation: 'Correct! (a > b) is false (10 > 20 is false), so the result is b = 20.' },
-        { id: 'b', text: '10', isCorrect: false, explanation: 'Incorrect. The condition (a > b) is false, so the value after : is returned.' },
-        { id: 'c', text: 'true', isCorrect: false, explanation: 'Incorrect. The ternary returns a value (a or b), not a boolean here.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. The ternary operator ?: is valid Java syntax.' }
+        { id: 'a', text: 'The condition should use > instead of <', isCorrect: false, explanation: 'Incorrect. The direction of comparison is fine. The real problem is something else.' },
+        { id: 'b', text: 'i is never incremented — the loop runs forever', isCorrect: true, explanation: 'Correct! Without i++, i stays at 0 forever, the condition i<5 is always true, creating an infinite loop.' },
+        { id: 'c', text: 'System.out.println should be System.out.print', isCorrect: false, explanation: 'Incorrect. The print method choice is irrelevant to correctness.' },
+        { id: 'd', text: 'The loop body needs curly braces to be valid', isCorrect: false, explanation: 'Incorrect. Curly braces are present.' },
       ],
-      hint: 'Ternary: condition ? valueIfTrue : valueIfFalse'
+      hint: 'Check whether the loop variable changes each iteration.',
     },
     {
       id: 'mod1-l6-c8',
-      question: 'What is the difference between & and && in Java?',
-      difficulty: 'hard',
-      xpReward: 20,
-      options: [
-        { id: 'a', text: '&& short-circuits (skips the right side if left is false); & always evaluates both', isCorrect: true, explanation: 'Correct! && is a short-circuit AND: if the left side is false, the right side is never evaluated. & always evaluates both sides.' },
-        { id: 'b', text: 'They are identical in behavior', isCorrect: false, explanation: 'Incorrect. The key difference is short-circuit evaluation: && skips right operand when left is false.' },
-        { id: 'c', text: '& is for integers, && is for booleans only', isCorrect: false, explanation: 'Incorrect. & works on both booleans and integers (bitwise). && only works on booleans.' },
-        { id: 'd', text: '& returns int, && returns boolean', isCorrect: false, explanation: 'Incorrect. When used with booleans, both return boolean. The difference is short-circuiting.' }
-      ],
-      hint: 'Short-circuit means stopping early when the result is already known.'
-    },
-    {
-      id: 'mod1-l6-c9',
-      question: 'Which expression evaluates to true?',
+      question: 'What does this for loop print?',
+      code: 'for (int i = 10; i > 0; i -= 3) {\n    System.out.print(i + " ");\n}',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: '(3 > 2) || (5 < 1)', isCorrect: true, explanation: 'Correct! || is OR, which returns true if at least ONE side is true. (3>2) is true, so the whole expression is true.' },
-        { id: 'b', text: '(3 > 2) && (5 < 1)', isCorrect: false, explanation: 'Incorrect. && requires BOTH sides to be true. (5<1) is false, so this is false.' },
-        { id: 'c', text: '!(3 > 2)', isCorrect: false, explanation: 'Incorrect. ! negates true to false. !(true) = false.' },
-        { id: 'd', text: '(1 == 2)', isCorrect: false, explanation: 'Incorrect. 1 is not equal to 2.' }
+        { id: 'a', text: '10 7 4', isCorrect: false, explanation: 'Incorrect. The loop also runs when i=1 since 1 > 0.' },
+        { id: 'b', text: '10 7 4 1', isCorrect: true, explanation: 'Correct! i=10,7,4,1. After i=1, i becomes -2 which is not > 0, so the loop ends.' },
+        { id: 'c', text: '10 7 4 1 -2', isCorrect: false, explanation: 'Incorrect. -2 is not printed because the condition i>0 is checked before printing.' },
+        { id: 'd', text: '10 8 6 4 2', isCorrect: false, explanation: 'Incorrect. The decrement is -=3, not -=2.' },
       ],
-      hint: 'OR (||) requires only one condition to be true.'
+      hint: 'i decrements by 3 each iteration. Check the stopping condition.',
+    },
+    {
+      id: 'mod1-l6-c9',
+      question: 'What does this loop compute and print?',
+      code: 'int sum = 0;\nfor (int i = 1; i <= 5; i++) {\n    sum += i;\n}\nSystem.out.println(sum);',
+      difficulty: 'medium',
+      xpReward: 15,
+      options: [
+        { id: 'a', text: '10', isCorrect: false, explanation: 'Incorrect. 1+2+3+4 = 10 only if i goes up to 4, but i goes up to 5.' },
+        { id: 'b', text: '5', isCorrect: false, explanation: 'Incorrect. 5 is the final value of i, not the sum.' },
+        { id: 'c', text: '14', isCorrect: false, explanation: 'Incorrect. Re-add: 1+2+3+4+5 = 15.' },
+        { id: 'd', text: '15', isCorrect: true, explanation: 'Correct! sum = 1+2+3+4+5 = 15.' },
+      ],
+      hint: 'Accumulate: sum = 0+1+2+3+4+5.',
     },
     {
       id: 'mod1-l6-c10',
-      question: 'What is the correct operator precedence order (highest to lowest)?',
+      question: 'What is the value of count after this nested loop?',
+      code: 'int count = 0;\nfor (int i = 0; i < 3; i++) {\n    for (int j = 0; j < 3; j++) {\n        if (j == 1) break;\n        count++;\n    }\n}\nSystem.out.println(count);',
       difficulty: 'hard',
       xpReward: 20,
       options: [
-        { id: 'a', text: '++ / -- → * / % → + - → < > → == != → && → ||', isCorrect: true, explanation: 'Correct! Unary operators are highest, then multiplicative, additive, relational, equality, logical AND, then logical OR.' },
-        { id: 'b', text: '+ - → * / → ++ -- → && → ||', isCorrect: false, explanation: 'Incorrect. Unary (++/--) has higher precedence than arithmetic operators.' },
-        { id: 'c', text: '&& → || → == != → < > → + - → * / →  ++', isCorrect: false, explanation: 'Incorrect. This is the reverse order — logical operators have lower precedence than arithmetic.' },
-        { id: 'd', text: 'All operators have equal precedence', isCorrect: false, explanation: 'Incorrect. Operator precedence is a fundamental concept that determines evaluation order.' }
+        { id: 'a', text: '3', isCorrect: true, explanation: 'Correct! The outer loop runs 3 times (i=0,1,2). Each time, j=0 increments count, then j=1 breaks the inner loop. Total: 3.' },
+        { id: 'b', text: '1', isCorrect: false, explanation: 'Incorrect. The inner break only exits the inner loop; the outer loop keeps running.' },
+        { id: 'c', text: '9', isCorrect: false, explanation: 'Incorrect. 9 would result without any break statements.' },
+        { id: 'd', text: '6', isCorrect: false, explanation: 'Incorrect. Inner break exits the inner loop when j=1, so each outer iteration only runs j=0.' },
       ],
-      hint: 'PEMDAS equivalent: Unary, Mult/Div, Add/Sub, Relational, Equality, Logical.'
+      hint: 'break exits only the innermost loop. Trace each outer iteration separately.',
     },
   ],
 };
 
-// MODULE 2: Classes and Objects
+// MODULE 2: Classes, Constructors, and Encapsulation
 export const module2Challenges: Record<string, Challenge[]> = {
   'mod2-lesson1': [
     {
       id: 'mod2-l1-c1',
-      question: 'Which OOP principle is demonstrated in this code?',
-      code: 'public class Animal {\n    protected String name;\n}',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What keyword is used to create a new object in Java?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Encapsulation', isCorrect: true, explanation: 'Correct! Using the protected access modifier demonstrates encapsulation by controlling access to the field.' },
-        { id: 'b', text: 'Inheritance', isCorrect: false, explanation: 'Incorrect. Inheritance uses the "extends" keyword.' },
-        { id: 'c', text: 'Polymorphism', isCorrect: false, explanation: 'Incorrect. Polymorphism involves method overriding or interfaces.' },
-        { id: 'd', text: 'Abstraction', isCorrect: false, explanation: 'Incorrect. Abstraction involves abstract classes or interfaces.' }
+        { id: 'a', text: 'object', isCorrect: false, explanation: 'Incorrect. "object" is not a Java keyword. Use "new ClassName()" to instantiate.' },
+        { id: 'b', text: 'create', isCorrect: false, explanation: 'Incorrect. "create" is not a Java keyword. Object instantiation uses "new".' },
+        { id: 'c', text: 'make', isCorrect: false, explanation: 'Incorrect. "make" is not a Java keyword.' },
+        { id: 'd', text: 'new', isCorrect: true, explanation: 'Correct! The new keyword allocates memory and calls the constructor to create a new object.' },
       ],
-      hint: 'Look at how the field\'s visibility is controlled.'
+      hint: 'Object instantiation in Java uses a specific keyword.',
     },
     {
       id: 'mod2-l1-c2',
-      question: 'How do you create an object from a class in Java?',
+      question: 'What is a field in a Java class?',
       difficulty: 'easy',
       xpReward: 10,
-      code: 'Car myCar = new Car();',
       options: [
-        { id: 'a', text: 'Using the "new" keyword followed by the constructor', isCorrect: true, explanation: 'Correct! "new Car()" calls the constructor and allocates memory for a new Car object.' },
-        { id: 'b', text: 'Using the "create" keyword', isCorrect: false, explanation: 'Incorrect. Java uses "new", not "create", to instantiate objects.' },
-        { id: 'c', text: 'By declaring the class name as a variable', isCorrect: false, explanation: 'Incorrect. Declaring a variable only creates a reference; "new" creates the actual object.' },
-        { id: 'd', text: 'Using the "make" keyword', isCorrect: false, explanation: 'Incorrect. "make" is not a Java keyword. Use "new".' }
+        { id: 'a', text: 'The name of the class file on disk', isCorrect: false, explanation: 'Incorrect. The filename relates to the public class name, but a field is a variable.' },
+        { id: 'b', text: 'A variable declared inside a class to represent object state', isCorrect: true, explanation: 'Correct! Fields (instance variables) are declared inside a class and hold the state of each object.' },
+        { id: 'c', text: 'The main entry point method of the class', isCorrect: false, explanation: 'Incorrect. The main method is the entry point; fields are data members.' },
+        { id: 'd', text: 'A method that returns a computed value', isCorrect: false, explanation: 'Incorrect. Methods define behavior; fields store state.' },
       ],
-      hint: 'Object instantiation in Java uses a specific keyword.'
+      hint: 'Fields store the state (data) of an object.',
     },
     {
       id: 'mod2-l1-c3',
-      question: 'What is the difference between a class and an object?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What is the output?',
+      code: 'class Counter {\n    static int count = 0;\n    Counter() { count++; }\n}\nnew Counter();\nnew Counter();\nnew Counter();\nSystem.out.println(Counter.count);',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'A class is a blueprint; an object is an instance of that blueprint', isCorrect: true, explanation: 'Correct! A class defines the structure and behavior; an object is an actual instance created from that class.' },
-        { id: 'b', text: 'A class and an object are the same thing', isCorrect: false, explanation: 'Incorrect. A class is a template; an object is a runtime instance of it.' },
-        { id: 'c', text: 'An object is a blueprint; a class is an instance', isCorrect: false, explanation: 'Incorrect. It\'s the other way around — the class is the blueprint.' },
-        { id: 'd', text: 'Classes are for methods; objects are for variables', isCorrect: false, explanation: 'Incorrect. Both classes and objects can have fields (variables) and methods.' }
+        { id: 'a', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Accessing a static field via the class name is valid.' },
+        { id: 'b', text: '0', isCorrect: false, explanation: 'Incorrect. Each new Counter() increments the static count.' },
+        { id: 'c', text: '3', isCorrect: true, explanation: 'Correct! count is a static field shared by all Counter objects. Creating 3 instances increments it 3 times.' },
+        { id: 'd', text: '1', isCorrect: false, explanation: 'Incorrect. A static field is shared — it is not reset to 0 for each new object.' },
       ],
-      hint: 'Think of a class as a cookie cutter and an object as the cookie.'
+      hint: 'Static fields belong to the class and are shared by all instances.',
     },
     {
       id: 'mod2-l1-c4',
-      question: 'Which access modifier makes a field accessible only within its own class?',
+      question: 'What is a getter method?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'private', isCorrect: true, explanation: 'Correct! private restricts access to only the class where the field is declared.' },
-        { id: 'b', text: 'public', isCorrect: false, explanation: 'Incorrect. public makes the field accessible from anywhere.' },
-        { id: 'c', text: 'protected', isCorrect: false, explanation: 'Incorrect. protected allows access within the class, subclasses, and the same package.' },
-        { id: 'd', text: 'default (no modifier)', isCorrect: false, explanation: 'Incorrect. Default (package-private) allows access within the same package.' }
+        { id: 'a', text: 'A method that inherits behavior from a parent class', isCorrect: false, explanation: 'Incorrect. Inheritance is about subclassing, not about getters.' },
+        { id: 'b', text: 'A method that returns the value of a private field', isCorrect: true, explanation: 'Correct! Getters provide read access to private fields without exposing them directly.' },
+        { id: 'c', text: 'A method that creates and returns a new object', isCorrect: false, explanation: 'Incorrect. Factory methods create objects; getters retrieve field values.' },
+        { id: 'd', text: 'A static method that tracks the count of objects', isCorrect: false, explanation: 'Incorrect. Object counting is unrelated to getters.' },
       ],
-      hint: 'Which modifier is the most restrictive?'
+      hint: 'Getters provide controlled read access to private fields.',
     },
     {
       id: 'mod2-l1-c5',
-      question: 'What is an instance variable?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is a setter method?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'A variable declared inside a class but outside any method, belonging to each object', isCorrect: true, explanation: 'Correct! Instance variables are unique per object. Each object gets its own copy of instance variables.' },
-        { id: 'b', text: 'A variable declared inside a method', isCorrect: false, explanation: 'Incorrect. Variables declared inside methods are local variables, not instance variables.' },
-        { id: 'c', text: 'A variable shared by all instances of a class', isCorrect: false, explanation: 'Incorrect. Variables shared by all instances are static variables.' },
-        { id: 'd', text: 'A variable that cannot be changed', isCorrect: false, explanation: 'Incorrect. That describes a final variable, not an instance variable.' }
+        { id: 'a', text: 'A method that sets or updates the value of a private field', isCorrect: true, explanation: 'Correct! Setters provide controlled write access, often including validation logic.' },
+        { id: 'b', text: 'A method that returns multiple values from an object', isCorrect: false, explanation: 'Incorrect. Java methods return a single value; setters are for writing, not returning.' },
+        { id: 'c', text: 'A method that compares two objects for equality', isCorrect: false, explanation: 'Incorrect. equals() handles comparison; setters write field values.' },
+        { id: 'd', text: 'A method that initializes static class-level variables', isCorrect: false, explanation: 'Incorrect. Static initializers or direct assignment handle static fields.' },
       ],
-      hint: 'Each object gets its own copy of these variables.'
+      hint: 'Setters provide controlled write access to private fields.',
     },
     {
       id: 'mod2-l1-c6',
-      question: 'What does the static keyword mean when applied to a method?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'public static void printInfo() { }',
+      question: 'What is the output?',
+      code: 'class Dog {\n    String name;\n    static int dogCount = 0;\n    Dog(String n) { name = n; dogCount++; }\n    String getName() { return name; }\n}\nDog d1 = new Dog("Rex");\nDog d2 = new Dog("Buddy");\nSystem.out.println(d1.getName() + " " + Dog.dogCount);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'The method belongs to the class, not to any specific object', isCorrect: true, explanation: 'Correct! Static methods belong to the class itself and can be called without creating an instance.' },
-        { id: 'b', text: 'The method can never be changed', isCorrect: false, explanation: 'Incorrect. static means class-level ownership, not immutability. "final" prevents overriding.' },
-        { id: 'c', text: 'The method is only accessible inside the class', isCorrect: false, explanation: 'Incorrect. static does not restrict visibility — that is the access modifier\'s job.' },
-        { id: 'd', text: 'The method runs automatically when the program starts', isCorrect: false, explanation: 'Incorrect. Only the main() method runs at startup. static alone does not do that.' }
+        { id: 'a', text: 'Buddy 2', isCorrect: false, explanation: 'Incorrect. d1.getName() returns "Rex", the name given to d1.' },
+        { id: 'b', text: 'Rex 1', isCorrect: false, explanation: 'Incorrect. Two Dog objects were created, so dogCount is 2 after both constructors run.' },
+        { id: 'c', text: 'Rex Buddy', isCorrect: false, explanation: 'Incorrect. Dog.dogCount is an integer, not a name.' },
+        { id: 'd', text: 'Rex 2', isCorrect: true, explanation: 'Correct! d1 is created (dogCount=1), d2 is created (dogCount=2). d1.getName() returns "Rex". Output: Rex 2.' },
       ],
-      hint: 'Static members belong to the class, not to instances.'
+      hint: 'Trace object creation: each new Dog increments the static counter.',
     },
     {
       id: 'mod2-l1-c7',
-      question: 'How do you call a static method named "greet" in class "Hello"?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What is wrong with this code?',
+      code: 'class Car {\n    private int speed;\n}\nCar c = new Car();\nc.speed = 100; // ?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'Hello.greet()', isCorrect: true, explanation: 'Correct! Static methods are called using the ClassName.methodName() syntax.' },
-        { id: 'b', text: 'new Hello().greet()', isCorrect: false, explanation: 'Incorrect. While this works, creating an instance to call a static method is unnecessary and not recommended.' },
-        { id: 'c', text: 'greet()', isCorrect: false, explanation: 'Incorrect. Without the class name, this only works from within the same class.' },
-        { id: 'd', text: 'Hello::greet()', isCorrect: false, explanation: 'Incorrect. Hello::greet is a method reference syntax used with lambdas, not a direct call.' }
+        { id: 'a', text: 'speed is private and cannot be accessed directly from outside the class', isCorrect: true, explanation: 'Correct! Private fields are only accessible within their class. External code must use a getter/setter.' },
+        { id: 'b', text: 'speed should be declared as int, not Integer', isCorrect: false, explanation: 'Incorrect. "int speed" is already a primitive — Integer would be the wrapper class.' },
+        { id: 'c', text: 'Car needs a constructor before fields can be declared', isCorrect: false, explanation: 'Incorrect. Java provides a default constructor automatically; field declarations are independent.' },
+        { id: 'd', text: 'You must use new Car(100) to set the speed field', isCorrect: false, explanation: 'Incorrect. Constructors can set fields, but the issue here is access control, not construction.' },
       ],
-      hint: 'Static methods use ClassName.method() format.'
+      hint: 'private means the field is not accessible from outside the class.',
     },
     {
       id: 'mod2-l1-c8',
-      question: 'Which statement about the "public" access modifier is correct?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What does the this keyword refer to inside an instance method?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'public members are accessible from any class in any package', isCorrect: true, explanation: 'Correct! public is the most permissive access modifier — no restrictions on access.' },
-        { id: 'b', text: 'public members are accessible only within the same package', isCorrect: false, explanation: 'Incorrect. That describes the default (package-private) access. public has no package restrictions.' },
-        { id: 'c', text: 'public members are accessible only within the same class', isCorrect: false, explanation: 'Incorrect. That describes private access.' },
-        { id: 'd', text: 'public members cannot be modified', isCorrect: false, explanation: 'Incorrect. "public" is about visibility, not mutability.' }
+        { id: 'a', text: 'The static context of the class (class-level data)', isCorrect: false, explanation: 'Incorrect. "this" refers to the current instance, not the static context.' },
+        { id: 'b', text: 'The next object that will be created from this class', isCorrect: false, explanation: 'Incorrect. "this" always refers to the CURRENT instance, not a future one.' },
+        { id: 'c', text: 'The parent class (superclass) of the current object', isCorrect: false, explanation: 'Incorrect. "super" refers to the parent class. "this" refers to the current object.' },
+        { id: 'd', text: 'The current instance of the class that the method is running on', isCorrect: true, explanation: 'Correct! "this" is a reference to the current object, used to distinguish instance fields from local variables.' },
       ],
-      hint: 'public is the most open access level.'
+      hint: 'this = the current object instance.',
     },
     {
       id: 'mod2-l1-c9',
-      question: 'What is the output of this code?',
+      question: 'What is the key difference between instance methods and static methods?',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'class Dog {\n    String name = "Buddy";\n}\nDog d1 = new Dog();\nDog d2 = new Dog();\nd1.name = "Rex";\nSystem.out.println(d2.name);',
       options: [
-        { id: 'a', text: 'Buddy', isCorrect: true, explanation: 'Correct! d1 and d2 are separate objects, each with their own "name" field. Changing d1.name does not affect d2.name.' },
-        { id: 'b', text: 'Rex', isCorrect: false, explanation: 'Incorrect. d2 is an independent object. Changing d1.name does not change d2.name.' },
-        { id: 'c', text: 'null', isCorrect: false, explanation: 'Incorrect. name is initialized to "Buddy" in the class definition.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. This code is valid and will run correctly.' }
+        { id: 'a', text: 'Static methods are called with new; instance methods are called without new', isCorrect: false, explanation: 'Incorrect. new creates objects; static methods are called via ClassName.method().' },
+        { id: 'b', text: 'Static methods can access instance fields directly; instance methods cannot', isCorrect: false, explanation: 'Incorrect. It is the opposite: static methods cannot access instance fields without an object reference.' },
+        { id: 'c', text: 'Instance methods run faster because they are compiled differently', isCorrect: false, explanation: 'Incorrect. Performance differences between static and instance methods are negligible.' },
+        { id: 'd', text: 'Instance methods require an object to be called; static methods belong to the class and do not', isCorrect: true, explanation: 'Correct! Instance methods operate on object state (can access "this"). Static methods belong to the class and cannot access instance fields directly.' },
       ],
-      hint: 'Each object has its own copy of instance fields.'
+      hint: 'Static methods belong to the class; instance methods belong to objects.',
     },
     {
       id: 'mod2-l1-c10',
-      question: 'What must every Java class file\'s public class name match?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the output?',
+      code: 'class Point {\n    int x, y;\n    Point(int x, int y) { this.x = x; this.y = y; }\n    void move(int dx, int dy) { x += dx; y += dy; }\n}\nPoint p = new Point(3, 4);\np.move(1, -2);\nSystem.out.println(p.x + " " + p.y);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'The filename (e.g., class Hello must be in Hello.java)', isCorrect: true, explanation: 'Correct! In Java, a public class name must exactly match the filename. Class Hello goes in Hello.java.' },
-        { id: 'b', text: 'The package name', isCorrect: false, explanation: 'Incorrect. The class name must match the filename, not the package name.' },
-        { id: 'c', text: 'The name of the main method', isCorrect: false, explanation: 'Incorrect. The main method is always called "main", regardless of the class name.' },
-        { id: 'd', text: 'Nothing — names are arbitrary', isCorrect: false, explanation: 'Incorrect. Java enforces that the public class name matches the .java filename.' }
+        { id: 'a', text: '3 4', isCorrect: false, explanation: 'Incorrect. move() modifies x and y, so the final values are not the initial ones.' },
+        { id: 'b', text: '4 -2', isCorrect: false, explanation: 'Incorrect. y = 4 + (-2) = 2, not -2.' },
+        { id: 'c', text: '1 -2', isCorrect: false, explanation: 'Incorrect. 1 and -2 are the deltas passed to move(), not the final coordinates.' },
+        { id: 'd', text: '4 2', isCorrect: true, explanation: 'Correct! x = 3+1 = 4, y = 4+(-2) = 2. println prints "4 2".' },
       ],
-      hint: 'Java is strict about class names matching filenames.'
+      hint: 'Trace each field update in move() and compute the final values.',
     },
   ],
-
   'mod2-lesson2': [
     {
       id: 'mod2-l2-c1',
-      question: 'What is the purpose of a constructor in Java?',
-      code: 'public class Student {\n    private String name;\n    public Student(String name) {\n        this.name = name;\n    }\n}',
+      question: 'What is the primary purpose of a constructor?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'To initialize objects when they are created', isCorrect: true, explanation: 'Correct! Constructors initialize object state when a new object is created.' },
-        { id: 'b', text: 'To destroy objects when no longer needed', isCorrect: false, explanation: 'Incorrect. Java uses garbage collection for cleanup, not constructors.' },
-        { id: 'c', text: 'To inherit from parent classes', isCorrect: false, explanation: 'Incorrect. The extends keyword is used for inheritance.' },
-        { id: 'd', text: 'To define static methods', isCorrect: false, explanation: 'Incorrect. Constructors initialize instances, not static methods.' }
+        { id: 'a', text: 'To compile and check the class before it is loaded by the JVM', isCorrect: false, explanation: 'Incorrect. Compilation is done by javac, not by constructors.' },
+        { id: 'b', text: 'To initialize object fields when the object is first created', isCorrect: true, explanation: 'Correct! Constructors run automatically when new is called and set up the initial state of the object.' },
+        { id: 'c', text: 'To define only the structure of the class without behavior', isCorrect: false, explanation: 'Incorrect. Constructors DO have behavior — they initialize fields.' },
+        { id: 'd', text: 'To copy the data of one object into a new object automatically', isCorrect: false, explanation: 'Incorrect. Copy constructors do this, but that is a specific type, not the general purpose.' },
       ],
-      hint: 'Think about what happens when you use "new".'
+      hint: 'Think about what happens when you use the new keyword.',
     },
     {
       id: 'mod2-l2-c2',
-      question: 'What is a default constructor?',
+      question: 'What distinguishes a constructor from a regular method?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'A no-argument constructor automatically provided by Java if you define no constructors', isCorrect: true, explanation: 'Correct! If you write no constructors, Java provides a default no-arg constructor that sets all fields to default values.' },
-        { id: 'b', text: 'The first constructor defined in a class', isCorrect: false, explanation: 'Incorrect. "Default constructor" specifically means a no-arg constructor auto-generated by Java.' },
-        { id: 'c', text: 'A constructor with the keyword "default"', isCorrect: false, explanation: 'Incorrect. "default" is not used as a constructor keyword in Java.' },
-        { id: 'd', text: 'A constructor that sets all fields to null', isCorrect: false, explanation: 'Incorrect. The default constructor exists automatically, but it sets primitives to 0/false, not null.' }
+        { id: 'a', text: 'Constructors share the class name and declare no return type', isCorrect: true, explanation: 'Correct! A constructor has the exact same name as the class and no return type declaration.' },
+        { id: 'b', text: 'Constructors can have any return type', isCorrect: false, explanation: 'Incorrect. Constructors have NO return type — not even void.' },
+        { id: 'c', text: 'Constructors can only accept a single parameter', isCorrect: false, explanation: 'Incorrect. Constructors can accept any number of parameters.' },
+        { id: 'd', text: 'Constructors must be declared public', isCorrect: false, explanation: 'Incorrect. Constructors can have any access modifier (private, protected, public, or default).' },
       ],
-      hint: 'Java provides this automatically when you write no constructors.'
+      hint: 'Constructors: same name as class, no return type.',
     },
     {
       id: 'mod2-l2-c3',
-      question: 'What is constructor overloading?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'class Box {\n    Box() { }\n    Box(int w, int h) { }\n    Box(int w, int h, int d) { }\n}',
+      question: 'What does this code print?',
+      code: 'class Box {\n    Box() { System.out.print("A"); }\n    Box(int x) { this(); System.out.print("B"); }\n}\nnew Box(5);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'Having multiple constructors with different parameter lists', isCorrect: true, explanation: 'Correct! Constructor overloading allows objects to be created in different ways depending on what arguments are provided.' },
-        { id: 'b', text: 'Having a constructor that calls another constructor', isCorrect: false, explanation: 'Incorrect. That is constructor chaining using this(). Overloading means multiple constructors with different parameters.' },
-        { id: 'c', text: 'Inheriting constructors from a parent class', isCorrect: false, explanation: 'Incorrect. Constructors are not inherited. That is a different concept.' },
-        { id: 'd', text: 'Using "static" in a constructor', isCorrect: false, explanation: 'Incorrect. Constructors cannot be static.' }
+        { id: 'a', text: 'BA', isCorrect: false, explanation: 'Incorrect. this() is called first, so "A" is printed before "B".' },
+        { id: 'b', text: 'AB', isCorrect: true, explanation: 'Correct! new Box(5) calls Box(int). this() delegates to Box(), which prints "A". Then Box(int) prints "B". Total: AB.' },
+        { id: 'c', text: 'B', isCorrect: false, explanation: 'Incorrect. Box(int) calls this(), which calls Box() first. Box() prints "A" before Box(int) prints "B".' },
+        { id: 'd', text: 'A', isCorrect: false, explanation: 'Incorrect. After Box() prints "A", control returns to Box(int), which also prints "B".' },
       ],
-      hint: 'Multiple constructors — each with different parameters.'
+      hint: 'this() calls the no-arg constructor first; trace the execution order.',
     },
     {
       id: 'mod2-l2-c4',
-      question: 'What does this() do when used inside a constructor?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'class Person {\n    Person() { this("Unknown"); }\n    Person(String name) { System.out.println(name); }\n}',
+      question: 'What happens if you define no constructors in a Java class?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Calls another constructor in the same class', isCorrect: true, explanation: 'Correct! this() is constructor chaining — it delegates to another constructor in the same class. Must be the first statement.' },
-        { id: 'b', text: 'Calls the parent class constructor', isCorrect: false, explanation: 'Incorrect. super() calls the parent class constructor. this() calls a constructor in the SAME class.' },
-        { id: 'c', text: 'Creates a new object of the same class', isCorrect: false, explanation: 'Incorrect. this() is a constructor call, not object creation.' },
-        { id: 'd', text: 'Refers to the current method name', isCorrect: false, explanation: 'Incorrect. this refers to the current instance; this() calls another constructor.' }
+        { id: 'a', text: 'The class cannot be instantiated — new ClassName() will fail', isCorrect: false, explanation: 'Incorrect. The auto-generated default constructor allows instantiation.' },
+        { id: 'b', text: 'All fields remain permanently uninitialized', isCorrect: false, explanation: 'Incorrect. Java assigns default values (0, false, null) to fields even without a constructor.' },
+        { id: 'c', text: 'Compile error — every class must explicitly define at least one constructor', isCorrect: false, explanation: 'Incorrect. Java automatically provides a no-arg constructor if you write none.' },
+        { id: 'd', text: 'Java provides a default no-argument constructor automatically', isCorrect: true, explanation: 'Correct! The default constructor is synthesized by the compiler if no constructors are written.' },
       ],
-      hint: 'this() delegates to a sibling constructor.'
+      hint: 'Java provides a default constructor only when you write none.',
     },
     {
       id: 'mod2-l2-c5',
-      question: 'What happens when you define a parameterized constructor but no no-arg constructor?',
+      question: 'What is super() used for inside a constructor?',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'class Cat {\n    Cat(String name) { }\n}\nCat c = new Cat(); // ?',
       options: [
-        { id: 'a', text: 'Compile error — no matching constructor', isCorrect: true, explanation: 'Correct! When you define any constructor, Java no longer provides the default no-arg constructor. new Cat() would fail to compile.' },
-        { id: 'b', text: 'Java automatically provides a no-arg constructor', isCorrect: false, explanation: 'Incorrect. Java only auto-provides a no-arg constructor when NO constructors are defined at all.' },
-        { id: 'c', text: 'Runtime NullPointerException', isCorrect: false, explanation: 'Incorrect. This is a compile-time error, not a runtime error.' },
-        { id: 'd', text: 'No error — any class can be instantiated with no args', isCorrect: false, explanation: 'Incorrect. Only classes with a no-arg constructor can be instantiated without arguments.' }
+        { id: 'a', text: 'To create and return a new instance of the superclass', isCorrect: false, explanation: 'Incorrect. super() is a constructor call, not an object creation expression.' },
+        { id: 'b', text: 'To call the parent class\'s constructor explicitly', isCorrect: true, explanation: 'Correct! super() invokes the parent class constructor, often to initialize inherited fields.' },
+        { id: 'c', text: 'To declare a return value from the constructor', isCorrect: false, explanation: 'Incorrect. Constructors cannot return values.' },
+        { id: 'd', text: 'To call another constructor within the same class', isCorrect: false, explanation: 'Incorrect. this() calls a constructor in the same class. super() calls the parent constructor.' },
       ],
-      hint: 'Java removes the auto no-arg constructor once you add any constructor.'
+      hint: 'super() vs this(): parent constructor vs sibling constructor.',
     },
     {
       id: 'mod2-l2-c6',
-      question: 'What is wrong with defining a constructor as "void"?',
+      question: 'What is the output?',
+      code: 'class Animal {\n    Animal() { System.out.print("A "); }\n}\nclass Dog extends Animal {\n    Dog() { System.out.print("D"); }\n}\nnew Dog();',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'public void Student(String name) { }',
       options: [
-        { id: 'a', text: 'This is a method, not a constructor — it will not be called by "new"', isCorrect: true, explanation: 'Correct! Constructors have no return type, not even void. Adding void makes it a regular method, not a constructor.' },
-        { id: 'b', text: 'Constructors must return "this"', isCorrect: false, explanation: 'Incorrect. Constructors never have a return type at all.' },
-        { id: 'c', text: 'Nothing is wrong — constructors can be void', isCorrect: false, explanation: 'Incorrect. Adding "void" makes it a regular method, not a constructor.' },
-        { id: 'd', text: 'Compile error because constructors must be private', isCorrect: false, explanation: 'Incorrect. Constructors can be public, private, or protected.' }
+        { id: 'a', text: 'DA', isCorrect: false, explanation: 'Incorrect. The parent constructor always runs first due to the implicit super() call.' },
+        { id: 'b', text: 'D', isCorrect: false, explanation: 'Incorrect. Dog() does not explicitly call super(), so Java inserts an implicit super() call to Animal().' },
+        { id: 'c', text: 'AD', isCorrect: false, explanation: 'Incorrect. There is a space after "A ": System.out.print("A ") prints "A " then Dog() prints "D". So "A D".' },
+        { id: 'd', text: 'A D', isCorrect: true, explanation: 'Correct! new Dog() implicitly calls super() → Animal() prints "A ", then Dog() prints "D". Output: "A D".' },
       ],
-      hint: 'Constructors have no return type — not even void.'
+      hint: 'Java inserts an implicit super() call if you don\'t write one.',
     },
     {
       id: 'mod2-l2-c7',
-      question: 'Where must a this() call appear in a constructor?',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'What is a copy constructor?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'As the very first statement', isCorrect: true, explanation: 'Correct! Both this() and super() must be the first statement in a constructor body. You cannot put them anywhere else.' },
-        { id: 'b', text: 'At the very end of the constructor', isCorrect: false, explanation: 'Incorrect. this() must be the FIRST statement, not the last.' },
-        { id: 'c', text: 'Anywhere inside the constructor', isCorrect: false, explanation: 'Incorrect. Java enforces that this() is the very first statement.' },
-        { id: 'd', text: 'In the class body outside any constructor', isCorrect: false, explanation: 'Incorrect. this() can only appear inside a constructor as its first statement.' }
+        { id: 'a', text: 'A constructor automatically inherited from the parent class', isCorrect: false, explanation: 'Incorrect. Constructors are NOT inherited in Java.' },
+        { id: 'b', text: 'A constructor that creates a new object as a copy of an existing object', isCorrect: true, explanation: 'Correct! A copy constructor takes an object of the same type and copies its field values.' },
+        { id: 'c', text: 'A constructor that creates an object with all fields set to zero', isCorrect: false, explanation: 'Incorrect. That describes the default constructor behavior for numeric fields.' },
+        { id: 'd', text: 'A constructor that compiles the class faster by caching initialization', isCorrect: false, explanation: 'Incorrect. Compilation is not related to constructors at runtime.' },
       ],
-      hint: 'Constructor delegation calls have a strict placement rule.'
+      hint: 'Copy constructors create duplicates of existing objects.',
     },
     {
       id: 'mod2-l2-c8',
-      question: 'What is the output of this code?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'class Animal {\n    String type;\n    Animal() { type = "Unknown"; }\n    Animal(String t) { type = t; }\n}\nAnimal a = new Animal("Dog");\nSystem.out.println(a.type);',
+      question: 'Where must this() or super() appear in a constructor body?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'Dog', isCorrect: true, explanation: 'Correct! new Animal("Dog") calls the parameterized constructor which sets type = "Dog".' },
-        { id: 'b', text: 'Unknown', isCorrect: false, explanation: 'Incorrect. "Unknown" is set by the no-arg constructor. Since "Dog" was passed, the parameterized constructor runs.' },
-        { id: 'c', text: 'null', isCorrect: false, explanation: 'Incorrect. The constructor sets type to "Dog".' },
-        { id: 'd', text: 'Animal', isCorrect: false, explanation: 'Incorrect. "Animal" is the class name, not the value assigned to type.' }
+        { id: 'a', text: 'As the very first statement in the constructor body', isCorrect: true, explanation: 'Correct! Java requires this() and super() to be the first statement, or the compiler will reject the code.' },
+        { id: 'b', text: 'Anywhere inside the constructor body with no restriction', isCorrect: false, explanation: 'Incorrect. Java strictly requires this()/super() to be the first statement.' },
+        { id: 'c', text: 'After all field initializations are complete', isCorrect: false, explanation: 'Incorrect. They must come before any other statements, including field initializations.' },
+        { id: 'd', text: 'At the end of the constructor body, after all field assignments', isCorrect: false, explanation: 'Incorrect. this() or super() must be the FIRST statement, not the last.' },
       ],
-      hint: 'Which constructor matches the argument "Dog"?'
+      hint: 'this() and super() must be the first statement.',
     },
     {
       id: 'mod2-l2-c9',
-      question: 'What is the default value of a String field in a class?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What does this code print?',
+      code: 'class Vehicle {\n    int speed;\n    Vehicle(int s) { speed = s; }\n    Vehicle(Vehicle v) { speed = v.speed * 2; }\n}\nVehicle v1 = new Vehicle(50);\nVehicle v2 = new Vehicle(v1);\nSystem.out.println(v2.speed);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'null', isCorrect: true, explanation: 'Correct! Reference types like String are initialized to null by default in class fields.' },
-        { id: 'b', text: '""  (empty string)', isCorrect: false, explanation: 'Incorrect. Java does not initialize String fields to empty string — they are null by default.' },
-        { id: 'c', text: '0', isCorrect: false, explanation: 'Incorrect. 0 is the default for numeric primitives, not for String (a reference type).' },
-        { id: 'd', text: 'undefined', isCorrect: false, explanation: 'Incorrect. "undefined" is JavaScript. Java uses null for uninitialized reference types.' }
+        { id: 'a', text: '50', isCorrect: false, explanation: 'Incorrect. v2 uses the copy constructor which doubles the speed.' },
+        { id: 'b', text: '25', isCorrect: false, explanation: 'Incorrect. The constructor multiplies by 2, not divides.' },
+        { id: 'c', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Passing a Vehicle object to Vehicle(Vehicle v) is valid.' },
+        { id: 'd', text: '100', isCorrect: true, explanation: 'Correct! v1.speed = 50. The copy constructor sets v2.speed = v1.speed * 2 = 100.' },
       ],
-      hint: 'Reference types have a different default than primitive types.'
+      hint: 'Trace the copy constructor: new speed = old speed × 2.',
     },
     {
       id: 'mod2-l2-c10',
-      question: 'Can a constructor call another constructor of the same class using this()?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'Can constructors be overloaded in Java?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Yes, as long as this() is the first statement', isCorrect: true, explanation: 'Correct! Constructor chaining with this() is valid as long as it appears as the very first statement in the constructor.' },
-        { id: 'b', text: 'No, constructors cannot call other constructors', isCorrect: false, explanation: 'Incorrect. Constructor chaining (using this()) is a valid and common Java pattern.' },
-        { id: 'c', text: 'Yes, but only from a static constructor', isCorrect: false, explanation: 'Incorrect. Java does not have static constructors (static initializer blocks are different).' },
-        { id: 'd', text: 'Only if both constructors are private', isCorrect: false, explanation: 'Incorrect. Access modifiers do not restrict this() usage.' }
+        { id: 'a', text: 'No — a class can only have one constructor', isCorrect: false, explanation: 'Incorrect. Java allows multiple constructors as long as their parameter lists differ.' },
+        { id: 'b', text: 'Yes — multiple constructors with different parameter lists are allowed', isCorrect: true, explanation: 'Correct! Constructor overloading lets you create objects in different ways depending on what arguments are provided.' },
+        { id: 'c', text: 'No — overloading applies only to regular methods, not constructors', isCorrect: false, explanation: 'Incorrect. Constructor overloading is a common and supported pattern in Java.' },
+        { id: 'd', text: 'Yes — but only if the constructors are declared static', isCorrect: false, explanation: 'Incorrect. Constructors cannot be declared static.' },
       ],
-      hint: 'this() enables constructor chaining within the same class.'
+      hint: 'Multiple constructors = constructor overloading.',
     },
   ],
-
   'mod2-lesson3': [
     {
       id: 'mod2-l3-c1',
-      question: 'What does the "this" keyword refer to?',
-      code: 'public class Car {\n    private String model;\n    public void setModel(String model) {\n        this.model = model;\n    }\n}',
+      question: 'Which access modifier is the most restrictive in Java?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'The current instance of the class', isCorrect: true, explanation: 'Correct! "this" refers to the current object, distinguishing instance fields from local parameters.' },
-        { id: 'b', text: 'The parent class', isCorrect: false, explanation: 'Incorrect. "super" refers to the parent class.' },
-        { id: 'c', text: 'A static variable', isCorrect: false, explanation: 'Incorrect. "this" refers to instance members, not static members.' },
-        { id: 'd', text: 'The main method', isCorrect: false, explanation: 'Incorrect. "this" refers to the current object, not any method.' }
+        { id: 'a', text: 'default (no modifier)', isCorrect: false, explanation: 'Incorrect. Default (package-private) is more permissive than private.' },
+        { id: 'b', text: 'public', isCorrect: false, explanation: 'Incorrect. public is the most permissive — accessible from anywhere.' },
+        { id: 'c', text: 'private', isCorrect: true, explanation: 'Correct! private limits access to only the class in which the member is declared.' },
+        { id: 'd', text: 'protected', isCorrect: false, explanation: 'Incorrect. protected is more permissive than private.' },
       ],
-      hint: 'The "this" keyword represents the object itself.'
+      hint: 'Think about which modifier locks data down the most.',
     },
     {
       id: 'mod2-l3-c2',
-      question: 'Why is "this" useful when a parameter name shadows an instance variable?',
+      question: 'What does the protected access modifier allow?',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'class Book {\n    String title;\n    void setTitle(String title) {\n        this.title = title; // disambiguate\n    }\n}',
       options: [
-        { id: 'a', text: 'this.title refers to the field; title refers to the parameter', isCorrect: true, explanation: 'Correct! When a parameter has the same name as a field, "this" is used to tell them apart.' },
-        { id: 'b', text: 'Both title and this.title refer to the parameter', isCorrect: false, explanation: 'Incorrect. Without "this", the local parameter shadows the field.' },
-        { id: 'c', text: '"this" creates a new variable', isCorrect: false, explanation: 'Incorrect. "this" does not create variables — it refers to the current instance.' },
-        { id: 'd', text: '"this" is only needed in static methods', isCorrect: false, explanation: 'Incorrect. "this" cannot be used in static methods at all.' }
+        { id: 'a', text: 'Access only from the declaring class itself', isCorrect: false, explanation: 'Incorrect. That is what private allows.' },
+        { id: 'b', text: 'Access from any class in any package', isCorrect: false, explanation: 'Incorrect. That is what public allows.' },
+        { id: 'c', text: 'Access only from within the method where the member is declared', isCorrect: false, explanation: 'Incorrect. protected applies to the class hierarchy and package, not to a single method.' },
+        { id: 'd', text: 'Access from the same class, its subclasses, and classes in the same package', isCorrect: true, explanation: 'Correct! protected is between public and package-private — it also opens access to subclasses in different packages.' },
       ],
-      hint: '"this" helps when local and instance names clash.'
+      hint: 'protected = same class + same package + subclasses.',
     },
     {
       id: 'mod2-l3-c3',
-      question: 'Can "this" be used inside a static method?',
+      question: 'What problem does this code illustrate?',
+      code: 'class BankAccount {\n    public double balance = 1000.0;\n}\nBankAccount acc = new BankAccount();\nacc.balance = -500;',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'No — static methods have no object instance, so "this" does not exist', isCorrect: true, explanation: 'Correct! Static methods belong to the class, not an instance. There is no current object, so "this" is meaningless and causes a compile error.' },
-        { id: 'b', text: 'Yes — "this" always works in any method', isCorrect: false, explanation: 'Incorrect. Using "this" in a static method causes a compile-time error.' },
-        { id: 'c', text: 'Yes, but only if the class has one instance', isCorrect: false, explanation: 'Incorrect. Java does not allow "this" in static methods regardless of instance count.' },
-        { id: 'd', text: 'Only if the static method is public', isCorrect: false, explanation: 'Incorrect. Access modifier has nothing to do with whether "this" is allowed.' }
+        { id: 'a', text: 'double cannot hold the value 1000.0', isCorrect: false, explanation: 'Incorrect. double easily holds 1000.0.' },
+        { id: 'b', text: 'balance is public, violating encapsulation by allowing direct, unvalidated modification', isCorrect: true, explanation: 'Correct! Public fields let any code set balance to -500 without validation. Private + setter would prevent invalid values.' },
+        { id: 'c', text: 'BankAccount needs a constructor to compile', isCorrect: false, explanation: 'Incorrect. Java provides a default constructor; this code compiles.' },
+        { id: 'd', text: 'Negative values cannot be assigned to numeric fields', isCorrect: false, explanation: 'Incorrect. Java allows negative values; the concern is about lack of validation.' },
       ],
-      hint: 'Static = no object. No object = no "this".'
+      hint: 'Public fields expose internal state without protection.',
     },
     {
       id: 'mod2-l3-c4',
-      question: 'What does "return this;" do inside a method?',
+      question: 'What does the principle of least privilege mean in programming?',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'class Builder {\n    Builder setName(String n) {\n        // ...\n        return this;\n    }\n}',
       options: [
-        { id: 'a', text: 'Returns the current object, enabling method chaining', isCorrect: true, explanation: 'Correct! "return this" returns the current object so methods can be chained: builder.setName("x").setAge(20).' },
-        { id: 'b', text: 'Creates a copy of the current object', isCorrect: false, explanation: 'Incorrect. "return this" returns the same object reference, not a copy.' },
-        { id: 'c', text: 'Terminates the program', isCorrect: false, explanation: 'Incorrect. "return this" simply returns the current object — it does not exit the program.' },
-        { id: 'd', text: 'Causes infinite recursion', isCorrect: false, explanation: 'Incorrect. "return this" just returns the reference; it does not call the method again.' }
+        { id: 'a', text: 'Give code only the minimum access permissions necessary to do its job', isCorrect: true, explanation: 'Correct! Least privilege means defaulting to the most restrictive access and opening up only as needed.' },
+        { id: 'b', text: 'Only one class per file should be declared public', isCorrect: false, explanation: 'Incorrect. While Java limits public classes per file, that is not the principle of least privilege.' },
+        { id: 'c', text: 'Use the smallest possible data type to save memory', isCorrect: false, explanation: 'Incorrect. Least privilege is about access control, not data types.' },
+        { id: 'd', text: 'Write methods as short as possible to reduce complexity', isCorrect: false, explanation: 'Incorrect. Method length is about readability, not access control.' },
       ],
-      hint: 'This pattern is used by the Builder design pattern.'
+      hint: 'Grant the minimum necessary access — default to private.',
     },
     {
       id: 'mod2-l3-c5',
-      question: 'What is the output of this code?',
+      question: 'What is the output?',
+      code: 'class Student {\n    private String name;\n    Student(String n) { name = n; }\n    String getName() { return name; }\n}\nStudent s = new Student("Alice");\nSystem.out.println(s.getName());',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'class Counter {\n    int count = 0;\n    void increment() { this.count++; }\n}\nCounter c = new Counter();\nc.increment();\nc.increment();\nSystem.out.println(c.count);',
       options: [
-        { id: 'a', text: '2', isCorrect: true, explanation: 'Correct! increment() adds 1 to this.count each time. After two calls, count = 2.' },
-        { id: 'b', text: '0', isCorrect: false, explanation: 'Incorrect. Two calls to increment() add to count, making it 2.' },
-        { id: 'c', text: '1', isCorrect: false, explanation: 'Incorrect. Two calls are made, not one.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. This is valid Java code.' }
+        { id: 'a', text: 'null', isCorrect: false, explanation: 'Incorrect. The constructor set name to "Alice"; it is not null.' },
+        { id: 'b', text: 'Alice', isCorrect: true, explanation: 'Correct! getName() returns the private name field, which was set to "Alice" in the constructor.' },
+        { id: 'c', text: 'Alice plus a newline character (Alice\\n)', isCorrect: false, explanation: 'Incorrect. The output is just Alice — println adds newline but we care about the printed value.' },
+        { id: 'd', text: 'name', isCorrect: false, explanation: 'Incorrect. getName() returns the field value, not the field name as a string.' },
       ],
-      hint: 'Count how many times increment() is called.'
+      hint: 'Trace the constructor call and then the getter return value.',
     },
     {
       id: 'mod2-l3-c6',
-      question: 'What does passing "this" to another method allow?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'class Student {\n    void register(Database db) {\n        db.save(this);\n    }\n}',
+      question: 'Which scenario demonstrates encapsulation correctly?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Passes the current object to the database so it can store it', isCorrect: true, explanation: 'Correct! Passing "this" lets the receiving method (db.save) operate on the current object directly.' },
-        { id: 'b', text: 'Creates a copy of the student and saves it', isCorrect: false, explanation: 'Incorrect. "this" passes the reference, not a copy.' },
-        { id: 'c', text: 'Causes a StackOverflowError', isCorrect: false, explanation: 'Incorrect. Passing "this" is perfectly safe and common in callbacks and builders.' },
-        { id: 'd', text: 'Only works if Student is a subclass of Database', isCorrect: false, explanation: 'Incorrect. Passing "this" does not require any inheritance relationship.' }
+        { id: 'a', text: 'Having a subclass inherit all fields from its parent class', isCorrect: false, explanation: 'Incorrect. Inheritance is a separate OOP concept from encapsulation.' },
+        { id: 'b', text: 'Using a static factory method to create all instances', isCorrect: false, explanation: 'Incorrect. Factory methods are a creational pattern, not encapsulation.' },
+        { id: 'c', text: 'Declaring all fields as public so any class can access them freely', isCorrect: false, explanation: 'Incorrect. Public fields violate encapsulation by removing access control.' },
+        { id: 'd', text: 'Using private fields with public getter and setter methods', isCorrect: true, explanation: 'Correct! This is the textbook encapsulation pattern: hide data, expose controlled access.' },
       ],
-      hint: '"this" is just a reference to the current object.'
+      hint: 'Encapsulation = private fields + public controlled access methods.',
     },
     {
       id: 'mod2-l3-c7',
-      question: 'Which is a correct use of "this" in a constructor?',
-      difficulty: 'easy',
-      xpReward: 10,
-      code: 'class Pen {\n    String color;\n    Pen(String color) {\n        this.color = color;\n    }\n}',
-      options: [
-        { id: 'a', text: 'this.color = color — assigns parameter to field', isCorrect: true, explanation: 'Correct! this.color refers to the instance field; color refers to the constructor parameter.' },
-        { id: 'b', text: 'this = new Pen() — creates another object', isCorrect: false, explanation: 'Incorrect. You cannot assign to "this" — it is not a variable you can reassign.' },
-        { id: 'c', text: 'this.Pen() — calls the constructor', isCorrect: false, explanation: 'Incorrect. You call another constructor using this(), not this.Constructor().' },
-        { id: 'd', text: 'return this.color — returns the field from a constructor', isCorrect: false, explanation: 'Incorrect. Constructors cannot return values.' }
-      ],
-      hint: 'this.field is how you access instance fields from constructors.'
-    },
-    {
-      id: 'mod2-l3-c8',
-      question: 'What is method chaining in the context of "this"?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'class Pizza {\n    String size, topping;\n    Pizza setSize(String s) { size=s; return this; }\n    Pizza setTopping(String t) { topping=t; return this; }\n}\nnew Pizza().setSize("Large").setTopping("Cheese");',
-      options: [
-        { id: 'a', text: 'Calling multiple methods on the same object in a single expression', isCorrect: true, explanation: 'Correct! Each method returns "this", so the next method is called on the same Pizza object.' },
-        { id: 'b', text: 'Calling a method recursively', isCorrect: false, explanation: 'Incorrect. Method chaining is not recursion — each call is to a different method.' },
-        { id: 'c', text: 'Calling methods from parent to child class', isCorrect: false, explanation: 'Incorrect. Method chaining is about calling multiple methods on the same object instance.' },
-        { id: 'd', text: 'Calling methods using "super"', isCorrect: false, explanation: 'Incorrect. Method chaining uses "this" (returning the current object), not "super".' }
-      ],
-      hint: 'Each method returns "this" so the next method can be called immediately.'
-    },
-    {
-      id: 'mod2-l3-c9',
-      question: 'What does "this" evaluate to when printed?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'class Box {\n    void show() { System.out.println(this); }\n}',
-      options: [
-        { id: 'a', text: 'The class name and hashcode (e.g., Box@1a2b3c)', isCorrect: true, explanation: 'Correct! By default, printing an object calls toString(), which returns ClassName@hexHashCode unless overridden.' },
-        { id: 'b', text: 'null', isCorrect: false, explanation: 'Incorrect. "this" is never null inside an instance method (the object must exist to call the method).' },
-        { id: 'c', text: 'The class source code', isCorrect: false, explanation: 'Incorrect. Java does not print source code when you print an object.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Printing "this" is valid; it calls the object\'s toString() method.' }
-      ],
-      hint: 'Printing an object calls toString() — what does the default return?'
-    },
-    {
-      id: 'mod2-l3-c10',
-      question: 'What happens if you try to do "this = new Car();" inside a method?',
+      question: 'What is the default access level when no modifier is written?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'Compile error — "this" cannot be assigned', isCorrect: true, explanation: 'Correct! "this" is a special reference that cannot be reassigned. It always points to the current instance.' },
-        { id: 'b', text: 'The current object is replaced with a new Car', isCorrect: false, explanation: 'Incorrect. You cannot replace the current object via "this". It is a read-only reference.' },
-        { id: 'c', text: 'Runtime NullPointerException', isCorrect: false, explanation: 'Incorrect. This would be caught at compile time, not runtime.' },
-        { id: 'd', text: 'Works fine — "this" is a normal variable', isCorrect: false, explanation: 'Incorrect. "this" is not a normal variable; you cannot assign to it.' }
+        { id: 'a', text: 'protected — accessible within hierarchy and package', isCorrect: false, explanation: 'Incorrect. protected must be explicitly written.' },
+        { id: 'b', text: 'private — accessible only within the class', isCorrect: false, explanation: 'Incorrect. private must be explicitly written.' },
+        { id: 'c', text: 'public — accessible everywhere', isCorrect: false, explanation: 'Incorrect. Writing nothing gives package-private access, not public.' },
+        { id: 'd', text: 'package-private — accessible only within the same package', isCorrect: true, explanation: 'Correct! When you write no modifier, the member is accessible only within the same package.' },
       ],
-      hint: '"this" is read-only — it always refers to the current instance.'
+      hint: 'No modifier = package-private (also called default access).',
+    },
+    {
+      id: 'mod2-l3-c8',
+      question: 'What is the main benefit of using private fields with getters and setters?',
+      difficulty: 'medium',
+      xpReward: 15,
+      options: [
+        { id: 'a', text: 'Private fields make the program run significantly faster', isCorrect: false, explanation: 'Incorrect. Access modifiers do not affect execution speed.' },
+        { id: 'b', text: 'The setter can include validation logic and the getter can format output before returning', isCorrect: true, explanation: 'Correct! Setters add a layer where invalid data can be rejected; getters can transform data before returning it.' },
+        { id: 'c', text: 'Getters and setters eliminate the need for constructors', isCorrect: false, explanation: 'Incorrect. Constructors and accessors serve different purposes.' },
+        { id: 'd', text: 'Private fields are automatically inherited by all subclasses', isCorrect: false, explanation: 'Incorrect. Private fields are NOT accessible or visible to subclasses.' },
+      ],
+      hint: 'Setters allow validation; getters allow controlled read access.',
+    },
+    {
+      id: 'mod2-l3-c9',
+      question: 'What does count equal after this code runs?',
+      code: 'class Counter {\n    private int count = 0;\n    void increment() { count++; }\n    int getCount() { return count; }\n}\nCounter c = new Counter();\nc.increment();\nc.increment();\nc.increment();\nSystem.out.println(c.getCount());',
+      difficulty: 'hard',
+      xpReward: 20,
+      options: [
+        { id: 'a', text: '1', isCorrect: false, explanation: 'Incorrect. increment() is called 3 times, not once.' },
+        { id: 'b', text: '3', isCorrect: true, explanation: 'Correct! increment() is called 3 times. Each call does count++. getCount() returns 3.' },
+        { id: 'c', text: '2', isCorrect: false, explanation: 'Incorrect. Count the calls: increment() × 3 = 3.' },
+        { id: 'd', text: '0', isCorrect: false, explanation: 'Incorrect. increment() is called 3 times, each time adding 1 to count.' },
+      ],
+      hint: 'Count how many times increment() is called.',
+    },
+    {
+      id: 'mod2-l3-c10',
+      question: 'Which access modifier allows access only within the same package (no modifier written)?',
+      difficulty: 'easy',
+      xpReward: 10,
+      options: [
+        { id: 'a', text: 'private', isCorrect: false, explanation: 'Incorrect. private is even more restrictive — only the declaring class.' },
+        { id: 'b', text: 'protected', isCorrect: false, explanation: 'Incorrect. protected must be explicitly written and extends beyond the package to subclasses.' },
+        { id: 'c', text: 'public', isCorrect: false, explanation: 'Incorrect. public allows access from anywhere.' },
+        { id: 'd', text: 'package-private (default — no keyword written)', isCorrect: true, explanation: 'Correct! When no access modifier is written, the member is accessible only within the same package.' },
+      ],
+      hint: 'No keyword = package-private access.',
     },
   ],
 };
@@ -1872,274 +1260,274 @@ export const module3Challenges: Record<string, Challenge[]> = {
   'mod3-lesson1': [
     {
       id: 'mod3-l1-c1',
-      question: 'What keyword is used to establish inheritance in Java?',
-      code: 'public class Dog _____ Animal { }',
+      question: 'Which keyword creates an inheritance relationship in Java?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'extends', isCorrect: true, explanation: 'Correct! "extends" creates a subclass that inherits from a superclass.' },
-        { id: 'b', text: 'implements', isCorrect: false, explanation: 'Incorrect. "implements" is for interfaces, not class inheritance.' },
-        { id: 'c', text: 'inherits', isCorrect: false, explanation: 'Incorrect. Java uses "extends", not "inherits".' },
-        { id: 'd', text: 'from', isCorrect: false, explanation: 'Incorrect. "from" is not a Java keyword.' }
+        { id: 'a', text: 'inherits', isCorrect: false, explanation: 'Incorrect. "inherits" is not a Java keyword.' },
+        { id: 'b', text: 'extends', isCorrect: true, explanation: 'Correct! "class Dog extends Animal" makes Dog a subclass of Animal.' },
+        { id: 'c', text: 'super', isCorrect: false, explanation: 'Incorrect. "super" references the parent class but does not create the relationship.' },
+        { id: 'd', text: 'implements', isCorrect: false, explanation: 'Incorrect. "implements" is used for interfaces, not class-to-class inheritance.' },
       ],
-      hint: 'Think about extending the functionality of a parent class.'
+      hint: 'Java uses "extends" for class inheritance.',
     },
     {
       id: 'mod3-l1-c2',
-      question: 'Which relationship does inheritance represent?',
+      question: 'What is the "is-a" relationship in OOP?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'IS-A relationship (e.g., Dog IS-A Animal)', isCorrect: true, explanation: 'Correct! Inheritance models an IS-A relationship. A Dog IS-A Animal because it inherits Animal\'s properties.' },
-        { id: 'b', text: 'HAS-A relationship (e.g., Dog HAS-A Animal)', isCorrect: false, explanation: 'Incorrect. HAS-A describes composition (e.g., Car HAS-A Engine). IS-A describes inheritance.' },
-        { id: 'c', text: 'USES-A relationship', isCorrect: false, explanation: 'Incorrect. USES-A is not a standard OOP relationship term for inheritance.' },
-        { id: 'd', text: 'CREATES-A relationship', isCorrect: false, explanation: 'Incorrect. Inheritance is an IS-A relationship, not CREATES-A.' }
+        { id: 'a', text: 'Encapsulation: data is hidden inside a class', isCorrect: false, explanation: 'Incorrect. Encapsulation is about access control, not type relationships.' },
+        { id: 'b', text: 'Composition: one class contains a field of another class type', isCorrect: false, explanation: 'Incorrect. Composition is a "has-a" relationship, not "is-a".' },
+        { id: 'c', text: 'Inheritance: a subclass IS a more specific type of its superclass', isCorrect: true, explanation: 'Correct! A Dog IS-A Animal because Dog extends Animal. Every Dog object is also an Animal.' },
+        { id: 'd', text: 'Implementation: a class satisfies all methods of an interface', isCorrect: false, explanation: 'Incorrect. That describes the "can-do" contract, not strictly the is-a relationship.' },
       ],
-      hint: 'A subclass IS-A type of its superclass.'
+      hint: 'Is-a = inheritance. Dog is-a Animal.',
     },
     {
       id: 'mod3-l1-c3',
-      question: 'What does a subclass inherit from its superclass?',
+      question: 'What is the output?',
+      code: 'class Animal {\n    String type = "Animal";\n}\nclass Cat extends Animal { }\nCat c = new Cat();\nSystem.out.println(c.type);',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'All non-private fields and methods', isCorrect: true, explanation: 'Correct! Subclasses inherit public, protected, and package-private members — not private ones.' },
-        { id: 'b', text: 'Only the public methods', isCorrect: false, explanation: 'Incorrect. Protected and package-private members are also inherited.' },
-        { id: 'c', text: 'Everything including private members', isCorrect: false, explanation: 'Incorrect. Private members are not inherited (though they exist in the object, they are not accessible).' },
-        { id: 'd', text: 'Only the constructor', isCorrect: false, explanation: 'Incorrect. Constructors are NOT inherited in Java.' }
+        { id: 'a', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Accessing an inherited field is valid.' },
+        { id: 'b', text: 'Cat', isCorrect: false, explanation: 'Incorrect. Cat does not define or override the "type" field, so it inherits "Animal".' },
+        { id: 'c', text: 'Animal', isCorrect: true, explanation: 'Correct! Cat extends Animal and inherits the "type" field. c.type accesses the inherited field, which is "Animal".' },
+        { id: 'd', text: 'null', isCorrect: false, explanation: 'Incorrect. The "type" field is initialized to "Animal" in the class definition.' },
       ],
-      hint: 'Access modifiers determine what gets passed down.'
+      hint: 'Cat inherits the "type" field from Animal.',
     },
     {
       id: 'mod3-l1-c4',
-      question: 'Can a Java class extend more than one class?',
+      question: 'What does super.method() do inside a subclass method?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'No — Java supports single inheritance only for classes', isCorrect: true, explanation: 'Correct! Java only allows a class to extend ONE superclass. Multiple inheritance of classes is not supported (though multiple interfaces can be implemented).' },
-        { id: 'b', text: 'Yes — Java supports multiple inheritance', isCorrect: false, explanation: 'Incorrect. Java does NOT allow a class to extend multiple classes. This is the diamond problem limitation.' },
-        { id: 'c', text: 'Yes, but only with the "multi" keyword', isCorrect: false, explanation: 'Incorrect. "multi" is not a Java keyword.' },
-        { id: 'd', text: 'Only abstract classes can extend multiple classes', isCorrect: false, explanation: 'Incorrect. No class in Java can extend more than one class.' }
+        { id: 'a', text: 'Invokes the parent class\'s version of the method on the current object', isCorrect: true, explanation: 'Correct! super.method() lets you call the parent implementation from within an overriding method.' },
+        { id: 'b', text: 'Hides the parent method from any future subclasses', isCorrect: false, explanation: 'Incorrect. super.method() is a call, not a hiding mechanism.' },
+        { id: 'c', text: 'Creates a new instance of the parent class and calls method on it', isCorrect: false, explanation: 'Incorrect. super.method() calls the parent\'s version on the current object, not a new instance.' },
+        { id: 'd', text: 'Grants access to private fields defined in the parent class', isCorrect: false, explanation: 'Incorrect. Private fields remain inaccessible even through super.' },
       ],
-      hint: 'Java chose single class inheritance to avoid the diamond problem.'
+      hint: 'super.method() calls the parent\'s version.',
     },
     {
       id: 'mod3-l1-c5',
-      question: 'What is the output of this code?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'class Animal {\n    String sound = "...";\n}\nclass Cat extends Animal {\n    String name = "Kitty";\n}\nCat c = new Cat();\nSystem.out.println(c.sound);',
+      question: 'What is the output?',
+      code: 'class Vehicle {\n    int wheels = 4;\n}\nclass Truck extends Vehicle {\n    int wheels = 18;\n    void showWheels() {\n        System.out.println(wheels + " " + super.wheels);\n    }\n}\nnew Truck().showWheels();',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: '"..."', isCorrect: true, explanation: 'Correct! Cat inherits the "sound" field from Animal. Accessing c.sound gives the Animal default "...".' },
-        { id: 'b', text: 'null', isCorrect: false, explanation: 'Incorrect. "sound" is initialized to "..." in Animal, which Cat inherits.' },
-        { id: 'c', text: 'Compile error — Cat does not define sound', isCorrect: false, explanation: 'Incorrect. Cat inherits "sound" from Animal, so it is accessible.' },
-        { id: 'd', text: 'Kitty', isCorrect: false, explanation: 'Incorrect. "Kitty" is the value of "name", not "sound".' }
+        { id: 'a', text: '18 4', isCorrect: true, explanation: 'Correct! Truck.wheels (18) hides Vehicle.wheels (4). wheels = 18 (Truck\'s), super.wheels = 4 (Vehicle\'s).' },
+        { id: 'b', text: '18 18', isCorrect: false, explanation: 'Incorrect. super.wheels specifically accesses the Vehicle\'s field, which is 4.' },
+        { id: 'c', text: '4 18', isCorrect: false, explanation: 'Incorrect. Without super, wheels refers to Truck\'s field (18). super.wheels accesses Vehicle\'s (4).' },
+        { id: 'd', text: '4 4', isCorrect: false, explanation: 'Incorrect. Truck declares its own wheels=18, which hides (not overrides) Vehicle\'s wheels=4.' },
       ],
-      hint: 'Inherited fields are accessible in subclass instances.'
+      hint: 'Field hiding: subclass field hides parent field; use super to reach parent\'s field.',
     },
     {
       id: 'mod3-l1-c6',
-      question: 'Which class is the implicit superclass of every Java class?',
+      question: 'Can a subclass directly access private fields of its parent class?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'java.lang.Object', isCorrect: true, explanation: 'Correct! Every Java class implicitly extends Object, which provides methods like toString(), equals(), and hashCode().' },
-        { id: 'b', text: 'java.lang.Class', isCorrect: false, explanation: 'Incorrect. java.lang.Class represents class metadata, not the base class.' },
-        { id: 'c', text: 'java.lang.Base', isCorrect: false, explanation: 'Incorrect. java.lang.Base does not exist in Java.' },
-        { id: 'd', text: 'java.lang.Root', isCorrect: false, explanation: 'Incorrect. The actual root class is java.lang.Object.' }
+        { id: 'a', text: 'Yes — private means accessible to the entire inheritance hierarchy', isCorrect: false, explanation: 'Incorrect. private is class-scoped; even subclasses cannot access parent private fields directly.' },
+        { id: 'b', text: 'Yes — using super.fieldName provides access', isCorrect: false, explanation: 'Incorrect. super gives access to non-private parent members, not private ones.' },
+        { id: 'c', text: 'No — private fields are accessible only within the class that declares them', isCorrect: true, explanation: 'Correct! Private means strictly class-private. Subclasses must use getters or protected members.' },
+        { id: 'd', text: 'Yes — but only if both classes are in the same package', isCorrect: false, explanation: 'Incorrect. That describes package-private (default) access, not private.' },
       ],
-      hint: 'Every Java object has toString(), equals(), and hashCode() — where do they come from?'
+      hint: 'private = class-only access. Even subclasses can\'t reach them directly.',
     },
     {
       id: 'mod3-l1-c7',
-      question: 'What is a superclass called in the context of inheritance?',
+      question: 'How many classes can a Java class directly extend?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'Parent class', isCorrect: true, explanation: 'Correct! A superclass is also called a parent class or base class. The inheriting class is the subclass, child class, or derived class.' },
-        { id: 'b', text: 'Child class', isCorrect: false, explanation: 'Incorrect. The child class inherits from the parent. The parent class is the superclass.' },
-        { id: 'c', text: 'Interface', isCorrect: false, explanation: 'Incorrect. Interfaces are a separate concept. A superclass is a regular class that is extended.' },
-        { id: 'd', text: 'Abstract class only', isCorrect: false, explanation: 'Incorrect. Any class (concrete or abstract) can be a superclass.' }
+        { id: 'a', text: 'Up to two classes', isCorrect: false, explanation: 'Incorrect. Java limits class inheritance to exactly one parent class.' },
+        { id: 'b', text: 'Unlimited — Java supports full multiple inheritance', isCorrect: false, explanation: 'Incorrect. Java intentionally supports only single class inheritance to avoid the diamond problem.' },
+        { id: 'c', text: 'Exactly one class (single inheritance)', isCorrect: true, explanation: 'Correct! Java supports single class inheritance — a class can extend only one superclass.' },
+        { id: 'd', text: 'Two — one immediate parent and one grandparent listed explicitly', isCorrect: false, explanation: 'Incorrect. The grandparent is inherited automatically; you extend only one class.' },
       ],
-      hint: 'Think about family relationships — parent, child.'
+      hint: 'Java uses single class inheritance only.',
     },
     {
       id: 'mod3-l1-c8',
-      question: 'Can you create an object of a superclass type that holds a subclass instance?',
+      question: 'What is the output?',
+      code: 'class A {\n    A() { System.out.print("A"); }\n}\nclass B extends A {\n    B() { System.out.print("B"); }\n}\nclass C extends B {\n    C() { System.out.print("C"); }\n}\nnew C();',
       difficulty: 'hard',
       xpReward: 20,
-      code: 'Animal a = new Dog();',
       options: [
-        { id: 'a', text: 'Yes — this is called upcasting', isCorrect: true, explanation: 'Correct! Storing a Dog in an Animal reference is upcasting. A Dog IS-A Animal, so this is valid and safe.' },
-        { id: 'b', text: 'No — the types must match exactly', isCorrect: false, explanation: 'Incorrect. Java allows a subclass object to be referenced by its superclass type (upcasting).' },
-        { id: 'c', text: 'Yes, but only if Dog is abstract', isCorrect: false, explanation: 'Incorrect. Upcasting works with any subclass, abstract or concrete.' },
-        { id: 'd', text: 'Only if you use a cast operator', isCorrect: false, explanation: 'Incorrect. Upcasting (from subclass to superclass) is automatic and does not require a cast.' }
+        { id: 'a', text: 'BAC', isCorrect: false, explanation: 'Incorrect. A runs first (it\'s the top of the chain), then B, then C.' },
+        { id: 'b', text: 'ABC', isCorrect: true, explanation: 'Correct! new C() → C() calls super() → B() calls super() → A() prints "A" → B() prints "B" → C() prints "C".' },
+        { id: 'c', text: 'C', isCorrect: false, explanation: 'Incorrect. All parent constructors in the chain run first.' },
+        { id: 'd', text: 'CBA', isCorrect: false, explanation: 'Incorrect. Constructor chaining runs from top of hierarchy down, not bottom-up.' },
       ],
-      hint: 'A subclass reference can be assigned to a superclass variable — IS-A allows it.'
+      hint: 'Constructor chains run from the topmost ancestor down.',
     },
     {
       id: 'mod3-l1-c9',
-      question: 'What is method overriding in the context of inheritance?',
+      question: 'What does the instanceof operator check?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'A subclass providing its own implementation of a method defined in the superclass', isCorrect: true, explanation: 'Correct! Overriding allows a subclass to replace the inherited method with a more specific implementation.' },
-        { id: 'b', text: 'Defining multiple methods with the same name in the same class', isCorrect: false, explanation: 'Incorrect. That is method overloading, not overriding.' },
-        { id: 'c', text: 'Making a superclass method private in the subclass', isCorrect: false, explanation: 'Incorrect. You cannot make an inherited method more restrictive (e.g., private).' },
-        { id: 'd', text: 'Deleting a method from the superclass', isCorrect: false, explanation: 'Incorrect. Overriding replaces the behavior, it does not delete the parent method.' }
+        { id: 'a', text: 'Whether a class has been loaded by the JVM', isCorrect: false, explanation: 'Incorrect. instanceof operates on object references, not class loading state.' },
+        { id: 'b', text: 'Whether an object\'s fields have been initialized', isCorrect: false, explanation: 'Incorrect. instanceof checks type, not initialization state.' },
+        { id: 'c', text: 'Whether two object references point to the exact same object', isCorrect: false, explanation: 'Incorrect. == checks for reference equality. instanceof checks type membership.' },
+        { id: 'd', text: 'Whether an object is an instance of a given class or any of its subclasses', isCorrect: true, explanation: 'Correct! instanceof returns true if the object is of the specified type or any subtype.' },
       ],
-      hint: 'The subclass replaces the superclass\'s method with its own version.'
+      hint: 'instanceof checks the type of an object, including superclass types.',
     },
     {
       id: 'mod3-l1-c10',
-      question: 'What is one major benefit of inheritance?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'What is the output? (Field hiding, not polymorphism.)',
+      code: 'class Parent { int x = 10; }\nclass Child extends Parent {\n    int x = 20;\n    void print() { System.out.println(x + " " + super.x); }\n}\nnew Child().print();',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'Code reuse — subclasses don\'t need to rewrite inherited behavior', isCorrect: true, explanation: 'Correct! Inheritance promotes code reuse. Common logic in the superclass is shared across all subclasses.' },
-        { id: 'b', text: 'It makes programs run faster', isCorrect: false, explanation: 'Incorrect. Inheritance is about code organization and reuse, not performance.' },
-        { id: 'c', text: 'It prevents any bugs from occurring', isCorrect: false, explanation: 'Incorrect. Inheritance does not prevent bugs; it just organizes code hierarchically.' },
-        { id: 'd', text: 'It removes the need for methods', isCorrect: false, explanation: 'Incorrect. Inheritance does not remove methods — it shares them.' }
+        { id: 'a', text: '10 20', isCorrect: false, explanation: 'Incorrect. The unqualified x accesses Child\'s field. super.x accesses Parent\'s field.' },
+        { id: 'b', text: '20 20', isCorrect: false, explanation: 'Incorrect. super.x specifically accesses Parent\'s field (10).' },
+        { id: 'c', text: '10 10', isCorrect: false, explanation: 'Incorrect. x without super refers to Child\'s x (20), not Parent\'s.' },
+        { id: 'd', text: '20 10', isCorrect: true, explanation: 'Correct! Child.x = 20 hides Parent.x = 10. Inside print(): x = 20 (Child\'s), super.x = 10 (Parent\'s).' },
       ],
-      hint: 'Inheritance is fundamentally about reusing code.'
+      hint: 'Fields are hidden (not overridden). super.x accesses the parent\'s version.',
     },
   ],
-
   'mod3-lesson2': [
     {
       id: 'mod3-l2-c1',
-      question: 'What does the super() call do in a constructor?',
-      code: 'class Dog extends Animal {\n    Dog(String name) { super(name); }\n}',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the primary purpose of the @Override annotation?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Calls the parent class constructor', isCorrect: true, explanation: 'Correct! super() calls the parent class constructor to initialize inherited fields.' },
-        { id: 'b', text: 'Creates a new superclass object', isCorrect: false, explanation: 'Incorrect. It calls the parent constructor, not creates a separate object.' },
-        { id: 'c', text: 'Deletes the parent class', isCorrect: false, explanation: 'Incorrect. super() does not delete anything.' },
-        { id: 'd', text: 'Makes the method static', isCorrect: false, explanation: 'Incorrect. super() is about inheritance, not static methods.' }
+        { id: 'a', text: 'It prevents the method from being called by subclasses', isCorrect: false, explanation: 'Incorrect. That would be the purpose of final, not @Override.' },
+        { id: 'b', text: 'It signals intent to override and causes a compile error if no parent method matches', isCorrect: true, explanation: 'Correct! @Override is checked by the compiler. If you misspell the method or parameters don\'t match, you get a compile error.' },
+        { id: 'c', text: 'It automatically calls super.method() before your code runs', isCorrect: false, explanation: 'Incorrect. @Override does not add any runtime behavior.' },
+        { id: 'd', text: 'It forces the JVM to run the method on a background thread', isCorrect: false, explanation: 'Incorrect. @Override is a compile-time annotation with no runtime threading behavior.' },
       ],
-      hint: 'super() initializes the parent part of the object.'
+      hint: '@Override catches typos and signature mismatches at compile time.',
     },
     {
       id: 'mod3-l2-c2',
-      question: 'Where must super() appear in a constructor?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the output?',
+      code: 'class Animal {\n    void sound() { System.out.println("Generic"); }\n}\nclass Dog extends Animal {\n    @Override\n    void sound() { System.out.println("Woof"); }\n}\nAnimal a = new Dog();\na.sound();',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'As the very first statement', isCorrect: true, explanation: 'Correct! super() must be the first statement in a constructor. Java enforces this at compile time.' },
-        { id: 'b', text: 'Anywhere in the constructor body', isCorrect: false, explanation: 'Incorrect. super() must be the very first statement, not anywhere.' },
-        { id: 'c', text: 'At the end of the constructor', isCorrect: false, explanation: 'Incorrect. Placing super() at the end causes a compile error.' },
-        { id: 'd', text: 'After all field initializations', isCorrect: false, explanation: 'Incorrect. super() must come before any other statements.' }
+        { id: 'a', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Assigning a Dog to an Animal reference (upcasting) is always valid.' },
+        { id: 'b', text: 'Generic', isCorrect: false, explanation: 'Incorrect. Even though "a" is declared as Animal, the actual object is Dog, so Dog\'s method runs.' },
+        { id: 'c', text: 'Woof', isCorrect: true, explanation: 'Correct! "a" is declared as Animal but points to a Dog object. Dynamic dispatch calls Dog\'s sound() method.' },
+        { id: 'd', text: 'GenericWoof', isCorrect: false, explanation: 'Incorrect. Dynamic dispatch selects only one method — the overriding one in Dog.' },
       ],
-      hint: 'Both super() and this() have the same placement rule.'
+      hint: 'Dynamic dispatch: the method called depends on the actual object type, not the reference type.',
     },
     {
       id: 'mod3-l2-c3',
-      question: 'What happens if you do NOT explicitly call super() in a subclass constructor?',
+      question: 'What does declaring a method final do?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'Java automatically inserts a no-arg super() call', isCorrect: true, explanation: 'Correct! If you don\'t call super() explicitly, Java inserts super() (the no-arg version) automatically as the first statement.' },
-        { id: 'b', text: 'The parent constructor is never called', isCorrect: false, explanation: 'Incorrect. Java always ensures the parent is initialized by auto-inserting super().' },
-        { id: 'c', text: 'Compile error in all cases', isCorrect: false, explanation: 'Incorrect. Only fails if the parent has no no-arg constructor.' },
-        { id: 'd', text: 'The subclass constructor runs the parent logic directly', isCorrect: false, explanation: 'Incorrect. The parent constructor is called via super(), not duplicated.' }
+        { id: 'a', text: 'Restricts the method to be accessible only within the declaring class', isCorrect: false, explanation: 'Incorrect. That describes private access. final is about overriding.' },
+        { id: 'b', text: 'Makes the method execute exactly once during the program lifetime', isCorrect: false, explanation: 'Incorrect. final methods can be called many times; final prevents overriding.' },
+        { id: 'c', text: 'Guarantees the method always returns the same constant value', isCorrect: false, explanation: 'Incorrect. final only prevents overriding; it does not constrain the return value.' },
+        { id: 'd', text: 'Prevents subclasses from overriding the method', isCorrect: true, explanation: 'Correct! A final method cannot be overridden in any subclass, locking the implementation.' },
       ],
-      hint: 'Java always calls the parent constructor — explicitly or implicitly.'
+      hint: 'final on a method = cannot be overridden.',
     },
     {
       id: 'mod3-l2-c4',
-      question: 'How do you call an overridden method from the superclass within a subclass?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'class Dog extends Animal {\n    void sound() {\n        super.sound();\n        System.out.println("Bark");\n    }\n}',
+      question: 'What is a covariant return type in method overriding?',
+      code: 'class Animal { Animal create() { return new Animal(); } }\nclass Dog extends Animal {\n    @Override\n    Dog create() { return new Dog(); } // Dog is a subtype of Animal\n}',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'super.methodName()', isCorrect: true, explanation: 'Correct! super.sound() calls the Animal version of sound(), then adds Dog-specific behavior.' },
-        { id: 'b', text: 'parent.methodName()', isCorrect: false, explanation: 'Incorrect. "parent" is not a Java keyword. Use "super".' },
-        { id: 'c', text: 'this.methodName()', isCorrect: false, explanation: 'Incorrect. "this.sound()" would call the Dog version (the current object), causing infinite recursion.' },
-        { id: 'd', text: 'Animal.methodName()', isCorrect: false, explanation: 'Incorrect. Calling via class name is for static methods. Use "super" for instance methods.' }
+        { id: 'a', text: 'A return type that must be identical to the parent method\'s return type', isCorrect: false, explanation: 'Incorrect. Prior to Java 5 that was required, but covariant return types relax this rule.' },
+        { id: 'b', text: 'A return type that changes to match the caller\'s type at runtime', isCorrect: false, explanation: 'Incorrect. Return types are resolved at compile time, not runtime.' },
+        { id: 'c', text: 'A return type that is a subclass of the parent method\'s declared return type', isCorrect: true, explanation: 'Correct! An overriding method can narrow the return type to a subtype of the parent\'s return type.' },
+        { id: 'd', text: 'A return type that is a superclass of the parent method\'s return type', isCorrect: false, explanation: 'Incorrect. Covariant means SUBTYPE, not supertype.' },
       ],
-      hint: '"super" gives access to the parent class\'s version of overridden methods.'
+      hint: 'Covariant = the return type can be a subtype of the original.',
     },
     {
       id: 'mod3-l2-c5',
-      question: 'What is the output of this code?',
+      question: 'What is the output?',
+      code: 'class Greeter {\n    String greet() { return "Hello"; }\n}\nclass FormalGreeter extends Greeter {\n    @Override\n    String greet() { return super.greet() + ", sir"; }\n}\nGreeter g = new FormalGreeter();\nSystem.out.println(g.greet());',
       difficulty: 'hard',
       xpReward: 20,
-      code: 'class A {\n    A() { System.out.println("A"); }\n}\nclass B extends A {\n    B() {\n        super();\n        System.out.println("B");\n    }\n}\nnew B();',
       options: [
-        { id: 'a', text: 'A then B', isCorrect: true, explanation: 'Correct! super() runs the A constructor first (prints "A"), then B continues (prints "B").' },
-        { id: 'b', text: 'B then A', isCorrect: false, explanation: 'Incorrect. super() is the first statement, so A runs before B.' },
-        { id: 'c', text: 'Only B', isCorrect: false, explanation: 'Incorrect. super() always calls the parent constructor.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. This is valid code with a proper explicit super() call.' }
+        { id: 'a', text: 'Hello sir', isCorrect: false, explanation: 'Incorrect. The code concatenates ", sir" (with a comma), so output includes the comma.' },
+        { id: 'b', text: 'Hello', isCorrect: false, explanation: 'Incorrect. The overriding greet() in FormalGreeter appends ", sir" to super.greet().' },
+        { id: 'c', text: 'sir', isCorrect: false, explanation: 'Incorrect. super.greet() is called first, contributing "Hello" before ", sir".' },
+        { id: 'd', text: 'Hello, sir', isCorrect: true, explanation: 'Correct! FormalGreeter.greet() calls super.greet() ("Hello") and concatenates ", sir". Dynamic dispatch selects FormalGreeter\'s version.' },
       ],
-      hint: 'super() runs the parent constructor FIRST.'
+      hint: 'Trace: super.greet() + ", sir" = "Hello" + ", sir".',
     },
     {
       id: 'mod3-l2-c6',
-      question: 'Can you access a superclass field using "super.fieldName"?',
+      question: 'Which rule applies to access modifiers when overriding a method?',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'class Animal { String name = "Animal"; }\nclass Dog extends Animal {\n    String name = "Dog";\n    void show() { System.out.println(super.name); }\n}',
       options: [
-        { id: 'a', text: 'Yes — super.name accesses the Animal class field', isCorrect: true, explanation: 'Correct! When both superclass and subclass have the same field name, super.name accesses the parent version.' },
-        { id: 'b', text: 'No — super can only be used for methods', isCorrect: false, explanation: 'Incorrect. super can access both fields and methods of the parent class.' },
-        { id: 'c', text: 'Yes, but only for private fields', isCorrect: false, explanation: 'Incorrect. super cannot access private fields. It works for public and protected fields.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. super.name is valid when accessing a parent field that is not private.' }
+        { id: 'a', text: 'The overriding method must use the exact same access modifier as the parent', isCorrect: false, explanation: 'Incorrect. You can widen access (e.g., protected to public) when overriding.' },
+        { id: 'b', text: 'The overriding method can throw any checked exception regardless of the parent', isCorrect: false, explanation: 'Incorrect. Overriding methods cannot introduce new checked exceptions not declared by the parent.' },
+        { id: 'c', text: 'Only public methods can be overridden in Java', isCorrect: false, explanation: 'Incorrect. Protected methods can also be overridden.' },
+        { id: 'd', text: 'The overriding method cannot use a more restrictive modifier than the parent method', isCorrect: true, explanation: 'Correct! You can widen access (e.g., protected → public) but never narrow it (e.g., public → private).' },
       ],
-      hint: 'super.field accesses the parent version of a shadowed field.'
+      hint: 'Overriding can widen but never narrow the access modifier.',
     },
     {
       id: 'mod3-l2-c7',
-      question: 'Why would you call super.toString() in an overriding toString() method?',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'What is the main difference between overriding and overloading?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'To include the parent class\'s string representation in addition to your own', isCorrect: true, explanation: 'Correct! Calling super.toString() includes the parent\'s output, then you add your own. This builds on parent behavior.' },
-        { id: 'b', text: 'To prevent the child\'s toString() from executing', isCorrect: false, explanation: 'Incorrect. Calling super.toString() does not prevent the child\'s logic — it just gets the parent output too.' },
-        { id: 'c', text: 'To make the method static', isCorrect: false, explanation: 'Incorrect. Calling super methods has nothing to do with static.' },
-        { id: 'd', text: 'To avoid a NullPointerException', isCorrect: false, explanation: 'Incorrect. super.toString() is not a null safety mechanism.' }
+        { id: 'a', text: 'They are two names for exactly the same concept', isCorrect: false, explanation: 'Incorrect. They are fundamentally different features of Java.' },
+        { id: 'b', text: 'Overriding occurs within the same class; overloading requires inheritance', isCorrect: false, explanation: 'Incorrect. It is reversed: overloading is in the same class; overriding involves inheritance.' },
+        { id: 'c', text: 'Overloading is resolved at runtime; overriding is resolved at compile time', isCorrect: false, explanation: 'Incorrect. It is reversed: overloading = compile time; overriding = runtime (dynamic dispatch).' },
+        { id: 'd', text: 'Overriding replaces a parent method with the same signature; overloading adds methods with the same name but different parameters', isCorrect: true, explanation: 'Correct! This is the core distinction. Overriding is about inheritance; overloading is about same-class name reuse with different signatures.' },
       ],
-      hint: 'Super calls let you build on top of parent behavior.'
+      hint: 'Overriding = same signature, inheritance. Overloading = same name, different params.',
     },
     {
       id: 'mod3-l2-c8',
-      question: 'In multilevel inheritance (A → B → C), how does C access A\'s method?',
+      question: 'What is the output? (Trace both calls carefully.)',
+      code: 'class Base {\n    static void bar() { System.out.println("Base"); }\n    void world() { System.out.println("Base world"); }\n}\nclass Sub extends Base {\n    static void bar() { System.out.println("Sub"); }\n    @Override void world() { System.out.println("Sub world"); }\n}\nBase b = new Sub();\nb.bar();\nb.world();',
       difficulty: 'hard',
       xpReward: 20,
       options: [
-        { id: 'a', text: 'C calls super.method() which calls B\'s version, and B can call super.method() to reach A', isCorrect: true, explanation: 'Correct! super always refers to the immediate parent. To reach A from C, B must also forward the super call.' },
-        { id: 'b', text: 'C calls super.super.method() to skip B', isCorrect: false, explanation: 'Incorrect. Java does not support "super.super" — you cannot skip levels.' },
-        { id: 'c', text: 'C directly calls A.method()', isCorrect: false, explanation: 'Incorrect. You cannot call a specific grandparent class method directly like that from an instance context.' },
-        { id: 'd', text: 'Multilevel super access is not possible', isCorrect: false, explanation: 'Incorrect. It is possible through the chain of super calls in each class.' }
+        { id: 'a', text: 'Base / Sub world', isCorrect: true, explanation: 'Correct! b.bar(): static method → reference type Base → "Base". b.world(): instance method → object type Sub → "Sub world".' },
+        { id: 'b', text: 'Base / Base world', isCorrect: false, explanation: 'Incorrect. world() is an instance method and IS polymorphic — it uses the object type (Sub).' },
+        { id: 'c', text: 'Sub / Sub world', isCorrect: false, explanation: 'Incorrect. Static methods (bar) are not polymorphic — they use the reference type (Base).' },
+        { id: 'd', text: 'Sub / Base world', isCorrect: false, explanation: 'Incorrect. bar() is static and uses reference type (Base), printing "Base.bar".' },
       ],
-      hint: 'super always refers to the IMMEDIATE parent — one level up only.'
+      hint: 'Static methods: resolved by reference type. Instance methods: resolved by object type.',
     },
     {
       id: 'mod3-l2-c9',
-      question: 'What is the difference between super() and super.method()?',
+      question: 'Can a private method be overridden in a subclass?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'super() calls the parent constructor; super.method() calls a parent instance method', isCorrect: true, explanation: 'Correct! super() is constructor chaining; super.method() invokes an overridden method from the parent class.' },
-        { id: 'b', text: 'They are the same thing', isCorrect: false, explanation: 'Incorrect. super() is for constructors; super.method() is for instance methods.' },
-        { id: 'c', text: 'super() creates a new parent object; super.method() deletes it', isCorrect: false, explanation: 'Incorrect. Neither creates a separate parent object.' },
-        { id: 'd', text: 'super() can be called anywhere; super.method() only in constructors', isCorrect: false, explanation: 'Incorrect. It\'s the other way: super() can only be in constructors; super.method() is used in regular methods.' }
+        { id: 'a', text: 'Yes — any method can be overridden regardless of its access modifier', isCorrect: false, explanation: 'Incorrect. private methods cannot be overridden because they are not visible to subclasses.' },
+        { id: 'b', text: 'No — private methods are invisible to subclasses and cannot be overridden', isCorrect: true, explanation: 'Correct! Private methods are not visible to subclasses. A subclass can define a method with the same name, but it is a new method, not an override.' },
+        { id: 'c', text: 'Yes — but only if the subclass is in the same package', isCorrect: false, explanation: 'Incorrect. private is class-scoped regardless of package. Package location does not affect this.' },
+        { id: 'd', text: 'No — but only because private methods are also implicitly final', isCorrect: false, explanation: 'Incorrect. private methods are not declared final; they are simply invisible to subclasses.' },
       ],
-      hint: 'One is for constructors, the other for methods.'
+      hint: 'Private methods are invisible to subclasses — they can\'t be overridden.',
     },
     {
       id: 'mod3-l2-c10',
-      question: 'What is the output of this code?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'class Vehicle {\n    void info() { System.out.println("Vehicle"); }\n}\nclass Car extends Vehicle {\n    void info() {\n        super.info();\n        System.out.println("Car");\n    }\n}\nnew Car().info();',
+      question: 'What is the output?',
+      code: 'class Calc {\n    int add(int a, int b) { return a + b; }\n}\nclass SmartCalc extends Calc {\n    @Override\n    int add(int a, int b) { return super.add(a, b) * 2; }\n}\nCalc c = new SmartCalc();\nSystem.out.println(c.add(3, 4));',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'Vehicle then Car', isCorrect: true, explanation: 'Correct! super.info() prints "Vehicle" first, then "Car" is printed by the Car class.' },
-        { id: 'b', text: 'Car then Vehicle', isCorrect: false, explanation: 'Incorrect. super.info() is called first, so "Vehicle" appears before "Car".' },
-        { id: 'c', text: 'Only Vehicle', isCorrect: false, explanation: 'Incorrect. After super.info(), the Car code also runs.' },
-        { id: 'd', text: 'Only Car', isCorrect: false, explanation: 'Incorrect. super.info() also runs, producing "Vehicle".' }
+        { id: 'a', text: '28', isCorrect: false, explanation: 'Incorrect. Only one multiplication by 2 occurs, not two.' },
+        { id: 'b', text: '8', isCorrect: false, explanation: 'Incorrect. super.add(3,4)=7, then *2=14.' },
+        { id: 'c', text: '14', isCorrect: true, explanation: 'Correct! c is SmartCalc. add(3,4) calls SmartCalc.add: super.add(3,4)=7, 7*2=14.' },
+        { id: 'd', text: '7', isCorrect: false, explanation: 'Incorrect. SmartCalc.add overrides to return super.add(a,b)*2, not super.add(a,b).' },
       ],
-      hint: 'super.info() runs first, then the rest of Car.info().'
+      hint: 'Trace: SmartCalc.add → super.add(3,4)=7 → 7×2=14.',
     },
   ],
 };
@@ -2149,349 +1537,350 @@ export const module4Challenges: Record<string, Challenge[]> = {
   'mod4-lesson1': [
     {
       id: 'mod4-l1-c1',
-      question: 'What is method overriding?',
-      code: 'class Animal {\n    void sound() { System.out.println("..."); }\n}\nclass Dog extends Animal {\n    @Override\n    void sound() { System.out.println("Bark"); }\n}',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is method overloading?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Providing a specific implementation of an inherited method in a subclass', isCorrect: true, explanation: 'Correct! Overriding replaces the parent\'s method behavior with a subclass-specific version.' },
-        { id: 'b', text: 'Creating multiple methods with the same name but different parameters', isCorrect: false, explanation: 'Incorrect. That is method overloading, not overriding.' },
-        { id: 'c', text: 'Making a method private in the subclass', isCorrect: false, explanation: 'Incorrect. Overriding is about reimplementing, not restricting access.' },
-        { id: 'd', text: 'Deleting a parent class method', isCorrect: false, explanation: 'Incorrect. Overriding replaces behavior; the parent method still exists.' }
+        { id: 'a', text: 'A method that replaces an inherited method from a parent class', isCorrect: false, explanation: 'Incorrect. That describes method overriding.' },
+        { id: 'b', text: 'Multiple methods in the same class with the same name but different parameter lists', isCorrect: true, explanation: 'Correct! Overloading provides multiple entry points for a method, each handling different argument types or counts.' },
+        { id: 'c', text: 'A method that calls itself recursively to solve a sub-problem', isCorrect: false, explanation: 'Incorrect. That describes recursion, not overloading.' },
+        { id: 'd', text: 'A method accessible from any class in any package', isCorrect: false, explanation: 'Incorrect. Accessibility is controlled by access modifiers, not overloading.' },
       ],
-      hint: 'Look at the @Override annotation.'
+      hint: 'Overloading = same name + different parameters in the same class.',
     },
     {
       id: 'mod4-l1-c2',
-      question: 'What is the purpose of the @Override annotation?',
+      question: 'Which is a valid overloaded version of void print(int x)?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'Tells the compiler to verify that a method actually overrides a superclass method', isCorrect: true, explanation: 'Correct! @Override causes a compile error if the method does not actually override a parent method, catching typos and mistakes.' },
-        { id: 'b', text: 'Makes the method run faster', isCorrect: false, explanation: 'Incorrect. @Override has no effect on performance.' },
-        { id: 'c', text: 'Required for overriding to work', isCorrect: false, explanation: 'Incorrect. @Override is optional, but strongly recommended for safety and clarity.' },
-        { id: 'd', text: 'Prevents the method from being overridden again', isCorrect: false, explanation: 'Incorrect. "final" prevents further overriding. @Override just validates the override.' }
+        { id: 'a', text: 'void Print(int x)', isCorrect: false, explanation: 'Incorrect. Java is case-sensitive. Print ≠ print, so this is a different method name, not overloading.' },
+        { id: 'b', text: 'int print(int x)', isCorrect: false, explanation: 'Incorrect. Changing only the return type does NOT constitute overloading. This causes a compile error.' },
+        { id: 'c', text: 'void print(double x)', isCorrect: true, explanation: 'Correct! This has the same name but a different parameter type (double vs int), which is valid overloading.' },
+        { id: 'd', text: 'void print(int x, int x)', isCorrect: false, explanation: 'Incorrect. Duplicate parameter names cause a compile error.' },
       ],
-      hint: '@Override is a safety annotation, not a requirement.'
+      hint: 'Valid overloading requires a different parameter list, not just a different return type.',
     },
     {
       id: 'mod4-l1-c3',
-      question: 'Which rules must a method follow to override a parent method? (Select the correct rule)',
+      question: 'Can methods be overloaded by differing only in return type?',
+      code: 'int calculate() { return 5; }\ndouble calculate() { return 5.0; } // compile error',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'Same name, same parameter list, same or wider access modifier', isCorrect: true, explanation: 'Correct! The overriding method must have the same signature. Access cannot be narrower (e.g., cannot make public method protected).' },
-        { id: 'b', text: 'Same name, different parameter list', isCorrect: false, explanation: 'Incorrect. Different parameters makes it overloading, not overriding.' },
-        { id: 'c', text: 'Any name, same return type', isCorrect: false, explanation: 'Incorrect. The name must also match for overriding.' },
-        { id: 'd', text: 'Same name, but can have any return type', isCorrect: false, explanation: 'Incorrect. The return type must also match (or be a covariant subtype).' }
+        { id: 'a', text: 'Yes — Java distinguishes methods by their complete signature including return type', isCorrect: false, explanation: 'Incorrect. Java method signatures include only the method name and parameter list, NOT the return type.' },
+        { id: 'b', text: 'Yes — but only when the methods are in a subclass', isCorrect: false, explanation: 'Incorrect. Return type alone cannot distinguish overloaded methods, regardless of class hierarchy.' },
+        { id: 'c', text: 'No — overloading requires a difference in the number or types of parameters', isCorrect: true, explanation: 'Correct! The return type is not part of the method signature for overloading purposes. Having only a different return type is a compile error.' },
+        { id: 'd', text: 'Yes — but only for primitive return types', isCorrect: false, explanation: 'Incorrect. Return type is never part of the overloading signature in Java.' },
       ],
-      hint: 'Overriding requires an exact signature match.'
+      hint: 'Method signature = name + parameter list (NOT return type).',
     },
     {
       id: 'mod4-l1-c4',
-      question: 'What is runtime polymorphism?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'Animal a = new Dog();\na.sound(); // Which sound() runs?',
+      question: 'When is method overloading resolved?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'The JVM decides which method to call at runtime based on the actual object type', isCorrect: true, explanation: 'Correct! Even though "a" is declared as Animal, the JVM sees the actual object is a Dog and calls Dog.sound().' },
-        { id: 'b', text: 'The compiler decides which method to call based on the declared type', isCorrect: false, explanation: 'Incorrect. That would be compile-time (static) dispatch. Runtime polymorphism happens at runtime.' },
-        { id: 'c', text: 'Animal\'s sound() always runs because "a" is of type Animal', isCorrect: false, explanation: 'Incorrect. The actual object type (Dog) determines which method runs, not the reference type.' },
-        { id: 'd', text: 'Both Animal\'s and Dog\'s sound() run', isCorrect: false, explanation: 'Incorrect. Only one method runs — the most specific one for the actual object.' }
+        { id: 'a', text: 'At runtime, based on the actual type of the object calling the method', isCorrect: false, explanation: 'Incorrect. Runtime type resolution describes method overriding (dynamic dispatch), not overloading.' },
+        { id: 'b', text: 'At compile time, based on the declared types of the arguments', isCorrect: true, explanation: 'Correct! Overloading resolution is a compile-time process, which is why it is called compile-time polymorphism.' },
+        { id: 'c', text: 'Only when the JVM loads the class for the first time', isCorrect: false, explanation: 'Incorrect. Overload resolution happens at compile time, not class-loading time.' },
+        { id: 'd', text: 'Each time the method is called, the JVM searches for a match', isCorrect: false, explanation: 'Incorrect. Overload resolution is baked in at compile time.' },
       ],
-      hint: 'The actual object type (Dog), not the reference type (Animal), determines the method.'
+      hint: 'Overloading = compile-time polymorphism.',
     },
     {
       id: 'mod4-l1-c5',
-      question: 'Can a static method be overridden in Java?',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'Which overloaded method gets called?',
+      code: 'void show(int x) { System.out.println("int"); }\nvoid show(long x) { System.out.println("long"); }\nbyte b = 5;\nshow(b); // ?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'No — static methods are "hidden", not overridden', isCorrect: true, explanation: 'Correct! Static methods belong to the class, not instances. Defining the same static method in a subclass "hides" it rather than overrides it. Runtime polymorphism does not apply.' },
-        { id: 'b', text: 'Yes — static methods override just like instance methods', isCorrect: false, explanation: 'Incorrect. Static method "overriding" is actually method hiding — different behavior.' },
-        { id: 'c', text: 'Yes, but only if marked with @Override', isCorrect: false, explanation: 'Incorrect. @Override on a static method causes a compile error because hiding is not overriding.' },
-        { id: 'd', text: 'Static methods cannot be redefined in subclasses', isCorrect: false, explanation: 'Incorrect. They can be redefined, but this is called hiding, not overriding.' }
+        { id: 'a', text: 'show(int x) — byte widens to int (closest matching type)', isCorrect: true, explanation: 'Correct! byte can widen to int, short, long, float, or double. int is the closest, so show(int) is called.' },
+        { id: 'b', text: 'show(long x) — byte widens to the largest integral type', isCorrect: false, explanation: 'Incorrect. Java picks the most specific (narrowest) applicable overload, which is int.' },
+        { id: 'c', text: 'The byte argument is printed as "byte" literally', isCorrect: false, explanation: 'Incorrect. The overloaded method is selected based on type widening rules.' },
+        { id: 'd', text: 'Compile error — no byte version exists', isCorrect: false, explanation: 'Incorrect. Java automatically widens byte to the closest matching type.' },
       ],
-      hint: 'Static methods belong to the class — there is no dynamic dispatch for them.'
+      hint: 'Java widens to the closest matching type when calling overloaded methods.',
     },
     {
       id: 'mod4-l1-c6',
-      question: 'What does "final" do when applied to a method?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'class Animal {\n    final void breathe() { }\n}',
+      question: 'What is the output?',
+      code: 'class MathHelper {\n    int square(int x) { return x * x; }\n    double square(double x) { return x * x; }\n}\nMathHelper m = new MathHelper();\nSystem.out.println(m.square(3));',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'Prevents the method from being overridden in subclasses', isCorrect: true, explanation: 'Correct! A final method cannot be overridden. Any attempt to override it in a subclass causes a compile error.' },
-        { id: 'b', text: 'Makes the method run only once', isCorrect: false, explanation: 'Incorrect. "final" on a method prevents overriding, not repeat execution.' },
-        { id: 'c', text: 'Makes the method private', isCorrect: false, explanation: 'Incorrect. "final" and "private" are separate modifiers with different effects.' },
-        { id: 'd', text: 'Makes the method static', isCorrect: false, explanation: 'Incorrect. "final" and "static" are independent modifiers.' }
+        { id: 'a', text: '9', isCorrect: true, explanation: 'Correct! m.square(3): 3 is an int literal, so square(int x) is called. Returns 3*3=9 (int).' },
+        { id: 'b', text: 'Compile error — ambiguous method call', isCorrect: false, explanation: 'Incorrect. 3 is an int literal, unambiguously calling square(int).' },
+        { id: 'c', text: '81', isCorrect: false, explanation: 'Incorrect. 81 would be 9 squared, not 3 squared.' },
+        { id: 'd', text: '9.0', isCorrect: false, explanation: 'Incorrect. 3 is an int literal, so square(int) is called, returning an int (9), not a double.' },
       ],
-      hint: '"final" locks the method implementation — no changes allowed downstream.'
+      hint: 'Integer literals call the int overload, not the double overload.',
     },
     {
       id: 'mod4-l1-c7',
-      question: 'What is the output of this code?',
+      question: 'What happens when you call process(5, 10)?',
+      code: 'void process(int x, double y) { }\nvoid process(double x, int y) { }\nprocess(5, 10); // ?',
       difficulty: 'hard',
       xpReward: 20,
-      code: 'class Shape {\n    void draw() { System.out.println("Shape"); }\n}\nclass Circle extends Shape {\n    @Override\n    void draw() { System.out.println("Circle"); }\n}\nShape s = new Circle();\ns.draw();',
       options: [
-        { id: 'a', text: 'Circle', isCorrect: true, explanation: 'Correct! Even though "s" is declared as Shape, the actual object is Circle. The JVM calls Circle.draw() at runtime.' },
-        { id: 'b', text: 'Shape', isCorrect: false, explanation: 'Incorrect. The actual type is Circle, so Circle.draw() is invoked via runtime polymorphism.' },
-        { id: 'c', text: 'Both "Shape" and "Circle"', isCorrect: false, explanation: 'Incorrect. Only the overriding method (Circle.draw) runs.' },
-        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Shape s = new Circle() is valid upcasting.' }
+        { id: 'a', text: 'process(double, int) is called since double has higher precision', isCorrect: false, explanation: 'Incorrect. Neither overload is "better" than the other — both require one widening conversion.' },
+        { id: 'b', text: 'Compile succeeds — Java finds an exact match for the int arguments', isCorrect: false, explanation: 'Incorrect. There is no exact match for (int, int). Both overloads require widening.' },
+        { id: 'c', text: 'process(int, double) is called since int is checked first', isCorrect: false, explanation: 'Incorrect. Java does not simply pick the first match; it looks for an unambiguous best match.' },
+        { id: 'd', text: 'Compile error — the call is ambiguous between both overloads', isCorrect: true, explanation: 'Correct! Both process(int,double) and process(double,int) require exactly one widening. Java cannot choose and reports an ambiguous method call.' },
       ],
-      hint: 'The actual object (Circle), not the reference type (Shape), decides the method.'
+      hint: 'Ambiguous overloads cause a compile error when neither is more specific.',
     },
     {
       id: 'mod4-l1-c8',
-      question: 'Can you override a method to throw more checked exceptions than the parent?',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'How does overloading differ from overriding?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'No — the overriding method cannot throw new or broader checked exceptions', isCorrect: true, explanation: 'Correct! The overriding method can only throw the same or narrower checked exceptions, or none. Adding new checked exceptions violates the Liskov Substitution Principle.' },
-        { id: 'b', text: 'Yes — you can add any exceptions in the overriding method', isCorrect: false, explanation: 'Incorrect. Adding broader checked exceptions in an overriding method causes a compile error.' },
-        { id: 'c', text: 'Yes, but only runtime exceptions', isCorrect: false, explanation: 'Incorrect. Unchecked (runtime) exceptions can be added freely, but checked exceptions cannot.' },
-        { id: 'd', text: 'No — overriding methods cannot throw any exceptions', isCorrect: false, explanation: 'Incorrect. They can throw the same or narrower checked exceptions, and any unchecked exceptions.' }
+        { id: 'a', text: 'They are two names for the same Java feature', isCorrect: false, explanation: 'Incorrect. They are distinct features with different rules and purposes.' },
+        { id: 'b', text: 'Overloading is resolved at runtime; overriding at compile time', isCorrect: false, explanation: 'Incorrect. It is reversed: overloading is compile-time; overriding is runtime.' },
+        { id: 'c', text: 'Overloading happens within one class with different signatures; overriding happens in a subclass replacing a parent method with the same signature', isCorrect: true, explanation: 'Correct! This captures the essential distinction between the two features.' },
+        { id: 'd', text: 'Overloading requires a class hierarchy; overriding works in any single class', isCorrect: false, explanation: 'Incorrect. It is reversed: overloading is within one class; overriding involves inheritance.' },
       ],
-      hint: 'Narrowing is allowed; broadening is not — for checked exceptions.'
+      hint: 'Overloading = same class, different params. Overriding = subclass, same signature.',
     },
     {
       id: 'mod4-l1-c9',
-      question: 'Can you override a method to make it more restrictive (e.g., from public to private)?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the output?',
+      code: 'class Printer {\n    void print(Object o) { System.out.println("Object"); }\n    void print(String s) { System.out.println("String"); }\n}\nPrinter p = new Printer();\np.print("hello");\np.print(null);',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'No — access cannot become more restrictive when overriding', isCorrect: true, explanation: 'Correct! An overriding method must have the same or wider access. Narrowing access (e.g., public → private) causes a compile error.' },
-        { id: 'b', text: 'Yes — any access modifier can be used', isCorrect: false, explanation: 'Incorrect. Access can only stay the same or become wider (e.g., protected → public), never narrower.' },
-        { id: 'c', text: 'Yes, but only if the parent method is protected', isCorrect: false, explanation: 'Incorrect. The rule applies regardless of the parent\'s access modifier.' },
-        { id: 'd', text: 'Access modifiers are ignored during overriding', isCorrect: false, explanation: 'Incorrect. Access modifiers are strictly enforced during overriding.' }
+        { id: 'a', text: 'String / Object', isCorrect: false, explanation: 'Incorrect. For null, Java picks the most specific applicable type, which is String (a subtype of Object).' },
+        { id: 'b', text: 'Compile error — null is ambiguous between String and Object overloads', isCorrect: false, explanation: 'Incorrect. String is more specific than Object, so null resolves to print(String) without ambiguity.' },
+        { id: 'c', text: 'String / String', isCorrect: true, explanation: 'Correct! "hello" matches print(String). null also matches print(String) because String is more specific than Object.' },
+        { id: 'd', text: 'Object / String', isCorrect: false, explanation: 'Incorrect. "hello" is a String literal, which directly matches print(String).' },
       ],
-      hint: 'Think of the Liskov Substitution Principle — a subclass must be usable where a superclass is expected.'
+      hint: 'Overloading resolution picks the most specific type. String is more specific than Object.',
     },
     {
       id: 'mod4-l1-c10',
-      question: 'What is the difference between method hiding and method overriding?',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'What is compile-time polymorphism?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'Overriding uses runtime dispatch; hiding uses compile-time dispatch based on reference type', isCorrect: true, explanation: 'Correct! Overriding (instance methods) is resolved at runtime. Hiding (static methods) is resolved at compile time based on the reference type.' },
-        { id: 'b', text: 'They are the same concept', isCorrect: false, explanation: 'Incorrect. Overriding and hiding have different resolution mechanisms.' },
-        { id: 'c', text: 'Hiding is for constructors; overriding is for methods', isCorrect: false, explanation: 'Incorrect. Both apply to methods. Hiding applies to static methods; overriding to instance methods.' },
-        { id: 'd', text: 'Overriding is for private methods; hiding is for public methods', isCorrect: false, explanation: 'Incorrect. Private methods cannot be overridden. The distinction is about static vs. instance methods.' }
+        { id: 'a', text: 'A method that changes its parameter types based on caller context', isCorrect: false, explanation: 'Incorrect. Java uses static typing; parameter types are fixed at compile time.' },
+        { id: 'b', text: 'Method overloading — the compiler determines which overloaded method to call', isCorrect: true, explanation: 'Correct! Because the method is selected at compile time based on argument types, overloading is called compile-time polymorphism.' },
+        { id: 'c', text: 'The JVM selecting which class to load based on startup arguments', isCorrect: false, explanation: 'Incorrect. Class loading is a separate JVM concern, not a polymorphism concept.' },
+        { id: 'd', text: 'The ability to create objects of different subclass types at runtime', isCorrect: false, explanation: 'Incorrect. That describes runtime polymorphism and dynamic dispatch.' },
       ],
-      hint: 'static → compile time (hiding). instance → runtime (overriding).'
+      hint: 'Compile-time polymorphism = overloading (resolved by the compiler).',
     },
   ],
-
   'mod4-lesson2': [
     {
       id: 'mod4-l2-c1',
-      question: 'Which statement about method overloading is TRUE?',
-      code: 'class Calculator {\n    int add(int a, int b) { return a + b; }\n    double add(double a, double b) { return a + b; }\n}',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is upcasting?',
+      code: 'Animal a = new Dog(); // upcasting',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Methods must have different parameter lists', isCorrect: true, explanation: 'Correct! Overloaded methods must differ in number, type, or order of parameters.' },
-        { id: 'b', text: 'Methods must have different return types', isCorrect: false, explanation: 'Incorrect. Return type alone is not sufficient to overload a method.' },
-        { id: 'c', text: 'Methods must be in different classes', isCorrect: false, explanation: 'Incorrect. Overloaded methods are in the same class.' },
-        { id: 'd', text: 'Methods must use the @Override annotation', isCorrect: false, explanation: 'Incorrect. @Override is for overriding, not overloading.' }
+        { id: 'a', text: 'Converting a primitive to its wrapper object type', isCorrect: false, explanation: 'Incorrect. That is autoboxing, not upcasting in the inheritance sense.' },
+        { id: 'b', text: 'Casting a parent class object to a child class reference', isCorrect: false, explanation: 'Incorrect. That is downcasting (which can fail if the object isn\'t really the subtype).' },
+        { id: 'c', text: 'Converting an int to a String representation', isCorrect: false, explanation: 'Incorrect. That is type conversion/concatenation, not upcasting in OOP.' },
+        { id: 'd', text: 'Assigning a subclass object to a superclass reference variable', isCorrect: true, explanation: 'Correct! Animal a = new Dog() is upcasting — the Dog is treated as an Animal reference.' },
       ],
-      hint: 'Focus on what makes overloaded methods different.'
+      hint: 'Upcasting = subclass object assigned to superclass reference.',
     },
     {
       id: 'mod4-l2-c2',
-      question: 'Is the following valid method overloading?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'class Test {\n    int compute(int a) { return a; }\n    double compute(int a) { return a; }\n}',
+      question: 'What is the output?',
+      code: 'class Shape {\n    void draw() { System.out.println("Shape"); }\n}\nclass Circle extends Shape {\n    void draw() { System.out.println("Circle"); }\n}\nShape[] shapes = { new Shape(), new Circle(), new Circle() };\nfor (Shape s : shapes) s.draw();',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'No — differing only by return type is not valid overloading', isCorrect: true, explanation: 'Correct! Java determines overloads by parameter list, not return type. These two methods have the same parameters, causing a compile error.' },
-        { id: 'b', text: 'Yes — different return types make them different methods', isCorrect: false, explanation: 'Incorrect. Return type is not considered when resolving overloads. Both methods would clash.' },
-        { id: 'c', text: 'Yes — Java can tell them apart at runtime', isCorrect: false, explanation: 'Incorrect. Overloading is resolved at compile time, and return type is not used for resolution.' },
-        { id: 'd', text: 'Only if the methods are private', isCorrect: false, explanation: 'Incorrect. Access modifier does not affect overload resolution.' }
+        { id: 'a', text: 'Circle / Circle / Circle', isCorrect: false, explanation: 'Incorrect. The first element is a Shape object, so Shape\'s draw() is called.' },
+        { id: 'b', text: 'Shape / Shape / Shape', isCorrect: false, explanation: 'Incorrect. Circle overrides draw(). Dynamic dispatch calls Circle\'s version for Circle objects.' },
+        { id: 'c', text: 'Shape / Circle / Circle', isCorrect: true, explanation: 'Correct! shapes[0] is a Shape → "Shape". shapes[1] and [2] are Circles → "Circle" each. Dynamic dispatch selects based on actual object type.' },
+        { id: 'd', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Upcasting Shape[] = {new Shape(), new Circle()} is valid.' },
       ],
-      hint: 'Overloads must differ in parameter list, not return type.'
+      hint: 'Dynamic dispatch picks the method based on the actual object, not the array type.',
     },
     {
       id: 'mod4-l2-c3',
-      question: 'When is the correct overloaded method chosen?',
+      question: 'What does instanceof return when the reference is null?',
+      code: 'String s = null;\nSystem.out.println(s instanceof String);',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'At compile time, based on the argument types', isCorrect: true, explanation: 'Correct! Overloading is compile-time (static) polymorphism. The compiler picks the best matching method based on argument types.' },
-        { id: 'b', text: 'At runtime, based on the object\'s actual type', isCorrect: false, explanation: 'Incorrect. Runtime dispatch applies to overriding, not overloading.' },
-        { id: 'c', text: 'Randomly chosen by the JVM', isCorrect: false, explanation: 'Incorrect. The compiler deterministically picks the most specific matching method.' },
-        { id: 'd', text: 'The first defined method is always chosen', isCorrect: false, explanation: 'Incorrect. The compiler picks based on argument types, not declaration order.' }
+        { id: 'a', text: 'true — null is a valid reference of any object type', isCorrect: false, explanation: 'Incorrect. null represents "no object"; it is not an instance of any class.' },
+        { id: 'b', text: 'NullPointerException is thrown', isCorrect: false, explanation: 'Incorrect. instanceof is null-safe by design and returns false for null.' },
+        { id: 'c', text: 'false', isCorrect: true, explanation: 'Correct! null instanceof AnyType always returns false in Java — null is not an instance of any type.' },
+        { id: 'd', text: 'Compile error — instanceof cannot be applied to a null reference', isCorrect: false, explanation: 'Incorrect. instanceof compiles and runs without error when the left side is null.' },
       ],
-      hint: 'Overloading = compile-time; overriding = runtime.'
+      hint: 'null instanceof AnyType always returns false.',
     },
     {
       id: 'mod4-l2-c4',
-      question: 'Which overloaded method is called here?',
+      question: 'What is the output?',
+      code: 'class A { void m() { System.out.println("A"); } }\nclass B extends A { void m() { System.out.println("B"); } }\nclass C extends B { }\nA obj = new C();\nobj.m();',
       difficulty: 'hard',
       xpReward: 20,
-      code: 'class Printer {\n    void print(int n) { System.out.println("int: " + n); }\n    void print(double n) { System.out.println("double: " + n); }\n}\nnew Printer().print(5);',
       options: [
-        { id: 'a', text: 'print(int n) — 5 is an int literal', isCorrect: true, explanation: 'Correct! 5 is an int literal, so the compiler picks the most specific match: print(int).' },
-        { id: 'b', text: 'print(double n) — Java always prefers double', isCorrect: false, explanation: 'Incorrect. Java picks the most specific match. Since 5 is an int, print(int) is chosen.' },
-        { id: 'c', text: 'Compile error — ambiguous call', isCorrect: false, explanation: 'Incorrect. There is no ambiguity; 5 matches int more specifically than double.' },
-        { id: 'd', text: 'Both are called', isCorrect: false, explanation: 'Incorrect. Only one method is called based on the argument type.' }
+        { id: 'a', text: 'B', isCorrect: true, explanation: 'Correct! C extends B, which overrides A\'s m(). C has no m(), so it uses B\'s. Dynamic dispatch: obj (type C) → B\'s m() → "B".' },
+        { id: 'b', text: 'A', isCorrect: false, explanation: 'Incorrect. C does not override m(), but B does. Dynamic dispatch walks up the chain: C → B\'s m().' },
+        { id: 'c', text: 'C', isCorrect: false, explanation: 'Incorrect. C has no m() method defined. The search goes up the hierarchy to B.' },
+        { id: 'd', text: 'AB', isCorrect: false, explanation: 'Incorrect. Dynamic dispatch calls only one method — the most specific one in the hierarchy.' },
       ],
-      hint: 'Java picks the most specific matching type.'
+      hint: 'Trace the inheritance chain. C inherits m() from B, not A.',
     },
     {
       id: 'mod4-l2-c5',
-      question: 'What is the difference between overloading and overriding?',
+      question: 'What is dynamic dispatch (runtime polymorphism)?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'Overloading is in the same class (different params); overriding is in a subclass (same params)', isCorrect: true, explanation: 'Correct! Overloading = same class, different parameters. Overriding = subclass, same signature.' },
-        { id: 'b', text: 'They are the same concept with different names', isCorrect: false, explanation: 'Incorrect. They serve different purposes and occur in different contexts.' },
-        { id: 'c', text: 'Overriding is for constructors; overloading is for methods', isCorrect: false, explanation: 'Incorrect. Both apply to methods. Constructors can be overloaded but not overridden.' },
-        { id: 'd', text: 'Overloading is at runtime; overriding is at compile time', isCorrect: false, explanation: 'Incorrect. It\'s the opposite: overloading is compile-time; overriding is runtime.' }
+        { id: 'a', text: 'The JVM selecting the method implementation based on the actual object type at runtime', isCorrect: true, explanation: 'Correct! The JVM examines the actual object\'s type (not the reference type) and calls the appropriate overriding method.' },
+        { id: 'b', text: 'Static methods being bound to their class at class-load time', isCorrect: false, explanation: 'Incorrect. Static methods use static binding; dynamic dispatch applies to instance methods.' },
+        { id: 'c', text: 'The compiler choosing which method to call based on the declared reference type', isCorrect: false, explanation: 'Incorrect. Compile-time selection based on reference type describes static/overloading resolution.' },
+        { id: 'd', text: 'A method that sends data to multiple threads simultaneously', isCorrect: false, explanation: 'Incorrect. "Dispatch" in this context means method selection, not thread communication.' },
       ],
-      hint: 'Key difference: same class vs. subclass, and same vs. different params.'
+      hint: 'Dynamic dispatch = JVM picks the method based on the actual object type.',
     },
     {
       id: 'mod4-l2-c6',
-      question: 'Can constructors be overloaded in Java?',
-      difficulty: 'easy',
-      xpReward: 10,
-      code: 'class Point {\n    Point() { }\n    Point(int x, int y) { }\n}',
+      question: 'What causes a ClassCastException?',
+      code: 'Animal a = new Animal();\nDog d = (Dog) a; // ClassCastException if a is not a Dog',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'Yes — constructors can be overloaded like regular methods', isCorrect: true, explanation: 'Correct! Constructor overloading is common in Java. Each constructor has a different parameter list.' },
-        { id: 'b', text: 'No — a class can only have one constructor', isCorrect: false, explanation: 'Incorrect. Java allows multiple constructors as long as their parameter lists differ.' },
-        { id: 'c', text: 'Yes, but only if the class extends another class', isCorrect: false, explanation: 'Incorrect. Constructor overloading is allowed for any class regardless of inheritance.' },
-        { id: 'd', text: 'No — constructors cannot have parameters', isCorrect: false, explanation: 'Incorrect. Constructors can and often do have parameters.' }
+        { id: 'a', text: 'Downcasting to a type the actual object is not an instance of', isCorrect: true, explanation: 'Correct! If Animal a = new Animal() and you write Dog d = (Dog) a, the actual object is not a Dog, causing ClassCastException at runtime.' },
+        { id: 'b', text: 'Using instanceof before performing a downcast', isCorrect: false, explanation: 'Incorrect. Using instanceof prevents ClassCastException — it is the safe approach.' },
+        { id: 'c', text: 'Upcasting a subclass object to a superclass reference', isCorrect: false, explanation: 'Incorrect. Upcasting is always safe and never throws exceptions.' },
+        { id: 'd', text: 'Calling an overridden method on an upcasted reference', isCorrect: false, explanation: 'Incorrect. Calling overridden methods on an upcasted reference is safe and is the core of polymorphism.' },
       ],
-      hint: 'Constructor overloading follows the same rules as method overloading.'
+      hint: 'ClassCastException: downcasting to a type the object isn\'t actually.',
     },
     {
       id: 'mod4-l2-c7',
-      question: 'What is "compile-time polymorphism"?',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is the output? (Static vs instance method resolution.)',
+      code: 'class Foo {\n    static void bar() { System.out.println("Foo.bar"); }\n    void baz() { System.out.println("Foo.baz"); }\n}\nclass Bar extends Foo {\n    static void bar() { System.out.println("Bar.bar"); }\n    void baz() { System.out.println("Bar.baz"); }\n}\nFoo obj = new Bar();\nobj.bar();\nobj.baz();',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'Polymorphism resolved by the compiler — method overloading', isCorrect: true, explanation: 'Correct! Compile-time (static) polymorphism is implemented via overloading. The compiler selects the method at compile time.' },
-        { id: 'b', text: 'Polymorphism resolved at runtime — method overriding', isCorrect: false, explanation: 'Incorrect. Runtime polymorphism is via overriding. Compile-time is via overloading.' },
-        { id: 'c', text: 'Using abstract classes', isCorrect: false, explanation: 'Incorrect. Abstract classes enable runtime polymorphism through overriding.' },
-        { id: 'd', text: 'Using the "static" keyword', isCorrect: false, explanation: 'Incorrect. "static" is not the defining feature of compile-time polymorphism.' }
+        { id: 'a', text: 'Foo.bar / Foo.baz', isCorrect: false, explanation: 'Incorrect. baz() is an instance method — dynamic dispatch selects Bar\'s version.' },
+        { id: 'b', text: 'Bar.bar / Foo.baz', isCorrect: false, explanation: 'Incorrect. bar() uses reference type (Foo). baz() uses object type (Bar).' },
+        { id: 'c', text: 'Foo.bar / Bar.baz', isCorrect: true, explanation: 'Correct! obj.bar(): static → reference type (Foo) → "Foo.bar". obj.baz(): instance → object type (Bar) → "Bar.baz".' },
+        { id: 'd', text: 'Bar.bar / Bar.baz', isCorrect: false, explanation: 'Incorrect. Static methods use the reference type (Foo), not the object type (Bar).' },
       ],
-      hint: 'Which type of polymorphism is decided before the program runs?'
+      hint: 'Key rule: static methods → reference type; instance methods → object type.',
     },
     {
       id: 'mod4-l2-c8',
-      question: 'How many overloaded methods can a class have with the same name?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'Why should you check instanceof before downcasting?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'As many as needed, as long as each has a unique parameter list', isCorrect: true, explanation: 'Correct! Java imposes no limit on overloads as long as each has a distinct parameter list.' },
-        { id: 'b', text: 'Maximum of 2', isCorrect: false, explanation: 'Incorrect. There is no such limit in Java.' },
-        { id: 'c', text: 'Maximum of 5', isCorrect: false, explanation: 'Incorrect. Java does not impose an artificial limit on overloaded methods.' },
-        { id: 'd', text: 'Exactly 1 — methods cannot share names', isCorrect: false, explanation: 'Incorrect. Overloading is specifically about multiple methods sharing a name.' }
+        { id: 'a', text: 'Downcasting to the wrong type causes ClassCastException at runtime', isCorrect: true, explanation: 'Correct! Without instanceof, a bad cast throws ClassCastException. Checking first lets you handle it gracefully.' },
+        { id: 'b', text: 'Java syntax requires instanceof before every cast', isCorrect: false, explanation: 'Incorrect. instanceof is optional; it is a best practice to prevent exceptions.' },
+        { id: 'c', text: 'The compiler cannot handle any form of downcasting alone', isCorrect: false, explanation: 'Incorrect. The compiler accepts casts syntactically; instanceof is a runtime check.' },
+        { id: 'd', text: 'instanceof makes the cast run faster at runtime', isCorrect: false, explanation: 'Incorrect. instanceof has no performance benefit; it prevents runtime exceptions.' },
       ],
-      hint: 'Unique parameter lists are the only constraint.'
+      hint: 'instanceof guards against ClassCastException.',
     },
     {
       id: 'mod4-l2-c9',
-      question: 'What happens when Java widens an argument type to find an overload match?',
+      question: 'What is the output? (Field access is not polymorphic.)',
+      code: 'class Animal { String name = "Animal"; }\nclass Dog extends Animal { String name = "Dog"; }\nAnimal a = new Dog();\nSystem.out.println(a.name);',
       difficulty: 'hard',
       xpReward: 20,
-      code: 'class Test {\n    void show(long n) { System.out.println("long"); }\n}\nnew Test().show(5); // 5 is int',
       options: [
-        { id: 'a', text: '"long" is printed — int 5 is widened to long', isCorrect: true, explanation: 'Correct! If no exact int match exists, Java widens int to long (a safe widening conversion) to find a match.' },
-        { id: 'b', text: 'Compile error — no int method exists', isCorrect: false, explanation: 'Incorrect. Java widens the argument type when no exact match is found.' },
-        { id: 'c', text: 'Nothing is printed', isCorrect: false, explanation: 'Incorrect. The method is found via widening and runs normally.' },
-        { id: 'd', text: 'show(long) is not called — it is ignored', isCorrect: false, explanation: 'Incorrect. The widening conversion makes show(long) the best available match.' }
+        { id: 'a', text: 'Compile error', isCorrect: false, explanation: 'Incorrect. Animal has a "name" field and a is of type Animal — the access is valid.' },
+        { id: 'b', text: 'null', isCorrect: false, explanation: 'Incorrect. Both classes declare name with non-null values.' },
+        { id: 'c', text: 'Dog', isCorrect: false, explanation: 'Incorrect. Field access is NOT polymorphic. The reference type (Animal) determines which "name" field is read.' },
+        { id: 'd', text: 'Animal', isCorrect: true, explanation: 'Correct! Fields are resolved by the reference type, not the object type. a is declared as Animal, so a.name accesses Animal\'s "name" field.' },
       ],
-      hint: 'Java automatically widens primitive types to find the best overload match.'
+      hint: 'Fields are not polymorphic — access depends on the reference type.',
     },
     {
       id: 'mod4-l2-c10',
-      question: 'Which of the following represents valid method overloading?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'void greet(String name) { }\nvoid greet(String firstName, String lastName) { }',
+      question: 'What does upcasting enable?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Yes — different number of parameters makes them distinct', isCorrect: true, explanation: 'Correct! The first greet has 1 parameter; the second has 2. Different parameter counts are a valid way to overload.' },
-        { id: 'b', text: 'No — both use String parameters so it is invalid', isCorrect: false, explanation: 'Incorrect. The number of parameters differs (1 vs 2), making this valid overloading.' },
-        { id: 'c', text: 'No — overloading only works with different types, not counts', isCorrect: false, explanation: 'Incorrect. Overloading can differ by parameter count, type, or order.' },
-        { id: 'd', text: 'Yes, but they must be private', isCorrect: false, explanation: 'Incorrect. Access modifiers do not affect overloading validity.' }
+        { id: 'a', text: 'Direct access to methods defined only in the subclass', isCorrect: false, explanation: 'Incorrect. Upcasting restricts visible API to the superclass type\'s interface.' },
+        { id: 'b', text: 'Treating a subclass object as its parent type to enable polymorphic behavior', isCorrect: true, explanation: 'Correct! Upcasting is the foundation of polymorphism — you can write code in terms of the supertype and it works for all subtypes.' },
+        { id: 'c', text: 'Modifying private fields of the parent class through the reference', isCorrect: false, explanation: 'Incorrect. Access modifiers are independent of upcasting.' },
+        { id: 'd', text: 'Comparing objects of different classes for equality', isCorrect: false, explanation: 'Incorrect. Equality comparison is unrelated to upcasting.' },
       ],
-      hint: 'Overloading can differ in number, type, or order of parameters.'
+      hint: 'Upcasting enables writing code against supertype references that works for all subtypes.',
     },
   ],
 };
 
-// MODULE 5: Abstraction
+// MODULE 5: Abstract Classes and Interfaces
 export const module5Challenges: Record<string, Challenge[]> = {
   'mod5-lesson1': [
     {
       id: 'mod5-l1-c1',
-      question: 'What is true about abstract classes?',
-      code: 'abstract class Shape {\n    abstract double area();\n}',
-      difficulty: 'medium',
-      xpReward: 15,
+      question: 'What is an abstract class?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'They cannot be instantiated directly', isCorrect: true, explanation: 'Correct! Abstract classes cannot be instantiated; they must be extended by concrete subclasses.' },
-        { id: 'b', text: 'They must have only abstract methods', isCorrect: false, explanation: 'Incorrect. Abstract classes can mix abstract and concrete methods.' },
-        { id: 'c', text: 'They cannot have constructors', isCorrect: false, explanation: 'Incorrect. Abstract classes can have constructors (called via super() from subclasses).' },
-        { id: 'd', text: 'They are the same as interfaces', isCorrect: false, explanation: 'Incorrect. Abstract classes and interfaces differ in multiple important ways.' }
+        { id: 'a', text: 'A class that only contains static methods and no instance members', isCorrect: false, explanation: 'Incorrect. Abstract classes can have instance fields, instance methods, and constructors.' },
+        { id: 'b', text: 'A class that cannot be instantiated directly and may contain abstract methods', isCorrect: true, explanation: 'Correct! abstract classes serve as templates. You instantiate their concrete subclasses, not the abstract class itself.' },
+        { id: 'c', text: 'A class that can be instantiated but only inside a static method', isCorrect: false, explanation: 'Incorrect. Abstract classes cannot be instantiated at all.' },
+        { id: 'd', text: 'A class with all methods marked private so they cannot be called externally', isCorrect: false, explanation: 'Incorrect. Private access is unrelated to abstract classes.' },
       ],
-      hint: 'Can you do "new Shape()" with an abstract class?'
+      hint: 'Abstract classes cannot be instantiated — they are design templates.',
     },
     {
       id: 'mod5-l1-c2',
-      question: 'What must a concrete subclass do with inherited abstract methods?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'abstract class Animal {\n    abstract void sound();\n}\nclass Dog extends Animal {\n    // what must go here?\n}',
+      question: 'What is an abstract method?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'Provide an implementation for every abstract method', isCorrect: true, explanation: 'Correct! A concrete (non-abstract) subclass must implement all abstract methods, otherwise it must also be declared abstract.' },
-        { id: 'b', text: 'Nothing — abstract methods are optional', isCorrect: false, explanation: 'Incorrect. Abstract methods are contracts that must be fulfilled by any concrete subclass.' },
-        { id: 'c', text: 'Delete the abstract method from the parent', isCorrect: false, explanation: 'Incorrect. You cannot delete parent methods. You implement them in the subclass.' },
-        { id: 'd', text: 'Declare the method as static', isCorrect: false, explanation: 'Incorrect. Implementing an abstract method means overriding it with a concrete body.' }
+        { id: 'a', text: 'A method declared without a body that subclasses must implement', isCorrect: true, explanation: 'Correct! Abstract methods define a contract — they have a signature but no implementation. Concrete subclasses must provide the body.' },
+        { id: 'b', text: 'A method that can never be overridden in any subclass', isCorrect: false, explanation: 'Incorrect. That describes a final method, not an abstract one.' },
+        { id: 'c', text: 'A static method that does not take any parameters', isCorrect: false, explanation: 'Incorrect. Abstract and static are independent concepts. Abstract methods cannot be static.' },
+        { id: 'd', text: 'A method that calls itself to solve problems recursively', isCorrect: false, explanation: 'Incorrect. That describes recursion, not abstract methods.' },
       ],
-      hint: 'A concrete class must fulfill all the abstract contracts.'
+      hint: 'Abstract method = signature only, no body — subclass must implement it.',
     },
     {
       id: 'mod5-l1-c3',
-      question: 'Can an abstract class have a constructor?',
+      question: 'What is the output?',
+      code: 'abstract class Shape {\n    abstract double area();\n    void describe() { System.out.println("Area: " + area()); }\n}\nclass Circle extends Shape {\n    double radius;\n    Circle(double r) { radius = r; }\n    double area() { return 3.14 * radius * radius; }\n}\nnew Circle(5).describe();',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'Yes — it is called by subclass constructors via super()', isCorrect: true, explanation: 'Correct! Abstract classes do have constructors, which are called when a subclass is instantiated via super().' },
-        { id: 'b', text: 'No — abstract classes cannot have constructors', isCorrect: false, explanation: 'Incorrect. Abstract classes can and often do have constructors for initializing shared state.' },
-        { id: 'c', text: 'Yes, but only no-arg constructors', isCorrect: false, explanation: 'Incorrect. Abstract class constructors can have any parameters.' },
-        { id: 'd', text: 'Only if the class has no abstract methods', isCorrect: false, explanation: 'Incorrect. Constructors are allowed in any abstract class regardless of its abstract methods.' }
+        { id: 'a', text: 'Compile error — Shape is abstract and cannot be instantiated', isCorrect: false, explanation: 'Incorrect. Circle is a concrete subclass of Shape. new Circle(5) is valid.' },
+        { id: 'b', text: 'Area: 0.0', isCorrect: false, explanation: 'Incorrect. radius is 5, so area = 3.14 * 25 = 78.5, not 0.' },
+        { id: 'c', text: 'Area: 78.5', isCorrect: true, explanation: 'Correct! new Circle(5) creates a Circle. describe() calls area() (dynamic dispatch to Circle\'s area()). Output: "Area: 78.5".' },
+        { id: 'd', text: '78.5', isCorrect: false, explanation: 'Incorrect. The describe() method prepends "Area: " before the value.' },
       ],
-      hint: 'Subclasses call the abstract class constructor via super().'
+      hint: 'describe() calls the abstract area() — dynamic dispatch routes to Circle\'s implementation.',
     },
     {
       id: 'mod5-l1-c4',
-      question: 'What does an abstract method look like?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'Which statement about abstract classes is correct?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'It has no body — only a signature ending with a semicolon', isCorrect: true, explanation: 'Correct! Abstract methods have no implementation: abstract void sound(); — no curly braces.' },
-        { id: 'b', text: 'It has an empty body: abstract void sound() {}', isCorrect: false, explanation: 'Incorrect. An empty body {} is a concrete method with no code. Abstract methods have no body at all.' },
-        { id: 'c', text: 'It must return null', isCorrect: false, explanation: 'Incorrect. Abstract methods define the return type but have no body to return anything.' },
-        { id: 'd', text: 'It must be static', isCorrect: false, explanation: 'Incorrect. Abstract methods cannot be static — they are instance-level contracts.' }
+        { id: 'a', text: 'An abstract class cannot define any constructors', isCorrect: false, explanation: 'Incorrect. Abstract classes CAN have constructors; they are called by subclass constructors via super().' },
+        { id: 'b', text: 'You can create instances of an abstract class using new', isCorrect: false, explanation: 'Incorrect. Attempting new AbstractClass() causes a compile error.' },
+        { id: 'c', text: 'Abstract classes cannot contain concrete (non-abstract) methods', isCorrect: false, explanation: 'Incorrect. Abstract classes CAN have concrete methods. This is one of their strengths over interfaces historically.' },
+        { id: 'd', text: 'A concrete subclass must implement all abstract methods or itself be declared abstract', isCorrect: true, explanation: 'Correct! If a subclass does not implement all abstract methods, it must be declared abstract — otherwise it\'s a compile error.' },
       ],
-      hint: 'Abstract methods end with ; — no curly braces.'
+      hint: 'Subclass must implement all abstract methods or be abstract itself.',
     },
     {
       id: 'mod5-l1-c5',
-      question: 'Can an abstract class have non-abstract (concrete) methods?',
-      difficulty: 'easy',
-      xpReward: 10,
+      question: 'The code below demonstrates which design pattern?',
+      code: 'abstract class Game {\n    abstract void initialize();\n    abstract void startPlay();\n    final void play() {\n        initialize();\n        startPlay();\n    }\n}',
+      difficulty: 'hard',
+      xpReward: 20,
       options: [
-        { id: 'a', text: 'Yes — abstract classes can mix abstract and concrete methods', isCorrect: true, explanation: 'Correct! Abstract classes can provide shared concrete implementations alongside abstract method contracts.' },
-        { id: 'b', text: 'No — all methods must be abstract', isCorrect: false, explanation: 'Incorrect. Interfaces require all methods to be abstract by default, not abstract classes.' },
-        { id: 'c', text: 'Only if marked with "final"', isCorrect: false, explanation: 'Incorrect. Concrete methods in abstract classes do not require "final".' },
-        { id: 'd', text: 'Only static methods can be concrete in abstract classes', isCorrect: false, explanation: 'Incorrect. Both static and instance methods can be concrete in an abstract class.' }
+        { id: 'a', text: 'Factory Method — the abstract class creates objects of various subclass types', isCorrect: false, explanation: 'Incorrect. Factory Method is about object creation. Template Method is about algorithm structure.' },
+        { id: 'b', text: 'Strategy — multiple algorithms are interchangeable via a common interface', isCorrect: false, explanation: 'Incorrect. Strategy uses interfaces for swappable algorithms. Template Method uses inheritance.' },
+        { id: 'c', text: 'Singleton — only one instance of the abstract class is ever created', isCorrect: false, explanation: 'Incorrect. Singleton restricts instantiation. Template Method is about method structure.' },
+        { id: 'd', text: 'Template Method — abstract class defines algorithm skeleton; steps are implemented by subclasses', isCorrect: true, explanation: 'Correct! The abstract class defines the overall algorithm (play) as a series of steps, and subclasses fill in the abstract steps.' },
       ],
-      hint: 'Abstract classes are partial implementations — some done, some left for subclasses.'
+      hint: 'Template Method: abstract class defines the algorithm; subclasses implement the steps.',
     },
     {
       id: 'mod5-l1-c6',
@@ -2499,221 +1888,213 @@ export const module5Challenges: Record<string, Challenge[]> = {
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'The subclass itself must be declared abstract', isCorrect: true, explanation: 'Correct! If a subclass leaves any abstract method unimplemented, it must itself be marked abstract.' },
-        { id: 'b', text: 'The program runs but skips the unimplemented method', isCorrect: false, explanation: 'Incorrect. Java enforces implementation at compile time.' },
-        { id: 'c', text: 'The unimplemented method returns null automatically', isCorrect: false, explanation: 'Incorrect. Java does not auto-implement abstract methods.' },
-        { id: 'd', text: 'Runtime exception when the method is called', isCorrect: false, explanation: 'Incorrect. This is a compile-time error, not a runtime exception.' }
+        { id: 'a', text: 'The abstract methods get empty (no-op) implementations automatically', isCorrect: false, explanation: 'Incorrect. Java does not generate empty implementations. You must provide them or declare the class abstract.' },
+        { id: 'b', text: 'The methods throw UnsupportedOperationException at runtime', isCorrect: false, explanation: 'Incorrect. This is a compile-time issue, not a runtime one.' },
+        { id: 'c', text: 'Java generates default implementations that return null or zero', isCorrect: false, explanation: 'Incorrect. Java never auto-generates method bodies for abstract methods.' },
+        { id: 'd', text: 'Compile error — the subclass must either implement all abstract methods or be declared abstract', isCorrect: true, explanation: 'Correct! A concrete class must implement all inherited abstract methods. Failure to do so is a compile error.' },
       ],
-      hint: 'Unimplemented abstract methods propagate the "abstract" requirement.'
+      hint: 'Concrete subclass must implement all abstract methods or get a compile error.',
     },
     {
       id: 'mod5-l1-c7',
-      question: 'Can "abstract" and "private" be used together on a method?',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'Can an abstract class have a constructor?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'No — abstract private is a compile error', isCorrect: true, explanation: 'Correct! Abstract methods must be overridden by subclasses, but private methods are not visible to subclasses. The combination is contradictory.' },
-        { id: 'b', text: 'Yes — you can have abstract private methods', isCorrect: false, explanation: 'Incorrect. Java prohibits abstract private methods because private methods cannot be overridden.' },
-        { id: 'c', text: 'Yes, but only in inner classes', isCorrect: false, explanation: 'Incorrect. The restriction applies everywhere.' },
-        { id: 'd', text: 'Yes, if the class is also abstract', isCorrect: false, explanation: 'Incorrect. The class being abstract does not remove the contradiction.' }
+        { id: 'a', text: 'No — constructors are only valid in concrete classes', isCorrect: false, explanation: 'Incorrect. Abstract classes commonly have constructors to initialize shared fields.' },
+        { id: 'b', text: 'No — abstract classes cannot be instantiated so constructors are forbidden', isCorrect: false, explanation: 'Incorrect. Abstract classes CAN have constructors, even though you can\'t call them directly with new.' },
+        { id: 'c', text: 'Yes — but the constructor must also be declared abstract', isCorrect: false, explanation: 'Incorrect. Constructors cannot be abstract. The abstract modifier applies to classes and methods, not constructors.' },
+        { id: 'd', text: 'Yes — subclass constructors call the abstract class constructor via super()', isCorrect: true, explanation: 'Correct! When you do new ConcreteSubclass(), it calls super() which runs the abstract class\'s constructor to initialize common fields.' },
       ],
-      hint: 'abstract means "must override" — private means "cannot see." Contradiction.'
+      hint: 'Abstract class constructors are called by subclasses via super().',
     },
     {
       id: 'mod5-l1-c8',
-      question: 'What is the main difference between an abstract class and an interface?',
+      question: 'What is the output?',
+      code: 'abstract class Vehicle {\n    abstract int speed();\n    void info() { System.out.println("Speed: " + speed() + " mph"); }\n}\nclass Car extends Vehicle { int speed() { return 60; } }\nclass Bike extends Vehicle { int speed() { return 20; } }\nVehicle v = new Car();\nv.info();\nv = new Bike();\nv.info();',
       difficulty: 'hard',
       xpReward: 20,
       options: [
-        { id: 'a', text: 'Abstract classes can have state (fields) and constructors; interfaces cannot (by default)', isCorrect: true, explanation: 'Correct! Abstract classes support instance fields, constructors, and both abstract and concrete methods. Interfaces (before Java 8) only had constants and abstract methods.' },
-        { id: 'b', text: 'They are identical in capability', isCorrect: false, explanation: 'Incorrect. Key differences include state, constructors, and multiple inheritance.' },
-        { id: 'c', text: 'Interfaces can be instantiated; abstract classes cannot', isCorrect: false, explanation: 'Incorrect. Neither can be directly instantiated.' },
-        { id: 'd', text: 'Abstract classes support multiple inheritance; interfaces do not', isCorrect: false, explanation: 'Incorrect. It\'s the other way: interfaces support multiple implementation; classes (abstract or not) support only single inheritance.' }
+        { id: 'a', text: 'Speed: 60 mph / Speed: 20 mph', isCorrect: true, explanation: 'Correct! First v is Car: info() calls speed()=60. Then v is Bike: info() calls speed()=20. Output: "Speed: 60 mph" then "Speed: 20 mph".' },
+        { id: 'b', text: 'Speed: 60 mph / Speed: 60 mph', isCorrect: false, explanation: 'Incorrect. After v = new Bike(), v refers to a Bike object. Dynamic dispatch calls Bike\'s speed().' },
+        { id: 'c', text: 'Speed: 0 mph / Speed: 0 mph', isCorrect: false, explanation: 'Incorrect. Both Car and Bike implement speed() with non-zero values.' },
+        { id: 'd', text: 'Compile error — abstract class Vehicle cannot be used as a reference type', isCorrect: false, explanation: 'Incorrect. Abstract class references are valid and are a core part of polymorphism.' },
       ],
-      hint: 'Think about state, constructors, and multiple inheritance.'
+      hint: 'Dynamic dispatch through abstract reference: actual type determines speed().',
     },
     {
       id: 'mod5-l1-c9',
-      question: 'When would you prefer an abstract class over an interface?',
-      difficulty: 'hard',
-      xpReward: 20,
+      question: 'What can extend an abstract class?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: 'When subclasses share common state or implementation code', isCorrect: true, explanation: 'Correct! Use an abstract class when you have shared fields/code that all subclasses should inherit. Interfaces are better for pure capability contracts.' },
-        { id: 'b', text: 'When you need multiple inheritance', isCorrect: false, explanation: 'Incorrect. Multiple inheritance is supported by interfaces (a class can implement many interfaces), not abstract classes.' },
-        { id: 'c', text: 'When all methods should be abstract', isCorrect: false, explanation: 'Incorrect. If all methods should be abstract with no state, an interface is usually the better choice.' },
-        { id: 'd', text: 'When you do not want any method implementations', isCorrect: false, explanation: 'Incorrect. If you want no implementations, prefer an interface.' }
+        { id: 'a', text: 'Only interfaces can extend abstract classes', isCorrect: false, explanation: 'Incorrect. Interfaces cannot extend classes. Only classes can extend classes.' },
+        { id: 'b', text: 'Only another abstract class', isCorrect: false, explanation: 'Incorrect. Concrete classes can also extend abstract classes, and they are the ones that make it instantiatable.' },
+        { id: 'c', text: 'Both another abstract class and a concrete class', isCorrect: true, explanation: 'Correct! An abstract class can be extended by any class — abstract or concrete. The concrete class must implement all abstract methods.' },
+        { id: 'd', text: 'Only concrete (non-abstract) classes', isCorrect: false, explanation: 'Incorrect. Another abstract class can extend an abstract class without implementing its abstract methods.' },
       ],
-      hint: 'Abstract class = shared state + partial implementation.'
+      hint: 'Both abstract and concrete classes can extend an abstract class.',
     },
     {
       id: 'mod5-l1-c10',
-      question: 'What is the output of this code?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'abstract class Vehicle {\n    String type = "Vehicle";\n    abstract void move();\n    void info() { System.out.println(type); }\n}\nclass Bike extends Vehicle {\n    void move() { System.out.println("Pedal"); }\n}\nBike b = new Bike();\nb.info();\nb.move();',
+      question: 'What is the main advantage of abstract classes over interfaces (pre-Java 8)?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: '"Vehicle" then "Pedal"', isCorrect: true, explanation: 'Correct! b.info() calls the concrete inherited info() which prints "Vehicle". b.move() calls Bike\'s implementation which prints "Pedal".' },
-        { id: 'b', text: '"Pedal" then "Vehicle"', isCorrect: false, explanation: 'Incorrect. info() is called first, so "Vehicle" prints before "Pedal".' },
-        { id: 'c', text: 'Compile error — cannot use abstract class', isCorrect: false, explanation: 'Incorrect. Bike is a concrete class that properly implements move(). Creating Bike objects is valid.' },
-        { id: 'd', text: 'Runtime error', isCorrect: false, explanation: 'Incorrect. All methods are properly implemented and the code runs without errors.' }
+        { id: 'a', text: 'Abstract classes allow implementing multiple simultaneously', isCorrect: false, explanation: 'Incorrect. A class can implement multiple interfaces but extend only one abstract class.' },
+        { id: 'b', text: 'Abstract classes work only with primitives; interfaces work with objects', isCorrect: false, explanation: 'Incorrect. Both abstract classes and interfaces work with any type.' },
+        { id: 'c', text: 'Abstract classes can contain concrete methods and state; classic interfaces had only abstract methods', isCorrect: true, explanation: 'Correct! Before Java 8, interfaces could only have abstract methods. Abstract classes could mix concrete methods and state, enabling code sharing.' },
+        { id: 'd', text: 'Abstract classes can be instantiated directly; interfaces cannot', isCorrect: false, explanation: 'Incorrect. Abstract classes cannot be instantiated either.' },
       ],
-      hint: 'Bike inherits info() from Vehicle and implements move().'
+      hint: 'Abstract class advantage: can have concrete methods and instance state.',
     },
   ],
-
   'mod5-lesson2': [
     {
       id: 'mod5-l2-c1',
-      question: 'What keyword is used to implement an interface?',
-      code: 'interface Drawable {\n    void draw();\n}\nclass Circle _____ Drawable {\n    public void draw() { }\n}',
+      question: 'What keyword defines an interface in Java?',
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        { id: 'a', text: 'implements', isCorrect: true, explanation: 'Correct! Classes use "implements" to fulfill an interface contract.' },
-        { id: 'b', text: 'extends', isCorrect: false, explanation: 'Incorrect. "extends" is for class inheritance. Interfaces use "implements".' },
-        { id: 'c', text: 'uses', isCorrect: false, explanation: 'Incorrect. "uses" is not a Java keyword.' },
-        { id: 'd', text: 'from', isCorrect: false, explanation: 'Incorrect. "from" is not a Java keyword.' }
+        { id: 'a', text: 'implements', isCorrect: false, explanation: 'Incorrect. "implements" is used by a class to adopt an interface, not to define one.' },
+        { id: 'b', text: 'abstract', isCorrect: false, explanation: 'Incorrect. "abstract" is used for abstract classes and methods, not for defining interfaces.' },
+        { id: 'c', text: 'interface', isCorrect: true, explanation: 'Correct! The "interface" keyword declares an interface: interface Drawable { ... }' },
+        { id: 'd', text: 'extends', isCorrect: false, explanation: 'Incorrect. "extends" is used for class inheritance and interface-to-interface inheritance.' },
       ],
-      hint: 'Interfaces are implemented, not extended (for classes).'
+      hint: 'interface Greet { } — the interface keyword creates an interface.',
     },
     {
       id: 'mod5-l2-c2',
-      question: 'Can a class implement more than one interface?',
+      question: 'What keyword does a class use to adopt an interface?',
       difficulty: 'easy',
       xpReward: 10,
-      code: 'class Robot implements Movable, Chargeable { }',
       options: [
-        { id: 'a', text: 'Yes — a class can implement multiple interfaces', isCorrect: true, explanation: 'Correct! Unlike class inheritance (single only), a class can implement as many interfaces as needed.' },
-        { id: 'b', text: 'No — only one interface per class', isCorrect: false, explanation: 'Incorrect. Java explicitly allows multiple interface implementation to achieve a form of multiple inheritance.' },
-        { id: 'c', text: 'Yes, but only if both interfaces have no methods', isCorrect: false, explanation: 'Incorrect. A class can implement multiple interfaces regardless of how many methods they have.' },
-        { id: 'd', text: 'Only abstract classes can implement multiple interfaces', isCorrect: false, explanation: 'Incorrect. Any class, concrete or abstract, can implement multiple interfaces.' }
+        { id: 'a', text: 'extends', isCorrect: false, explanation: 'Incorrect. "extends" is used for class-to-class or interface-to-interface inheritance.' },
+        { id: 'b', text: 'abstract', isCorrect: false, explanation: 'Incorrect. "abstract" marks abstract classes and methods.' },
+        { id: 'c', text: 'implements', isCorrect: true, explanation: 'Correct! "class Dog implements Animal" — a class uses "implements" to agree to fulfill the interface contract.' },
+        { id: 'd', text: 'interface', isCorrect: false, explanation: 'Incorrect. "interface" declares an interface, it does not implement one.' },
       ],
-      hint: 'Multiple interfaces = multiple inheritance of type in Java.'
+      hint: 'class MyClass implements MyInterface { ... }',
     },
     {
       id: 'mod5-l2-c3',
-      question: 'What is the default access modifier of interface methods (before Java 8)?',
+      question: 'What is the implicit access modifier of interface methods in Java (before Java 8)?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'public abstract', isCorrect: true, explanation: 'Correct! Interface methods are implicitly public and abstract. You do not need to write those keywords.' },
-        { id: 'b', text: 'private', isCorrect: false, explanation: 'Incorrect. Interface methods are public by default — they are meant to be implemented by external classes.' },
-        { id: 'c', text: 'protected', isCorrect: false, explanation: 'Incorrect. Interface methods are public abstract by default.' },
-        { id: 'd', text: 'package-private', isCorrect: false, explanation: 'Incorrect. Interface members are public by default.' }
+        { id: 'a', text: 'package-private (no modifier)', isCorrect: false, explanation: 'Incorrect. Interface methods are always public, even without writing the modifier.' },
+        { id: 'b', text: 'private static', isCorrect: false, explanation: 'Incorrect. Interface methods are public, not private. (Java 9+ added private interface methods.)' },
+        { id: 'c', text: 'protected abstract', isCorrect: false, explanation: 'Incorrect. Interface members cannot be protected.' },
+        { id: 'd', text: 'public abstract', isCorrect: true, explanation: 'Correct! Interface methods are implicitly public and abstract. You don\'t need to write these modifiers explicitly.' },
       ],
-      hint: 'Interfaces define a public contract — all methods are public.'
+      hint: 'Interface methods are implicitly public abstract.',
     },
     {
       id: 'mod5-l2-c4',
-      question: 'What must a concrete class that implements an interface do?',
+      question: 'What is the purpose of a default method in a Java interface?',
       difficulty: 'medium',
       xpReward: 15,
       options: [
-        { id: 'a', text: 'Implement all abstract methods declared in the interface', isCorrect: true, explanation: 'Correct! Unless the implementing class is abstract itself, it must provide implementations for all interface methods.' },
-        { id: 'b', text: 'Only implement methods it wants to use', isCorrect: false, explanation: 'Incorrect. All abstract interface methods must be implemented in a concrete class.' },
-        { id: 'c', text: 'Extend the interface using "extends"', isCorrect: false, explanation: 'Incorrect. Classes "implement" interfaces, not "extend" them.' },
-        { id: 'd', text: 'Nothing — interfaces only serve as documentation', isCorrect: false, explanation: 'Incorrect. The Java compiler enforces that all interface methods are implemented.' }
+        { id: 'a', text: 'To make the entire interface abstract by default', isCorrect: false, explanation: 'Incorrect. Interfaces are inherently abstract. default methods are concrete method bodies in interfaces.' },
+        { id: 'b', text: 'To provide a method that all implementing classes are REQUIRED to override', isCorrect: false, explanation: 'Incorrect. default methods are optional to override. Classes inherit the default implementation if they don\'t override.' },
+        { id: 'c', text: 'To create class-level utility methods accessible via the interface name', isCorrect: false, explanation: 'Incorrect. That is the purpose of static methods in interfaces.' },
+        { id: 'd', text: 'To provide an optional method body that implementing classes can inherit or override', isCorrect: true, explanation: 'Correct! default methods let interfaces evolve without breaking existing implementations. Implementing classes can use or override the default.' },
       ],
-      hint: 'Interfaces are contracts — all terms must be fulfilled.'
+      hint: 'Default methods provide optional concrete implementations in interfaces.',
     },
     {
       id: 'mod5-l2-c5',
-      question: 'What is the output of this code?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'interface Greeting {\n    void greet();\n}\nclass Hello implements Greeting {\n    public void greet() { System.out.println("Hello!"); }\n}\nGreeting g = new Hello();\ng.greet();',
+      question: 'How many interfaces can a single Java class implement?',
+      difficulty: 'easy',
+      xpReward: 10,
       options: [
-        { id: 'a', text: '"Hello!"', isCorrect: true, explanation: 'Correct! g is of type Greeting but holds a Hello object. greet() is dispatched at runtime to Hello.greet().' },
-        { id: 'b', text: 'Nothing — Greeting has no implementation', isCorrect: false, explanation: 'Incorrect. Hello implements greet(), which is what runs.' },
-        { id: 'c', text: 'Compile error — cannot assign Hello to Greeting', isCorrect: false, explanation: 'Incorrect. A class that implements an interface can be stored in an interface reference.' },
-        { id: 'd', text: 'Runtime error', isCorrect: false, explanation: 'Incorrect. This is valid polymorphic code that runs correctly.' }
+        { id: 'a', text: 'Exactly one', isCorrect: false, explanation: 'Incorrect. Java intentionally allows implementing multiple interfaces to compensate for no multiple class inheritance.' },
+        { id: 'b', text: 'None — only abstract classes support implements', isCorrect: false, explanation: 'Incorrect. Any class (abstract or concrete) can implement interfaces.' },
+        { id: 'c', text: 'Multiple interfaces', isCorrect: true, explanation: 'Correct! class Amphibian implements Swimmer, Climber is valid. A class can implement as many interfaces as needed.' },
+        { id: 'd', text: 'At most two', isCorrect: false, explanation: 'Incorrect. There is no numeric limit on the number of interfaces a class can implement.' },
       ],
-      hint: 'Interface references support runtime polymorphism like class references do.'
+      hint: 'A class can implement multiple interfaces — that\'s their superpower.',
     },
     {
       id: 'mod5-l2-c6',
-      question: 'Can an interface extend another interface?',
+      question: 'What is a functional interface?',
       difficulty: 'medium',
       xpReward: 15,
-      code: 'interface A { void methodA(); }\ninterface B extends A { void methodB(); }',
       options: [
-        { id: 'a', text: 'Yes — interfaces can extend other interfaces using "extends"', isCorrect: true, explanation: 'Correct! An interface can extend another interface. A class implementing B must implement both methodA() and methodB().' },
-        { id: 'b', text: 'No — interfaces cannot extend other interfaces', isCorrect: false, explanation: 'Incorrect. Interface inheritance using "extends" is valid and common in Java.' },
-        { id: 'c', text: 'Yes, but using "implements" instead of "extends"', isCorrect: false, explanation: 'Incorrect. Interfaces use "extends" to inherit from other interfaces. "implements" is for classes.' },
-        { id: 'd', text: 'Only if both interfaces are in the same package', isCorrect: false, explanation: 'Incorrect. Interface inheritance has no package restriction.' }
+        { id: 'a', text: 'An interface with two or more abstract methods to enable chaining', isCorrect: false, explanation: 'Incorrect. Two or more abstract methods would NOT be a functional interface.' },
+        { id: 'b', text: 'An interface with exactly one abstract method, enabling lambda expression assignment', isCorrect: true, explanation: 'Correct! Functional interfaces (e.g., Runnable, Comparator) have exactly one abstract method and can be implemented with a lambda.' },
+        { id: 'c', text: 'An interface that extends java.util.function.Function', isCorrect: false, explanation: 'Incorrect. A functional interface is defined by having exactly one abstract method, not by extending a specific class.' },
+        { id: 'd', text: 'An interface that contains only static methods', isCorrect: false, explanation: 'Incorrect. Static methods do not count toward the abstract method count.' },
       ],
-      hint: 'Interface-to-interface uses "extends"; class-to-interface uses "implements".'
+      hint: 'Functional interface = exactly one abstract method → enables lambdas.',
     },
     {
       id: 'mod5-l2-c7',
-      question: 'What is a default method in an interface (Java 8+)?',
-      difficulty: 'hard',
-      xpReward: 20,
-      code: 'interface Logger {\n    default void log(String msg) {\n        System.out.println(msg);\n    }\n}',
+      question: 'How does an interface extend another interface?',
+      difficulty: 'medium',
+      xpReward: 15,
       options: [
-        { id: 'a', text: 'A method with an implementation that classes can optionally override', isCorrect: true, explanation: 'Correct! Default methods allow interfaces to provide a concrete method body. Implementing classes can use it as-is or override it.' },
-        { id: 'b', text: 'A method that runs automatically when the interface is loaded', isCorrect: false, explanation: 'Incorrect. Default methods are just concrete methods in interfaces — they do not auto-run.' },
-        { id: 'c', text: 'A method that must be overridden by all implementing classes', isCorrect: false, explanation: 'Incorrect. Abstract (non-default) methods must be implemented. Default methods are optional to override.' },
-        { id: 'd', text: 'A static factory method for creating the interface', isCorrect: false, explanation: 'Incorrect. Default methods are instance methods, not factory methods.' }
+        { id: 'a', text: 'Using the implements keyword', isCorrect: false, explanation: 'Incorrect. Only classes use "implements". Interface-to-interface inheritance uses "extends".' },
+        { id: 'b', text: 'Using the extends keyword', isCorrect: true, explanation: 'Correct! interface B extends A {} — interfaces use "extends" (not "implements") to inherit from other interfaces.' },
+        { id: 'c', text: 'Using the inherits keyword', isCorrect: false, explanation: 'Incorrect. "inherits" is not a Java keyword.' },
+        { id: 'd', text: 'Using the abstract keyword followed by the parent interface name', isCorrect: false, explanation: 'Incorrect. There is no such syntax in Java.' },
       ],
-      hint: '"default" provides a fallback implementation — override only if needed.'
+      hint: 'Interface extends interface: interface B extends A { }',
     },
     {
       id: 'mod5-l2-c8',
-      question: 'What type are fields declared in an interface?',
-      difficulty: 'medium',
-      xpReward: 15,
-      code: 'interface Config {\n    int MAX_SIZE = 100;\n}',
-      options: [
-        { id: 'a', text: 'public static final — they are constants', isCorrect: true, explanation: 'Correct! Interface fields are implicitly public, static, and final — they are constants shared by all implementors.' },
-        { id: 'b', text: 'private — only accessible inside the interface', isCorrect: false, explanation: 'Incorrect. Interface fields are public by default.' },
-        { id: 'c', text: 'Instance fields that each class gets a copy of', isCorrect: false, explanation: 'Incorrect. Interface fields are static and final — not instance fields.' },
-        { id: 'd', text: 'Abstract — must be initialized in implementing classes', isCorrect: false, explanation: 'Incorrect. Interface fields must be initialized where declared and cannot be overridden.' }
-      ],
-      hint: 'Interface fields are always public, static, and final.'
-    },
-    {
-      id: 'mod5-l2-c9',
-      question: 'Can a class both extend a class and implement an interface?',
-      difficulty: 'easy',
-      xpReward: 10,
-      code: 'class SportsCar extends Car implements Turbo { }',
-      options: [
-        { id: 'a', text: 'Yes — extends one class and implements one or more interfaces', isCorrect: true, explanation: 'Correct! A class can extend one superclass AND implement multiple interfaces simultaneously.' },
-        { id: 'b', text: 'No — you must choose either extends or implements', isCorrect: false, explanation: 'Incorrect. Both can be combined in a single class declaration.' },
-        { id: 'c', text: 'Yes, but only if the class is abstract', isCorrect: false, explanation: 'Incorrect. Both concrete and abstract classes can extend + implement.' },
-        { id: 'd', text: 'Only if the superclass also implements the interface', isCorrect: false, explanation: 'Incorrect. There is no such requirement.' }
-      ],
-      hint: 'Java allows: class X extends Y implements A, B { }'
-    },
-    {
-      id: 'mod5-l2-c10',
-      question: 'Why do interfaces enable "programming to an interface"?',
+      question: 'What is the output?',
+      code: 'interface Greet {\n    default String greet() { return "Hello"; }\n}\ninterface Farewell {\n    default String farewell() { return "Bye"; }\n}\nclass Messenger implements Greet, Farewell { }\nMessenger m = new Messenger();\nSystem.out.println(m.greet() + " and " + m.farewell());',
       difficulty: 'hard',
       xpReward: 20,
       options: [
-        { id: 'a', text: 'You can swap implementations without changing code that uses the interface', isCorrect: true, explanation: 'Correct! Code that depends on an interface type works with any implementation. You can change the concrete class without modifying the calling code.' },
-        { id: 'b', text: 'Interfaces make code run faster', isCorrect: false, explanation: 'Incorrect. Interfaces are about flexibility and design, not runtime performance.' },
-        { id: 'c', text: 'Interfaces prevent bugs automatically', isCorrect: false, explanation: 'Incorrect. Interfaces define contracts but do not prevent logic bugs.' },
-        { id: 'd', text: 'Programming to an interface means using only abstract classes', isCorrect: false, explanation: 'Incorrect. "Programming to an interface" refers to using interface types in declarations, not just abstract classes.' }
+        { id: 'a', text: 'null and null', isCorrect: false, explanation: 'Incorrect. The default methods have non-null return values.' },
+        { id: 'b', text: 'Compile error — a class implementing two interfaces with default methods must override both', isCorrect: false, explanation: 'Incorrect. Overriding default methods is only required if two interfaces have the SAME method name (diamond conflict). Here they have different names.' },
+        { id: 'c', text: 'Hello', isCorrect: false, explanation: 'Incorrect. Both greet() and farewell() are called.' },
+        { id: 'd', text: 'Hello and Bye', isCorrect: true, explanation: 'Correct! Messenger implements both interfaces and inherits both default methods. greet() returns "Hello", farewell() returns "Bye". Output: "Hello and Bye".' },
       ],
-      hint: 'Depend on the abstraction, not the concrete implementation.'
+      hint: 'Messenger inherits both default methods since they have different names.',
+    },
+    {
+      id: 'mod5-l2-c9',
+      question: 'Fields declared in an interface are implicitly:',
+      code: 'interface Config {\n    int MAX_SIZE = 100; // implicitly public static final\n}',
+      difficulty: 'hard',
+      xpReward: 20,
+      options: [
+        { id: 'a', text: 'public instance fields that each implementing class owns a copy of', isCorrect: false, explanation: 'Incorrect. Interface fields are static (class-level), not instance fields.' },
+        { id: 'b', text: 'private static — accessible only within the interface', isCorrect: false, explanation: 'Incorrect. Interface fields are public, not private.' },
+        { id: 'c', text: 'public static final — constants accessible via the interface name', isCorrect: true, explanation: 'Correct! Interface fields are implicitly public static final, making them constants. They cannot be reassigned.' },
+        { id: 'd', text: 'protected abstract — requiring implementation in classes', isCorrect: false, explanation: 'Incorrect. Fields cannot be abstract. Interface fields are public static final constants.' },
+      ],
+      hint: 'Interface fields = public static final constants.',
+    },
+    {
+      id: 'mod5-l2-c10',
+      question: 'When two interfaces declare a default method with the same signature, what must the implementing class do?',
+      code: 'interface A { default void hello() { System.out.println("A"); } }\ninterface B { default void hello() { System.out.println("B"); } }\nclass C implements A, B {\n    public void hello() { A.super.hello(); } // must override\n}',
+      difficulty: 'hard',
+      xpReward: 20,
+      options: [
+        { id: 'a', text: 'Override the method to resolve the ambiguity — otherwise it\'s a compile error', isCorrect: true, explanation: 'Correct! Java requires the implementing class to override the conflicting default method. Inside the override, you can call InterfaceName.super.method() to pick one.' },
+        { id: 'b', text: 'Java automatically picks the first listed interface\'s version', isCorrect: false, explanation: 'Incorrect. Java does not silently pick one — it requires an explicit resolution.' },
+        { id: 'c', text: 'Java automatically picks the most recently defined interface\'s version', isCorrect: false, explanation: 'Incorrect. Java does not have this rule. Ambiguity must be resolved explicitly.' },
+        { id: 'd', text: 'This is impossible — a class cannot implement two interfaces with the same default method name', isCorrect: false, explanation: 'Incorrect. A class CAN implement both, but it MUST override the conflicting method.' },
+      ],
+      hint: 'Diamond conflict: implementing class must override the ambiguous default method.',
     },
   ],
 };
 
-// Comprehensive challenges for all remaining modules
+// All lesson challenges combined
 export const allLessonChallenges: Record<string, Challenge[]> = {
   ...module1Challenges,
   ...module2Challenges,
   ...module3Challenges,
   ...module4Challenges,
   ...module5Challenges,
-  
-  // Add more modules with similar patterns...
-  // MODULE 6-10 challenges would follow the same structure
-  
-  // Default challenge for lessons without specific challenges
+
+  // Default placeholder for lessons without specific challenges
   'default': [
     {
       id: 'default-c1',
@@ -2721,107 +2102,70 @@ export const allLessonChallenges: Record<string, Challenge[]> = {
       difficulty: 'easy',
       xpReward: 10,
       options: [
-        {
-          id: 'a',
-          text: 'Continue Learning',
-          isCorrect: true,
-          explanation: 'Great! Keep progressing through the lessons.'
-        }
-      ]
+        { id: 'a', text: 'Continue Learning', isCorrect: true, explanation: 'Great! Keep progressing through the lessons.' },
+        { id: 'b', text: 'Review the material first', isCorrect: false, explanation: 'Reviewing is great, but completing the lesson unlocks more challenges.' },
+        { id: 'c', text: 'Skip this lesson', isCorrect: false, explanation: 'Each lesson builds on the previous one — complete them in order.' },
+        { id: 'd', text: 'Come back later', isCorrect: false, explanation: 'Now is the best time — keep your momentum going!' }
+      ],
+      hint: 'Complete the lesson content to unlock specific challenges.'
     }
   ]
 };
 
-// Helper function to get challenges for a lesson
+// Helper function to get challenges for a specific lesson
 export function getChallengesForLesson(lessonId: string): Challenge[] {
-  // Try direct lookup first
   let challenges: Challenge[] | undefined;
-  
+
+  // 1. Direct lookup (e.g., "mod1-lesson1")
   if (allLessonChallenges[lessonId]) {
     challenges = allLessonChallenges[lessonId];
   }
-  
-  // Convert lesson1-1 format to mod1-lesson1 format
-  // lesson1-1 -> mod1-lesson1
-  // lesson2-5 -> mod2-lesson5
+
+  // 2. Convert "lesson1-1" format to "mod1-lesson1"
   if (!challenges) {
-    const match = lessonId.match(/lesson(\d+)-(\d+)/);
+    const match = lessonId.match(/^lesson(\d+)-(\d+)$/);
     if (match) {
-      const moduleNum = match[1];
-      const lessonNum = match[2];
-      const convertedId = `mod${moduleNum}-lesson${lessonNum}`;
-      if (allLessonChallenges[convertedId]) {
-        challenges = allLessonChallenges[convertedId];
-      }
+      const convertedId = `mod${match[1]}-lesson${match[2]}`;
+      challenges = allLessonChallenges[convertedId];
     }
   }
-  
-  // Try mod1-lesson1-1 format to mod1-lesson1 format
+
+  // 3. Convert "mod1-lesson1-1" format to "mod1-lesson1"
   if (!challenges) {
-    const modMatch = lessonId.match(/mod(\d+)-lesson(\d+)-(\d+)/);
+    const modMatch = lessonId.match(/^mod(\d+)-lesson(\d+)-\d+$/);
     if (modMatch) {
-      const moduleNum = modMatch[1];
-      const lessonNum = modMatch[2];
-      const convertedId = `mod${moduleNum}-lesson${lessonNum}`;
-      if (allLessonChallenges[convertedId]) {
-        challenges = allLessonChallenges[convertedId];
-      }
+      const convertedId = `mod${modMatch[1]}-lesson${modMatch[2]}`;
+      challenges = allLessonChallenges[convertedId];
     }
   }
-  
-  // If fewer than 10 challenges found, just return what we have (no identical padding)
-  if (challenges && challenges.length > 0 && challenges.length < 10) {
-    return challenges;
-  }
-  
-  // If challenges found and has 10 or more, return first 10
+
+  // 4. Return found challenges (up to 10)
   if (challenges && challenges.length >= 10) {
     return challenges.slice(0, 10);
   }
-  
-  // If no challenges found, generate 10 generic questions
-  if (!challenges) {
-    const defaultQuestions: Challenge[] = [];
-    const baseId = lessonId.replace(/lesson(\d+)-(\d+)/, 'mod$1-l$2');
-    
-    for (let i = 1; i <= 10; i++) {
-      defaultQuestions.push({
-        id: `${baseId}-c${i}`,
-        question: `Question ${i}: Which statement is true about this topic?`,
-        difficulty: (i % 3 === 1 ? 'easy' : i % 3 === 2 ? 'medium' : 'hard') as 'easy' | 'medium' | 'hard',
-        xpReward: (i % 3 === 1 ? 10 : i % 3 === 2 ? 15 : 20),
-        options: [
-          {
-            id: 'a',
-            text: 'It is an important concept in Java programming',
-            isCorrect: true,
-            explanation: 'Correct! This topic is fundamental to understanding Java.'
-          },
-          {
-            id: 'b',
-            text: 'It should be ignored by beginners',
-            isCorrect: false,
-            explanation: 'Incorrect. All concepts are important for learning.'
-          },
-          {
-            id: 'c',
-            text: 'It is only for advanced programmers',
-            isCorrect: false,
-            explanation: 'Incorrect. These concepts build upon each other from basics to advanced.'
-          },
-          {
-            id: 'd',
-            text: 'It is not used in real-world applications',
-            isCorrect: false,
-            explanation: 'Incorrect. All Java concepts have practical applications.'
-          }
-        ],
-        hint: 'Focus on understanding the fundamentals.'
-      });
-    }
-    
-    return defaultQuestions;
+  if (challenges && challenges.length > 0) {
+    return challenges;
   }
-  
-  return allLessonChallenges['default'];
+
+  // 5. Fallback: generate 10 generic placeholder questions
+  const baseId = lessonId.replace(/[^a-zA-Z0-9]/g, '-');
+  const defaultQuestions: Challenge[] = [];
+  for (let i = 1; i <= 10; i++) {
+    const difficultyLevel = (i % 3 === 1 ? 'easy' : i % 3 === 2 ? 'medium' : 'hard') as 'easy' | 'medium' | 'hard';
+    const xpAmount = i % 3 === 1 ? 10 : i % 3 === 2 ? 15 : 20;
+    defaultQuestions.push({
+      id: `${baseId}-c${i}`,
+      question: `Question ${i}: Which statement is true about this Java topic?`,
+      difficulty: difficultyLevel,
+      xpReward: xpAmount,
+      options: [
+        { id: 'a', text: 'It is a fundamental concept in Java programming', isCorrect: true, explanation: 'Correct! This topic is essential for building a strong Java foundation.' },
+        { id: 'b', text: 'It is not used in real-world Java applications', isCorrect: false, explanation: 'Incorrect. All Java concepts covered here have real-world applications.' },
+        { id: 'c', text: 'It is only relevant for advanced Java developers', isCorrect: false, explanation: 'Incorrect. These concepts build progressively from basic to advanced.' },
+        { id: 'd', text: 'It should be skipped by beginners', isCorrect: false, explanation: 'Incorrect. All concepts presented here are appropriate for learners at this level.' }
+      ],
+      hint: 'Focus on understanding the fundamentals of this topic.'
+    });
+  }
+  return defaultQuestions;
 }

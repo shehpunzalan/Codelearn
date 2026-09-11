@@ -4,10 +4,10 @@ import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import Editor from '@monaco-editor/react';
-import { 
+import {
   ArrowLeft, Brain, Code as CodeIcon, Send, Save, RotateCcw,
   FileText, CheckCircle, AlertCircle, XCircle, Sparkles,
-  MessageSquare, Clock
+  MessageSquare, Clock, Lightbulb, Lock
 } from 'lucide-react';
 import { analyzeJavaCode, compileJavaCode } from '../utils/aiFeedback';
 import { saveProgress, saveSubmission, getProgress } from '../utils/storage';
@@ -102,6 +102,9 @@ export function CodeEditorPage({ module, lesson, onBack, onViewFeedback }: CodeE
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Submission | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [hintVisible, setHintVisible] = useState(false);
+  const [hintUsed, setHintUsed] = useState(false);
   const [codeMetrics, setCodeMetrics] = useState<CodeMetrics>({ lines: 0, characters: 0 });
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics>({
     startTime: Date.now(),
@@ -447,6 +450,11 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
     if (!compilationResult.success) {
       toast.error('Compilation failed! Check your code for errors.');
       setIsSubmitting(false);
+      const newFailed = failedAttempts + 1;
+      setFailedAttempts(newFailed);
+      if (newFailed >= 2) {
+        toast.info('💡 A hint is now available! Check the hint panel.', { duration: 4000 });
+      }
       
       // Still create a submission for failed attempts
       const failedFeedback: Feedback = {
@@ -499,8 +507,11 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
     // Step 2: Analyze code with AI
     const analysis = analyzeJavaCode(code, lesson.title);
     
+    // Apply hint penalty: -10 points if student used the hint
+    const finalScore = hintUsed ? Math.max(0, analysis.score - 10) : analysis.score;
+
     const feedback: Feedback = {
-      codeQuality: analysis.score,
+      codeQuality: finalScore,
       oopPrinciples: analysis.detectedPatterns,
       errors: analysis.errors,
       suggestions: analysis.suggestions,
@@ -522,7 +533,7 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
       code,
       feedback,
       timestamp: new Date().toISOString(),
-      score: analysis.score,
+      score: finalScore,
       performanceMetrics: updatedMetrics
     };
 
@@ -557,10 +568,10 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
       lessonId: lesson.id,
       code,
       timestamp: new Date().toISOString(),
-      score: analysis.score,
+      score: finalScore,
       feedback: analysis.feedback,
       errors: analysis.errors,
-      passed: analysis.passed
+      passed: finalScore >= 80
     });
 
     // Save to allSubmissions for FeedbackPage
@@ -570,12 +581,13 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
       timestamp: new Date().toISOString(),
       lessonId: lesson.id,
       moduleId: module.id,
-      score: analysis.score,
+      score: finalScore,
+      hintUsed,
       feedback: {
         oopPrinciples: analysis.detectedPatterns,
         errors: analysis.errors,
         suggestions: analysis.suggestions,
-        codeQuality: analysis.score
+        codeQuality: finalScore
       }
     };
     allSubmissions.unshift(feedbackSubmission); // Add to beginning of array
@@ -586,8 +598,8 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
       userId: user.id,
       moduleId: module.id,
       lessonId: lesson.id,
-      completed: analysis.passed,
-      score: analysis.score,
+      completed: finalScore >= 80,
+      score: finalScore,
       attempts: updatedMetrics.submitAttempts,
       lastAttempt: new Date().toISOString(),
       code,
@@ -595,14 +607,34 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
       timeSpent: updatedMetrics.timeSpent
     });
 
+    // Quiz unlock: if this is a remedial activity and grade >= 80, unlock the locked quiz
+    if (finalScore >= 80) {
+      const interventions: any[] = JSON.parse(localStorage.getItem(`interventions_${user.id}`) || '[]');
+      const relatedIntervention = interventions.find(
+        (iv: any) => iv.lessonId === lesson.id || iv.moduleId === module.id
+      );
+      if (relatedIntervention) {
+        const lockKey = `quiz_locked_${user.id}_${relatedIntervention.moduleId || module.id}_${relatedIntervention.lessonId || lesson.id}`;
+        localStorage.removeItem(lockKey);
+        toast.success('Quiz unlocked! You may now retake the quiz for this lesson.', { duration: 5000 });
+      }
+    }
+
     setLastSubmission(submission);
     setHasSubmitted(true);
     setIsSubmitting(false);
 
-    if (analysis.passed) {
-      toast.success(`Great job! Score: ${analysis.score}/100 — keep it up!`);
+    if (finalScore >= 80) {
+      toast.success(`Great job! Score: ${finalScore}/100${hintUsed ? ' (hint used: −10 applied)' : ''} — keep it up!`);
+      setFailedAttempts(0);
     } else {
-      toast.warning(`Score: ${analysis.score}/100 — check the feedback below and try again.`);
+      const newFailed = failedAttempts + 1;
+      setFailedAttempts(newFailed);
+      if (newFailed >= 2) {
+        toast.info('💡 A hint is now available! Check the hint panel.', { duration: 4000 });
+      } else {
+        toast.warning(`Score: ${finalScore}/100${hintUsed ? ' (hint used: −10 applied)' : ''} — check the feedback and try again.`);
+      }
     }
   };
 
@@ -612,6 +644,64 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
    * @param score - The code quality score (0-100)
    * @returns CSS class name for text color
    */
+  const getLessonHint = () => {
+    const title = (lesson.title || '').toLowerCase();
+    if (title.includes('class') || title.includes('object')) {
+      return { topic: 'Classes & Objects', hints: [
+        'Every Java class needs at least one public class definition matching the filename.',
+        'Use the new keyword to create objects: MyClass obj = new MyClass();',
+        'Instance variables are declared inside the class but outside any method.',
+      ]};
+    }
+    if (title.includes('inherit')) {
+      return { topic: 'Inheritance', hints: [
+        'Use extends to inherit from a parent class: class Dog extends Animal { }',
+        'Call the parent constructor with super() as the first line in a subclass constructor.',
+        'Subclasses inherit all public and protected members of the parent.',
+      ]};
+    }
+    if (title.includes('encapsul') || title.includes('access')) {
+      return { topic: 'Encapsulation', hints: [
+        'Declare fields as private, then provide public getters and setters.',
+        'Example: private int age; with public int getAge() { return age; }',
+        'Setters can validate input before assigning the value.',
+      ]};
+    }
+    if (title.includes('polymorphism') || title.includes('override')) {
+      return { topic: 'Polymorphism / Overriding', hints: [
+        'Use @Override annotation before a method to override a parent\'s method.',
+        'The overriding method must have the same name and parameter types.',
+        'Call the parent\'s method with super.methodName() when needed.',
+      ]};
+    }
+    if (title.includes('abstract') || title.includes('interface')) {
+      return { topic: 'Abstract Classes & Interfaces', hints: [
+        'Abstract classes use the abstract keyword and cannot be instantiated directly.',
+        'All abstract methods must be implemented by concrete subclasses.',
+        'Interfaces use the interface keyword; classes implement them with implements.',
+      ]};
+    }
+    if (title.includes('constructor')) {
+      return { topic: 'Constructors', hints: [
+        'A constructor has the same name as the class and no return type.',
+        'Use this() to call another constructor within the same class.',
+        'If you define any constructor, Java no longer provides the default no-arg one.',
+      ]};
+    }
+    if (title.includes('loop') || title.includes('for') || title.includes('while')) {
+      return { topic: 'Loops', hints: [
+        'for (int i = 0; i < n; i++) is the standard counted loop structure.',
+        'Use break to exit a loop early and continue to skip the current iteration.',
+        'do-while always runs the body at least once before checking the condition.',
+      ]};
+    }
+    return { topic: lesson.title || 'Java OOP', hints: [
+      'Make sure your class name matches what the problem asks for.',
+      'Check that all opening { braces have matching closing } braces.',
+      'Every statement in Java must end with a semicolon ;',
+    ]};
+  };
+
   const getQualityColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
@@ -811,13 +901,33 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
                         <XCircle className="w-4 h-4" />
                         Problems in Your Code ({lastSubmission.feedback.errors.length})
                       </p>
-                      <ul className="text-xs text-red-800 space-y-1.5">
-                        {lastSubmission.feedback.errors.map((error, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <span className="text-red-500 mt-0.5">•</span>
-                            <span>{error}</span>
-                          </li>
-                        ))}
+                      <ul className="text-xs text-red-800 space-y-2">
+                        {lastSubmission.feedback.errors.map((error, idx) => {
+                          const categoryMatch = error.match(/^(✗\s*)?(Syntax Error|Semantic Error|Logical Error|Runtime Error|Compilation Error|Logic Error|Missing|Incorrect):/i);
+                          const category = categoryMatch ? categoryMatch[2] : null;
+                          const message = categoryMatch ? error.slice(categoryMatch[0].length).trim() : error.replace(/^✗\s*/, '');
+                          const badgeColor = category
+                            ? category.toLowerCase().includes('syntax') ? 'bg-orange-100 text-orange-800'
+                            : category.toLowerCase().includes('logic') ? 'bg-purple-100 text-purple-800'
+                            : category.toLowerCase().includes('runtime') ? 'bg-yellow-100 text-yellow-800'
+                            : category.toLowerCase().includes('semantic') ? 'bg-pink-100 text-pink-800'
+                            : category.toLowerCase().includes('compil') ? 'bg-red-100 text-red-800'
+                            : 'bg-gray-100 text-gray-800'
+                            : null;
+                          return (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                              <span className="flex-1">
+                                {badgeColor && (
+                                  <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded mr-1.5 ${badgeColor}`}>
+                                    {category}
+                                  </span>
+                                )}
+                                {message}
+                              </span>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   ) : (
@@ -871,6 +981,70 @@ ${feedback.suggestions.length > 0 ? feedback.suggestions.map(s => `- ${s}`).join
               </div>
             </CardContent>
           </Card>
+          {/* Hint Panel */}
+          {(() => {
+            const hint = getLessonHint();
+            const unlocked = failedAttempts >= 2;
+            return (
+              <Card className={`border-0 shadow-md mt-4 transition-all duration-300 ${unlocked ? '' : 'opacity-60'}`}>
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {unlocked
+                        ? <Lightbulb className="w-5 h-5 text-yellow-500" />
+                        : <Lock className="w-5 h-5 text-[var(--muted-foreground)]" />}
+                      <h3 className="text-sm font-bold text-[var(--foreground)]">
+                        Hint — {hint.topic}
+                      </h3>
+                    </div>
+                    {unlocked && (
+                      <button
+                        onClick={() => {
+                          if (!hintVisible && !hintUsed) {
+                            setHintUsed(true);
+                            const log = JSON.parse(localStorage.getItem('hintUsageLog') || '[]');
+                            log.push({ userId: user?.id, lessonId: lesson.id, moduleId: module?.id, usedAt: new Date().toISOString() });
+                            localStorage.setItem('hintUsageLog', JSON.stringify(log));
+                          }
+                          setHintVisible(v => !v);
+                        }}
+                        className="text-xs font-medium text-[var(--primary)] hover:underline"
+                      >
+                        {hintVisible ? 'Hide' : 'Show Hint'}
+                      </button>
+                    )}
+                  </div>
+
+                  {!unlocked && (
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      Make <strong>2 attempts</strong> to unlock the hint for this problem.
+                      {failedAttempts === 1 ? ' (1 attempt used)' : ''}
+                    </p>
+                  )}
+
+                  {unlocked && hintVisible && (
+                    <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200 space-y-2">
+                      {hint.hints.map((h, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="text-yellow-500 font-bold text-xs mt-0.5">{i + 1}.</span>
+                          <p className="text-xs text-yellow-900">{h}</p>
+                        </div>
+                      ))}
+                      <p className="text-[10px] text-yellow-700 mt-2 pt-2 border-t border-yellow-200">
+                        Note: Using a hint is recorded and may affect your final score.
+                      </p>
+                    </div>
+                  )}
+
+                  {unlocked && !hintVisible && (
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      Hint available. Click <strong>Show Hint</strong> to reveal — usage will be logged.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
       </div>
     </div>

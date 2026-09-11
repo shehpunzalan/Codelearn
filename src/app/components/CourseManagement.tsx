@@ -398,91 +398,46 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
                 <Dialog open={showCreateModule} onOpenChange={setShowCreateModule}>
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Module
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Module
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>Create New Module</DialogTitle>
+                      <DialogTitle>Course Modules</DialogTitle>
                       <DialogDescription>
-                        Create a new learning module with lessons and exercises
+                        All available modules and their lesson content
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="module-title">Module Title *</Label>
-                        <Input id="module-title" placeholder="e.g., Advanced Polymorphism Techniques" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="module-description">Description *</Label>
-                        <Textarea id="module-description" placeholder="Describe the module content and learning outcomes..." rows={4} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="module-difficulty">Difficulty Level *</Label>
-                          <Select>
-                            <SelectTrigger id="module-difficulty">
-                              <SelectValue placeholder="Select difficulty" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="beginner">Beginner</SelectItem>
-                              <SelectItem value="intermediate">Intermediate</SelectItem>
-                              <SelectItem value="advanced">Advanced</SelectItem>
-                            </SelectContent>
-                          </Select>
+                    <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                      {modules.map((mod, idx) => (
+                        <div key={mod.id} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-purple-600 text-white text-xs">Module {idx + 1}</Badge>
+                              <span className="font-semibold text-gray-900 text-sm">{mod.title}</span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">{mod.totalLessons} lessons</Badge>
+                          </div>
+                          {mod.description && <p className="text-xs text-gray-500 mb-2">{mod.description}</p>}
+                          <div className="space-y-1">
+                            {mod.lessons.map((lesson, li) => (
+                              <div key={lesson.id} className="flex items-center gap-2 text-xs text-gray-600 py-1 border-t border-gray-100">
+                                <BookOpen className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                                <span>Lesson {li + 1}: {lesson.title}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="module-duration-2">Estimated Duration *</Label>
-                          <Select>
-                            <SelectTrigger id="module-duration-2">
-                              <SelectValue placeholder="Select duration" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="30min">30 minutes</SelectItem>
-                              <SelectItem value="1hr">1 hour</SelectItem>
-                              <SelectItem value="1.5hr">1.5 hours</SelectItem>
-                              <SelectItem value="2hr">2 hours</SelectItem>
-                              <SelectItem value="2.5hr">2.5 hours</SelectItem>
-                              <SelectItem value="3hr">3 hours</SelectItem>
-                              <SelectItem value="4hr">4 hours</SelectItem>
-                              <SelectItem value="5hr">5 hours</SelectItem>
-                              <SelectItem value="6hr">6 hours</SelectItem>
-                              <SelectItem value="8hr">8 hours</SelectItem>
-                              <SelectItem value="10hr">10 hours</SelectItem>
-                              <SelectItem value="12hr">12+ hours</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="module-topics">Key Topics (comma-separated)</Label>
-                        <Input id="module-topics" placeholder="e.g., Abstract Classes, Interfaces, Method Overriding" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="module-start-date">Availability Start *</Label>
-                          <Input id="module-start-date" type="date" min={new Date().toISOString().split('T')[0]} defaultValue={new Date().toISOString().split('T')[0]} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="module-deadline">Completion Deadline *</Label>
-                          <Input id="module-deadline" type="date" min={new Date().toISOString().split('T')[0]} />
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2 pt-4">
-                        <Button variant="outline" onClick={() => setShowCreateModule(false)}>
-                          Cancel
-                        </Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowCreateModule(false)}>
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Module
-                        </Button>
-                      </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-end pt-2">
+                      <Button variant="outline" onClick={() => setShowCreateModule(false)}>Close</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
-              <p className="text-sm text-gray-600 mb-4">View and manage all course modules</p>
+              <p className="text-sm text-gray-600 mb-4">Browse and navigate all course modules</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -512,78 +467,30 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Award className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900">Manage Activities</h3>
+                  <h3 className="font-semibold text-gray-900">View Activity</h3>
                 </div>
                 <Dialog open={showCreateActivity} onOpenChange={setShowCreateActivity}>
                   <DialogTrigger asChild>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Activity
+                    <Button size="sm" variant="outline">
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Activities
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                  <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                      <DialogTitle>Create New Activity</DialogTitle>
+                      <DialogTitle>Remedial Activities</DialogTitle>
                       <DialogDescription>
-                        Create a coding assignment or exercise for students
+                        Student → Intervention → Remedial Activity → Submitted Code → Grade
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="activity-title">Activity Title *</Label>
-                        <Input id="activity-title" placeholder="e.g., Create a Student Class with Encapsulation" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="activity-module">Module *</Label>
-                        <Select>
-                          <SelectTrigger id="activity-module">
-                            <SelectValue placeholder="Select module" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="module1">Module 1: Java OOP Fundamentals</SelectItem>
-                            <SelectItem value="module2">Module 2: Classes and Objects</SelectItem>
-                            <SelectItem value="module3">Module 3: Encapsulation</SelectItem>
-                            <SelectItem value="module4">Module 4: Inheritance</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="activity-description">Description *</Label>
-                        <Textarea id="activity-description" placeholder="Describe the learning objectives and requirements..." rows={4} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="activity-points">Total Points *</Label>
-                          <Input id="activity-points" type="number" placeholder="100" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="activity-due">Due Date *</Label>
-                          <Input id="activity-due" type="date" min={new Date().toISOString().split('T')[0]} defaultValue={new Date().toISOString().split('T')[0]} />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="activity-starter">Starter Code (Optional)</Label>
-                        <Textarea 
-                          id="activity-starter" 
-                          placeholder="public class Student {&#10;    // TODO: Implement encapsulation&#10;}" 
-                          className="font-mono text-sm" 
-                          rows={6}
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2 pt-4">
-                        <Button variant="outline" onClick={() => setShowCreateActivity(false)}>
-                          Cancel
-                        </Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowCreateActivity(false)}>
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Activity
-                        </Button>
-                      </div>
+                    <ActivityViewer />
+                    <div className="flex justify-end pt-2">
+                      <Button variant="outline" onClick={() => setShowCreateActivity(false)}>Close</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
-              <p className="text-sm text-gray-600 mb-4">Create and manage student assignments</p>
+              <p className="text-sm text-gray-600 mb-4">View remedial activities and submitted work</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -1137,6 +1044,93 @@ export function CourseManagement({ user, modules, onBack }: CourseManagementProp
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function ActivityViewer() {
+  const interventions: any[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i) || '';
+      if (key.startsWith('interventions_')) {
+        const items = JSON.parse(localStorage.getItem(key) || '[]');
+        interventions.push(...items);
+      }
+    }
+  } catch {}
+
+  const registeredUsers: any[] = [];
+  try {
+    const raw = localStorage.getItem('registeredUsers');
+    if (raw) registeredUsers.push(...JSON.parse(raw));
+  } catch {}
+
+  const submissions: any[] = [];
+  try {
+    const raw = localStorage.getItem('allSubmissions');
+    if (raw) submissions.push(...JSON.parse(raw));
+  } catch {}
+
+  if (interventions.length === 0) {
+    return (
+      <div className="py-10 text-center text-gray-500">
+        <FileText className="w-10 h-10 mx-auto mb-2 opacity-40" />
+        <p className="text-sm">No remedial activities have been assigned yet.</p>
+        <p className="text-xs mt-1 text-gray-400">Use "Needs Attention → Send Intervention" to assign activities to students.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+      {interventions.map((iv: any, idx: number) => {
+        const student = registeredUsers.find((u: any) => u.id === iv.studentId);
+        const studentSubs = submissions.filter((s: any) => s.userId === iv.studentId || s.lessonId === iv.lessonId);
+        const latestSub = studentSubs[0];
+        const grade = latestSub?.score ?? null;
+        const gradeColor = grade === null ? 'text-gray-400' : grade >= 80 ? 'text-green-600' : grade >= 60 ? 'text-yellow-600' : 'text-red-600';
+
+        return (
+          <div key={idx} className="border border-gray-200 rounded-lg p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-500" />
+                <span className="font-semibold text-sm text-gray-900">{student?.name || iv.studentId}</span>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                {new Date(iv.timestamp || Date.now()).toLocaleDateString()}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              <div>
+                <p className="text-gray-500 font-medium mb-0.5">Intervention</p>
+                <p className="text-gray-700">{iv.message?.slice(0, 60) || 'Remedial coding activity'}{(iv.message?.length || 0) > 60 ? '…' : ''}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 font-medium mb-0.5">Activity Type</p>
+                <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs font-normal">Remedial Coding</Badge>
+              </div>
+              <div>
+                <p className="text-gray-500 font-medium mb-0.5">Grade</p>
+                <span className={`font-bold text-sm ${gradeColor}`}>
+                  {grade !== null ? `${grade}/100` : 'Pending'}
+                </span>
+                {grade !== null && grade >= 80 && <span className="ml-1 text-green-600 text-xs">✓ Quiz Unlocked</span>}
+                {grade !== null && grade < 80 && <span className="ml-1 text-red-500 text-xs">✗ Quiz Locked</span>}
+              </div>
+            </div>
+            {latestSub?.code && (
+              <details className="text-xs">
+                <summary className="cursor-pointer text-blue-600 hover:text-blue-700">View submitted code</summary>
+                <pre className="mt-2 bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto max-h-40">
+                  {latestSub.code}
+                </pre>
+              </details>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

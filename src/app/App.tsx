@@ -334,17 +334,30 @@ function AppContent() {
     );
   }, [user?.id]);
 
-  // Auto-logout when the user switches to another browser tab or minimizes the window.
+  // Auto-logout when the user switches tabs or minimizes during quiz/code editor.
   useEffect(() => {
     if (!user) return;
     const onVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
+        // Record the event for monitoring before logging out
+        const activeView = currentView;
+        if (activeView === 'quiz' || activeView === 'code-editor' || activeView === 'modules') {
+          const securityLog = JSON.parse(localStorage.getItem('security_log') || '[]');
+          securityLog.push({
+            userId: user.id,
+            userName: user.name,
+            event: 'auto_logout_tab_switch',
+            view: activeView,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('security_log', JSON.stringify(securityLog));
+        }
         handleLogout();
       }
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, [user]);
+  }, [user, currentView]);
 
   const handleLogin = async (loggedInUser: User) => {
     clearProgressDataForNewUser(loggedInUser.id);

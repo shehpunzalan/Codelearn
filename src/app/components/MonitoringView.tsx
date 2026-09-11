@@ -3,21 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
-import { Textarea } from './ui/textarea';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import {
-  ArrowLeft, Activity, Eye, AlertCircle, CheckCircle2, Code,
-  Search, Filter, Clock, User, FileText, MessageSquare, Settings,
-  TrendingUp, XCircle, Send, FileCode, BarChart3, Brain, Target,
-  BookOpen, Zap, Users, Award, Network, Database
+  ArrowLeft, Activity, AlertCircle, CheckCircle2,
+  Search, Clock, User, FileCode, Brain, Target,
+  TrendingUp, Users, Award, Network, ShieldAlert
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { mockModules } from '../data/mockData';
 import { syncBackendStudentsToLocalStorage } from '../utils/syncStudents';
-import { saveNotification } from '../utils/storage';
-import * as backendApi from '../services/backendApi';
 
 interface MonitoringViewProps {
   onBack: () => void;
@@ -59,10 +51,6 @@ function getRelativeTime(ts: number): string {
 export function MonitoringView({ onBack, classSchedule }: MonitoringViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLevel, setFilterLevel] = useState<'ALL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NEW'>('ALL');
-  const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
-  const [adjustmentType, setAdjustmentType] = useState('');
-  const [adjustmentMessage, setAdjustmentMessage] = useState('');
   const [students, setStudents] = useState<StudentData[]>([]);
   const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
 
@@ -245,54 +233,6 @@ export function MonitoringView({ onBack, classSchedule }: MonitoringViewProps) {
   const mediumStudents = filtered.filter(s => s.level === 'MEDIUM');
   const lowStudents = filtered.filter(s => s.level === 'LOW');
   const newStudents = filtered.filter(s => s.level === 'NEW');
-
-  const handleMakeAdjustment = (student: StudentData) => {
-    setSelectedStudent(student);
-    setAdjustmentType(student.level === 'LOW' ? 'supplemental-material' : student.level === 'MEDIUM' ? 'practice-exercises' : 'modify-pacing');
-    setAdjustmentMessage('');
-    setAdjustmentDialogOpen(true);
-  };
-
-  const confirmAdjustment = async () => {
-    if (!adjustmentType) { toast.error('Please select an adjustment type'); return; }
-    if (!adjustmentMessage.trim()) { toast.error('Please enter adjustment details'); return; }
-    if (!selectedStudent) return;
-
-    const typeLabels: Record<string, string> = {
-      'modify-pacing': 'Pacing Adjustment',
-      'additional-resources': 'Additional Resources',
-      'practice-focus': 'Practice Focus',
-      'concept-review': 'Concept Review',
-    };
-    const title = typeLabels[adjustmentType] || 'Instructional Adjustment';
-    const notifId = `adjustment_${Date.now()}`;
-
-    try {
-      await backendApi.createNotification({
-        userId: selectedStudent.id,
-        type: 'adjustment',
-        title,
-        message: adjustmentMessage,
-      });
-    } catch { /* backend unreachable */ }
-
-    saveNotification({
-      id: notifId,
-      userId: selectedStudent.id,
-      type: 'adjustment',
-      title,
-      message: adjustmentMessage,
-      timestamp: new Date().toISOString(),
-      read: false,
-      sourceType: 'instructor',
-    } as any);
-
-    toast.success(`Adjustment created and ${selectedStudent.name} has been notified!`);
-    setAdjustmentDialogOpen(false);
-    setAdjustmentType('');
-    setAdjustmentMessage('');
-    setSelectedStudent(null);
-  };
 
   const getActivityStyle = (status: string) => {
     if (status === 'completed') return { border: 'border-green-400', bg: 'bg-green-50', color: 'text-green-600', Icon: CheckCircle2 };
@@ -480,7 +420,6 @@ export function MonitoringView({ onBack, classSchedule }: MonitoringViewProps) {
                         <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Level</th>
                         <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Avg Score</th>
                         <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Quizzes</th>
-                        <th className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--foreground)' }}>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -512,15 +451,6 @@ export function MonitoringView({ onBack, classSchedule }: MonitoringViewProps) {
                               {s.quizCount > 0 ? `${s.avgScore}%` : '—'}
                             </td>
                             <td className="px-4 py-3 text-center" style={{ color: 'var(--muted-foreground)' }}>{s.quizCount}</td>
-                            <td className="px-4 py-3 text-center">
-                              <button
-                                onClick={() => handleMakeAdjustment(s)}
-                                className="px-3 py-1 rounded text-xs font-semibold"
-                                style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', border: 'none', cursor: 'pointer' }}
-                              >
-                                Adjust
-                              </button>
-                            </td>
                           </tr>
                         );
                       })}
@@ -596,91 +526,52 @@ export function MonitoringView({ onBack, classSchedule }: MonitoringViewProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Security Events — Tab Switch Log */}
+          <Card style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2" style={{ color: 'var(--foreground)', fontSize: '1rem' }}>
+                <ShieldAlert className="w-4 h-4 text-red-500" />
+                Security Events
+              </CardTitle>
+              <CardDescription style={{ color: 'var(--muted-foreground)' }}>
+                Students auto-logged out due to tab switching during quiz/editor
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const log: { userId: string; userName: string; event: string; view: string; timestamp: string }[] =
+                  JSON.parse(localStorage.getItem('security_log') || '[]');
+                if (log.length === 0) {
+                  return (
+                    <p className="text-xs py-4 text-center" style={{ color: 'var(--muted-foreground)' }}>
+                      No security events recorded.
+                    </p>
+                  );
+                }
+                return (
+                  <ul className="space-y-2 max-h-48 overflow-y-auto">
+                    {log.slice().reverse().map((entry, i) => (
+                      <li key={i} className="flex items-start gap-2 p-2 rounded-lg bg-red-50 border border-red-100 text-xs">
+                        <AlertCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          <strong>{entry.userName || entry.userId}</strong> — tab switch during{' '}
+                          <span className="font-medium">{entry.view}</span>{' '}
+                          <span className="text-gray-500">
+                            {new Date(entry.timestamp).toLocaleString()}
+                          </span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Instructional Adjustment Dialog */}
-      <Dialog open={adjustmentDialogOpen} onOpenChange={setAdjustmentDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" style={{ color: 'var(--primary)' }} />
-              Make Instructional Adjustment
-            </DialogTitle>
-            <DialogDescription>
-              Create a personalized learning adjustment for {selectedStudent?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="adj-type">Adjustment Type</Label>
-              <Select value={adjustmentType} onValueChange={setAdjustmentType}>
-                <SelectTrigger id="adj-type"><SelectValue placeholder="Select type..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="supplemental-material">Provide Supplemental Material</SelectItem>
-                  <SelectItem value="one-on-one">Schedule One-on-One Session</SelectItem>
-                  <SelectItem value="practice-exercises">Assign Practice Exercises</SelectItem>
-                  <SelectItem value="modify-pacing">Modify Learning Pacing</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="adj-details">Adjustment Details</Label>
-              <Textarea
-                id="adj-details"
-                value={adjustmentMessage}
-                onChange={(e) => setAdjustmentMessage(e.target.value)}
-                rows={6}
-                placeholder="Describe the instructional adjustment..."
-                className="resize-none"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAdjustmentDialogOpen(false)}>Cancel</Button>
-            <Button onClick={confirmAdjustment} style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
-              <Settings className="w-4 h-4 mr-2" />Create Adjustment
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
-function StudentCard({ student, borderColor, bg, scoreColor, icon, onAdjust, urgent }: {
-  student: StudentData;
-  borderColor: string;
-  bg: string;
-  scoreColor: string;
-  icon: React.ReactNode;
-  onAdjust: (s: StudentData) => void;
-  urgent?: boolean;
-}) {
-  return (
-    <div className={`p-4 rounded-lg border-l-4 ${borderColor} ${bg} hover:opacity-90 transition-opacity`}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            {icon}
-            <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{student.name}</span>
-            {student.quizCount > 0 && (
-              <Badge className={`${scoreColor} text-white text-xs`}>{student.avgScore}%</Badge>
-            )}
-            {urgent && <Badge className="bg-red-700 text-white text-xs animate-pulse">URGENT</Badge>}
-          </div>
-          <div className="text-xs space-y-0.5 ml-6" style={{ color: 'var(--muted-foreground)' }}>
-            <p>{student.email}</p>
-            <p>Quizzes: {student.quizCount} · Modules done: {student.modulesCompleted}</p>
-            {student.lastActive && (
-              <p><Clock className="w-3 h-3 inline mr-1" />Last active: {new Date(student.lastActive).toLocaleDateString()}</p>
-            )}
-          </div>
-        </div>
-      </div>
-      <Button size="sm" variant="outline" className="w-full mt-2 h-7 text-xs" onClick={() => onAdjust(student)}>
-        <MessageSquare className="w-3 h-3 mr-1" />Make Instructional Adjustment
-      </Button>
-    </div>
-  );
-}
