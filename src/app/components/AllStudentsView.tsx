@@ -8,15 +8,18 @@ import {
   ArrowLeft, Search, User, Mail, Calendar,
   Award, TrendingUp, AlertCircle, Eye, Filter,
   Users, CheckCircle, BookOpen, GraduationCap,
-  TrendingDown, Minus, BarChart3, Trash2
+  TrendingDown, Minus, BarChart3, Trash2, MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { getUserStats, getAllProgress, getAllSubmissions } from '../utils/storage';
+import { getUserStats, getAllProgress, getAllSubmissions, saveNotification } from '../utils/storage';
+import { Textarea } from './ui/textarea';
+import { Label } from './ui/label';
 import * as backendApi from '../services/backendApi';
 
 interface AllStudentsViewProps {
   onBack: () => void;
   onViewStudent?: (userId: string, userName: string) => void;
+  classSchedule?: string;
 }
 
 interface StudentData {
@@ -33,7 +36,7 @@ interface StudentData {
   status: 'excellent' | 'good' | 'needs-attention';
 }
 
-export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps) {
+export function AllStudentsView({ onBack, onViewStudent, classSchedule }: AllStudentsViewProps) {
   const [students, setStudents] = useState<StudentData[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<StudentData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,6 +45,9 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<StudentData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [interventionTarget, setInterventionTarget] = useState<StudentData | null>(null);
+  const [interventionMessage, setInterventionMessage] = useState('');
+  const [lockedQuiz, setLockedQuiz] = useState<{ moduleId: string; lessonId: string } | null>(null);
 
   useEffect(() => {
     loadStudents();
@@ -153,8 +159,14 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
       const usersData = localStorage.getItem('registeredUsers');
       const registeredUsers = usersData ? JSON.parse(usersData) : [];
       
-      // Filter only students
-      const studentUsers = registeredUsers.filter((user: any) => user.role === 'student');
+      // Filter only students matching this instructor's class schedule
+      const instrSchedule = (classSchedule || '').trim().toLowerCase();
+      const studentUsers = registeredUsers.filter((user: any) => {
+        if (user.role !== 'student') return false;
+        if (!instrSchedule) return true;
+        const stuSchedule = (user.classSchedule || user.department || '').trim().toLowerCase();
+        return stuSchedule === instrSchedule;
+      });
       
       // Calculate stats for each student
       const studentsWithStats: StudentData[] = studentUsers.map((student: any) => {
@@ -313,6 +325,67 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
   };
 
   const stats = calculateOverallStats();
+
+  const openIntervention = (student: StudentData) => {
+    setInterventionTarget(student);
+    setInterventionMessage('');
+    // Detect locked quiz for this student
+    let found: { moduleId: string; lessonId: string } | null = null;
+    for (let ki = 0; ki < localStorage.length; ki++) {
+      const lk = localStorage.key(ki) || '';
+      const prefix = `quiz_attempts_${student.id}_`;
+      if (!lk.startsWith(prefix)) continue;
+      try {
+        if (parseInt(localStorage.getItem(lk) || '0', 10) >= 3) {
+          const rest = lk.slice(prefix.length);
+          const sep = rest.indexOf('_');
+          if (sep !== -1) { found = { moduleId: rest.slice(0, sep), lessonId: rest.slice(sep + 1) }; break; }
+        }
+      } catch { /* ignore */ }
+    }
+    setLockedQuiz(found);
+  };
+
+  const confirmIntervention = async () => {
+    if (!interventionMessage.trim()) { toast.error('Please enter your instructions for the student'); return; }
+    if (!interventionTarget) return;
+
+    const title = 'Remedial Activity Assigned';
+    const notifId = `intervention_${Date.now()}`;
+
+    try {
+      await backendApi.createNotification({
+        userId: interventionTarget.id,
+        type: 'intervention',
+        title,
+        message: interventionMessage,
+        moduleId: lockedQuiz?.moduleId,
+        lessonId: lockedQuiz?.lessonId,
+      });
+    } catch { /* backend unreachable */ }
+
+    saveNotification({
+      id: notifId,
+      userId: interventionTarget.id,
+      type: 'intervention',
+      title,
+      message: interventionMessage,
+      moduleId: lockedQuiz?.moduleId,
+      lessonId: lockedQuiz?.lessonId,
+      timestamp: new Date().toISOString(),
+      read: false,
+      sourceType: 'instructor',
+    } as any);
+
+    if (lockedQuiz) {
+      localStorage.removeItem(`quiz_attempts_${interventionTarget.id}_${lockedQuiz.moduleId}_${lockedQuiz.lessonId}`);
+    }
+
+    toast.success(`Intervention sent to ${interventionTarget.name}! They have been notified.`);
+    setInterventionTarget(null);
+    setInterventionMessage('');
+    setLockedQuiz(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -569,7 +642,7 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                           variant="outline"
                           size="sm"
                           className="border-red-300 text-red-700 hover:bg-red-50"
-                          onClick={() => toast.info(`Sending intervention to ${student.name}`)}
+                          onClick={() => openIntervention(student)}
                         >
                           <AlertCircle className="w-4 h-4 mr-1" />
                           Send Intervention
@@ -644,6 +717,56 @@ export function AllStudentsView({ onBack, onViewStudent }: AllStudentsViewProps)
                   Delete Permanently
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Intervention Dialog */}
+      <Dialog open={!!interventionTarget} onOpenChange={(open) => { if (!open) { setInterventionTarget(null); setInterventionMessage(''); setLockedQuiz(null); } }}>
+        <DialogContent className="max-w-lg" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+          <DialogHeader>
+            <DialogTitle style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--foreground)', fontFamily: 'var(--font-sans)' }}>
+              <MessageSquare style={{ width: 20, height: 20, color: 'var(--primary)' }} />
+              Send Intervention
+            </DialogTitle>
+            <DialogDescription style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>
+              {interventionTarget?.name} · Avg score: {interventionTarget?.averageScore}%
+            </DialogDescription>
+          </DialogHeader>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <Label style={{ color: 'var(--foreground)', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
+                Instructor Instructions *
+              </Label>
+              <Textarea
+                value={interventionMessage}
+                onChange={(e) => setInterventionMessage(e.target.value)}
+                rows={5}
+                placeholder="Provide specific guidance on what concepts to review and how to improve..."
+                className="resize-none"
+                style={{ fontFamily: 'var(--font-sans)' }}
+              />
+            </div>
+
+            <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md, 8px)', background: lockedQuiz ? 'color-mix(in srgb, var(--success, #22c55e) 10%, var(--card))' : 'var(--muted)', border: `1px solid ${lockedQuiz ? 'color-mix(in srgb, var(--success, #22c55e) 30%, transparent)' : 'var(--border)'}` }}>
+              <p style={{ margin: 0, fontSize: '0.8rem', fontFamily: 'var(--font-sans)', color: lockedQuiz ? 'var(--success, #16a34a)' : 'var(--muted-foreground)', fontWeight: 600 }}>
+                {lockedQuiz
+                  ? `✓ Will unlock locked quiz: ${lockedQuiz.moduleId} · ${lockedQuiz.lessonId}`
+                  : 'No locked quiz detected for this student on this device.'}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setInterventionTarget(null); setInterventionMessage(''); setLockedQuiz(null); }} style={{ fontFamily: 'var(--font-sans)' }}>Cancel</Button>
+            <Button
+              onClick={confirmIntervention}
+              style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', fontFamily: 'var(--font-sans)' }}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Send Intervention
             </Button>
           </DialogFooter>
         </DialogContent>

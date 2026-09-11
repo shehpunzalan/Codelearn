@@ -16,9 +16,12 @@ import {
 import { toast } from 'sonner';
 import { mockModules } from '../data/mockData';
 import { syncBackendStudentsToLocalStorage } from '../utils/syncStudents';
+import { saveNotification } from '../utils/storage';
+import * as backendApi from '../services/backendApi';
 
 interface MonitoringViewProps {
   onBack: () => void;
+  classSchedule?: string;
 }
 
 interface StudentData {
@@ -53,7 +56,7 @@ function getRelativeTime(ts: number): string {
   return `${diffDays}d ago`;
 }
 
-export function MonitoringView({ onBack }: MonitoringViewProps) {
+export function MonitoringView({ onBack, classSchedule }: MonitoringViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLevel, setFilterLevel] = useState<'ALL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NEW'>('ALL');
   const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
@@ -69,7 +72,12 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
 
   useEffect(() => {
     const registered: any[] = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    const realStudents = registered.filter((u: any) => u.role === 'student');
+    const instrSchedule = (classSchedule || '').trim().toLowerCase();
+    const realStudents = registered.filter((u: any) => {
+      if (u.role !== 'student') return false;
+      if (!instrSchedule) return true;
+      return (u.classSchedule || u.department || '').trim().toLowerCase() === instrSchedule;
+    });
 
     const computedStudents: StudentData[] = realStudents.map((user: any) => {
       // Collect all quiz results for this student
@@ -245,10 +253,41 @@ export function MonitoringView({ onBack }: MonitoringViewProps) {
     setAdjustmentDialogOpen(true);
   };
 
-  const confirmAdjustment = () => {
+  const confirmAdjustment = async () => {
     if (!adjustmentType) { toast.error('Please select an adjustment type'); return; }
     if (!adjustmentMessage.trim()) { toast.error('Please enter adjustment details'); return; }
-    toast.success(`Instructional adjustment created for ${selectedStudent?.name}!`);
+    if (!selectedStudent) return;
+
+    const typeLabels: Record<string, string> = {
+      'modify-pacing': 'Pacing Adjustment',
+      'additional-resources': 'Additional Resources',
+      'practice-focus': 'Practice Focus',
+      'concept-review': 'Concept Review',
+    };
+    const title = typeLabels[adjustmentType] || 'Instructional Adjustment';
+    const notifId = `adjustment_${Date.now()}`;
+
+    try {
+      await backendApi.createNotification({
+        userId: selectedStudent.id,
+        type: 'adjustment',
+        title,
+        message: adjustmentMessage,
+      });
+    } catch { /* backend unreachable */ }
+
+    saveNotification({
+      id: notifId,
+      userId: selectedStudent.id,
+      type: 'adjustment',
+      title,
+      message: adjustmentMessage,
+      timestamp: new Date().toISOString(),
+      read: false,
+      sourceType: 'instructor',
+    } as any);
+
+    toast.success(`Adjustment created and ${selectedStudent.name} has been notified!`);
     setAdjustmentDialogOpen(false);
     setAdjustmentType('');
     setAdjustmentMessage('');

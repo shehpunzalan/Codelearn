@@ -143,6 +143,7 @@ export function Login({ onLogin, onShowRegister }: LoginProps) {
             email: localMatch.email,
             role: localMatch.role,
             enrolledCourses: localMatch.enrolledCourses || ['CCS108'],
+            classSchedule: localMatch.classSchedule || localMatch.department || '',
           };
           localStorage.setItem('currentUser', JSON.stringify(user));
           localStorage.setItem('accessToken', `local-token-${user.id}`);

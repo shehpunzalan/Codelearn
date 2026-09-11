@@ -17,10 +17,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from './ui/popover';
-import { getAllNotifications, markNotificationAsRead, deleteNotification } from '../utils/storage';
+import { getAllNotifications, markNotificationAsRead, deleteNotification, saveNotification, clearAllNotifications } from '../utils/storage';
 import { createSampleNotifications } from '../utils/notifications';
 import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
+import * as backendApi from '../services/backendApi';
 
 interface HeaderProps {
   user: User | null;
@@ -41,7 +42,6 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
   // Load notifications on mount and when popover opens
   React.useEffect(() => {
     if (user.role === 'student') {
-      // Initialize sample notifications if none exist
       createSampleNotifications(user.id);
       setNotifications(getAllNotifications(user.id));
     }
@@ -54,6 +54,54 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
     }
   }, [notificationOpen, user.id, user.role]);
 
+  // Poll backend for cross-device notifications (interventions, adjustments)
+  React.useEffect(() => {
+    if (user.role !== 'student') return;
+
+    const applyBackendNotifs = async () => {
+      try {
+        const res = await backendApi.getNotifications(user.id);
+        const items: any[] = res?.data || res?.notifications || [];
+        if (!Array.isArray(items) || items.length === 0) return;
+
+        const existing = getAllNotifications(user.id);
+        const existingIds = new Set(existing.map((n: any) => String(n.id)));
+        let changed = false;
+
+        for (const item of items) {
+          const remoteId = String(item.id || item.notificationId || '');
+          if (!remoteId || existingIds.has(remoteId)) continue;
+
+          // For intervention notifications: unlock the locked quiz
+          if ((item.type === 'intervention' || item.type === 'adjustment') && item.module_id && item.lesson_id) {
+            const quizKey = `quiz_attempts_${user.id}_${item.module_id}_${item.lesson_id}`;
+            localStorage.removeItem(quizKey);
+          }
+
+          saveNotification({
+            id: remoteId,
+            userId: user.id,
+            type: item.type || 'announcement',
+            title: item.title || 'New Notification',
+            message: item.message || item.body || '',
+            moduleId: item.module_id || item.moduleId,
+            lessonId: item.lesson_id || item.lessonId,
+            timestamp: item.created_at || item.timestamp || new Date().toISOString(),
+            read: false,
+            sourceType: 'instructor',
+          } as any);
+          changed = true;
+        }
+
+        if (changed) setNotifications(getAllNotifications(user.id));
+      } catch { /* backend unreachable — ignore */ }
+    };
+
+    applyBackendNotifs();
+    const interval = setInterval(applyBackendNotifs, 30_000);
+    return () => clearInterval(interval);
+  }, [user.id, user.role]);
+
   // Count unread notifications for badge display
   const unreadCount = notifications.filter(notification => !notification.read).length;
 
@@ -65,7 +113,19 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
   const handleDeleteNotification = (notificationId: string) => {
     deleteNotification(user.id, notificationId);
     setNotifications(getAllNotifications(user.id));
-    toast.success('Notification deleted');
+  };
+
+  const handleMarkAllRead = () => {
+    const all = getAllNotifications(user.id);
+    all.forEach(n => markNotificationAsRead(user.id, n.id));
+    setNotifications(getAllNotifications(user.id));
+    toast.success('All notifications marked as read');
+  };
+
+  const handleClearAll = () => {
+    clearAllNotifications(user.id);
+    setNotifications([]);
+    toast.success('All notifications cleared');
   };
 
   const handleNotificationClick = (notification: any) => {
@@ -233,8 +293,32 @@ export function Header({ user, currentView, onNavigate, onLogout, onSettings }: 
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-96 p-0 border-0 shadow-lg">
                   <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-                    <h4 className="text-base font-semibold text-gray-900">Notifications</h4>
-                    <p className="text-xs text-gray-600 mt-0.5">{unreadCount} unread notifications</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-base font-semibold" style={{ fontFamily: 'var(--font-sans)', color: 'var(--foreground)' }}>Notifications</h4>
+                        {unreadCount > 0 && <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>{unreadCount} unread</p>}
+                      </div>
+                      <div className="flex gap-1">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={handleMarkAllRead}
+                            className="text-xs px-2 py-1 rounded hover:bg-white/60 transition-colors"
+                            style={{ color: 'var(--primary)', fontFamily: 'var(--font-sans)' }}
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                        {notifications.length > 0 && (
+                          <button
+                            onClick={handleClearAll}
+                            className="text-xs px-2 py-1 rounded hover:bg-white/60 transition-colors"
+                            style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}
+                          >
+                            Clear all
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <ScrollArea className="h-96">
                     {notifications.length === 0 ? (

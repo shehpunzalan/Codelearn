@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createModuleNotification, createActivityNotification, createAnnouncementNotification } from '../utils/notifications';
-import { getAllProgress, getAllSubmissions, getUserStats } from '../utils/storage';
+import { getAllProgress, getAllSubmissions, getUserStats, saveNotification } from '../utils/storage';
+import * as backendApi from '../services/backendApi';
 import { syncBackendStudentsToLocalStorage, startRegistrationPolling } from '../utils/syncStudents';
 import { AllStudentsView } from './AllStudentsView';
 import { StudentDetailView } from './StudentDetailView';
@@ -39,6 +40,7 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null);
   const [interventionMessage, setInterventionMessage] = useState('');
   const [interventionActivity, setInterventionActivity] = useState('');
+  const [lockedQuiz, setLockedQuiz] = useState<{ moduleId: string; lessonId: string } | null>(null);
   const [showAllStudents, setShowAllStudents] = useState(false);
   const [viewingStudentId, setViewingStudentId] = useState<string | null>(null);
   const [viewingStudentName, setViewingStudentName] = useState<string>('');
@@ -75,9 +77,21 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
       const usersData = localStorage.getItem('registeredUsers');
       // refreshTick dependency ensures this re-runs when new users arrive
       const registeredUsers: any[] = usersData ? JSON.parse(usersData) : [];
-      const students = registeredUsers.filter((u: any) =>
-        u.role === 'student' && u.id !== 'demo-instructor' && u.id !== 'demo-student'
-      );
+
+      // Get this instructor's class schedule to filter matching students
+      const instructorProfile = registeredUsers.find((u: any) => u.id === user.id);
+      const instructorSchedule: string = (instructorProfile?.classSchedule || instructorProfile?.department || '').trim().toLowerCase();
+
+      const students = registeredUsers.filter((u: any) => {
+        if (u.role !== 'student') return false;
+        if (u.id === 'demo-instructor' || u.id === 'demo-student') return false;
+        // If instructor has a schedule, only show students with the same schedule
+        if (instructorSchedule) {
+          const studentSchedule = (u.classSchedule || u.department || '').trim().toLowerCase();
+          return studentSchedule === instructorSchedule;
+        }
+        return true; // no schedule set — show all
+      });
 
       setTotalStudents(students.length);
 
@@ -279,16 +293,69 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
     setSelectedStudent(student);
     setInterventionMessage('');
     setInterventionActivity('');
+
+    // Find any quiz this student failed 3 times (MAX_ATTEMPTS = 3)
+    let found: { moduleId: string; lessonId: string } | null = null;
+    for (let ki = 0; ki < localStorage.length; ki++) {
+      const lk = localStorage.key(ki) || '';
+      const prefix = `quiz_attempts_${student.id}_`;
+      if (!lk.startsWith(prefix)) continue;
+      try {
+        if (parseInt(localStorage.getItem(lk) || '0', 10) >= 3) {
+          const rest = lk.slice(prefix.length);
+          const sep = rest.indexOf('_');
+          if (sep !== -1) { found = { moduleId: rest.slice(0, sep), lessonId: rest.slice(sep + 1) }; break; }
+        }
+      } catch { /* ignore */ }
+    }
+    setLockedQuiz(found);
     setInterventionDialogOpen(true);
   };
 
-  const confirmSendIntervention = () => {
+  const confirmSendIntervention = async () => {
     if (!interventionMessage.trim()) { toast.error('Please enter your instructions for the student'); return; }
-    toast.success(`Intervention sent to ${selectedStudent?.name}!`);
+    if (!selectedStudent) return;
+
+    const title = 'Remedial Activity Assigned';
+    const notifId = `intervention_${Date.now()}`;
+
+    // 1. Write to backend so the student receives it on any device
+    try {
+      await backendApi.createNotification({
+        userId: selectedStudent.id,
+        type: 'intervention',
+        title,
+        message: interventionMessage,
+        moduleId: lockedQuiz?.moduleId,
+        lessonId: lockedQuiz?.lessonId,
+      });
+    } catch { /* backend unreachable — fall through to local */ }
+
+    // 2. Also write directly to local localStorage (works if same device / same browser)
+    saveNotification({
+      id: notifId,
+      userId: selectedStudent.id,
+      type: 'intervention',
+      title,
+      message: interventionMessage,
+      moduleId: lockedQuiz?.moduleId,
+      lessonId: lockedQuiz?.lessonId,
+      timestamp: new Date().toISOString(),
+      read: false,
+      sourceType: 'instructor',
+    } as any);
+
+    // 3. Reset the locked quiz attempt counter on this device
+    if (lockedQuiz) {
+      localStorage.removeItem(`quiz_attempts_${selectedStudent.id}_${lockedQuiz.moduleId}_${lockedQuiz.lessonId}`);
+    }
+
+    toast.success(`Intervention sent to ${selectedStudent.name}! They have been notified.`);
     setInterventionDialogOpen(false);
     setInterventionMessage('');
     setInterventionActivity('');
     setSelectedStudent(null);
+    setLockedQuiz(null);
   };
 
   const handleSendDemoNotifications = () => {
@@ -303,6 +370,13 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
     return (
       <AllStudentsView
         onBack={() => setShowAllStudents(false)}
+        classSchedule={(() => {
+          try {
+            const reg = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const me = reg.find((u: any) => u.id === user.id);
+            return me?.classSchedule || me?.department || '';
+          } catch { return ''; }
+        })()}
         onViewStudent={(userId, userName) => {
           setViewingStudentId(userId);
           setViewingStudentName(userName);
@@ -717,6 +791,15 @@ export function InstructorDashboard({ user, modules, onSelectModule, onNavigate 
               />
               <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted-foreground)', fontFamily: 'var(--font-sans)' }}>
                 Completing this activity will allow the student to retake the quiz and advance to the next lesson.
+              </p>
+            </div>
+
+            {/* Quiz unlock status */}
+            <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md, 8px)', background: lockedQuiz ? 'color-mix(in srgb, var(--success, #22c55e) 10%, var(--card))' : 'var(--muted)', border: `1px solid ${lockedQuiz ? 'color-mix(in srgb, var(--success, #22c55e) 30%, transparent)' : 'var(--border)'}` }}>
+              <p style={{ margin: 0, fontSize: '0.8rem', fontFamily: 'var(--font-sans)', color: lockedQuiz ? 'var(--success, #16a34a)' : 'var(--muted-foreground)', fontWeight: 600 }}>
+                {lockedQuiz
+                  ? `✓ Sending this intervention will also unlock the student's locked quiz (${lockedQuiz.moduleId} · ${lockedQuiz.lessonId}).`
+                  : 'No locked quiz detected for this student on this device.'}
               </p>
             </div>
           </div>

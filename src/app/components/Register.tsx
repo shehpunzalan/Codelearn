@@ -274,7 +274,8 @@ export function Register({ onRegister, onShowLogin }: RegisterProps) {
       email: trimmedEmail,
       role,
       studentId: role === 'student' ? studentId : undefined,
-      section: role === 'student' ? (classSchedule || section) : undefined,
+      section: classSchedule || section || undefined,
+      classSchedule: classSchedule || undefined,
     }).catch(() => { /* non-blocking — local save already succeeded */ });
 
     // Notify instructor dashboards on any open tabs to refresh student list

@@ -11,6 +11,7 @@ import type { Module } from '../types';
 interface LessonViewerProps {
   module: Module;
   userId?: string;
+  initialLessonId?: string | null;
   onBack: () => void;
   onViewFeedback?: () => void;
   onStartCoding: (moduleId: string, lessonId: string) => void;
@@ -39,6 +40,7 @@ interface QuizStats {
 export function LessonViewer({
   module,
   userId,
+  initialLessonId,
   onBack,
   onStartCoding,
   onOpenVideoTutorial,
@@ -50,8 +52,8 @@ export function LessonViewer({
   onNextModule,
   onLessonOpen,
 }: LessonViewerProps) {
-  const [screen, setScreen] = useState<Screen>('list');
-  const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
+  const [screen, setScreen] = useState<Screen>(() => initialLessonId ? 'content' : 'list');
+  const [activeLessonId, setActiveLessonId] = useState<string | null>(initialLessonId ?? null);
   const [quizStats, setQuizStats] = useState<QuizStats | null>(null);
 
   // User-scoped key so different users don't share completed-lesson state.

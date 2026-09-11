@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   avatar?: string;
   enrolledCourses?: string[];
+  classSchedule?: string;
 }
 
 export interface Lesson {

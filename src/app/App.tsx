@@ -351,9 +351,10 @@ function AppContent() {
     setUser(loggedInUser);
     setCurrentView("dashboard");
     setShowLogin(false);
-    // Fetch last saved position and prompt to resume (skip for demo accounts)
+    // Fetch last saved position and prompt to resume — students only
     const token = localStorage.getItem("accessToken");
     if (
+      loggedInUser.role === 'student' &&
       token &&
       token !== "demo-token-student" &&
       token !== "demo-token-instructor"
@@ -951,6 +952,7 @@ function AppContent() {
           user.role === "instructor" && (
             <MonitoringView
               onBack={() => setCurrentView("dashboard")}
+              classSchedule={user?.classSchedule}
             />
           )}
 
